@@ -3,11 +3,16 @@ module register(write, we, clr, clk, read);
 	input we, clr, clk;
 	output [31:0] read;
 		
-	genvar i;
-	generate
-		for(i = 0; i < 32; i = i + 1) begin: dffloop
-			dff_c bitstore(.d(write[i]), .clr(clr), .en(we), .clk(clk), .q(read[i]));
+	reg[31:0] read;
+		
+	always @(posedge clk) begin
+		if(clr) begin
+			read = 32'b0;
+		end else begin 
+			if(we) begin
+				read = write;
+			end
 		end
-	endgenerate
+	end	
 	
 endmodule
