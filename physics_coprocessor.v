@@ -2,59 +2,63 @@ module physics_coprocessor(
     // Control signals
     clock,                          // I: The master clock
     reset,                          // I: A reset signal
-    call,							// I: Call to the coprocessor
-
-    // Regfile
-    ctrl_writeEnable,               // O: Write enable for regfile
-    ctrl_writeReg,                  // O: Register to write to in regfile
-    ctrl_readRegA,                  // O: Register to read from port A of regfile
-    ctrl_readRegB,                  // O: Register to read from port B of regfile
-    data_writeReg,                  // O: Data to write to for regfile
-    data_readRegA,                  // I: Data from port A of regfile
-    data_readRegB                   // I: Data from port B of regfile
+    call,									// I: Call to the coprocessor
+	 
+	 mass1, mass2,							// I: Player masses
+	 startPos1, startPos2,				// I: Starting positions
+	 
+	 force1, force2,						// I: Player Force Inputs
+	 freeze1, freeze2,					// I: Player Freeze Inputs
+	 paralyze1, paralyze2,				// I: Player paralyze inputs
+	 
+	 wallL1, wallL2,						// I: Player has wall on left
+	 wallR1, wallR2,						// I: Player has wall on right
+	 wallD1, wallD2, 						// I: Player on top of wall (ground)
+	 wallU1, wallU2,						// I: Player has wall above
+	 
+	 platfD1, platfD2,					// I: Player on top of platform
+	 platfT1, platfT2,					// I: Player dropping thru platform
+	 
+	 pos1, pos2								// O: Player positions
 );
 
     // Control signals
     input clock, reset, call;
-
-    // Regfile
-    output ctrl_writeEnable;
-    output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-    output [31:0] data_writeReg;
-    input [31:0] data_readRegA, data_readRegB;
-
-    /* YOUR CODE STARTS HERE */
-
-    // Regfile Controls
-    reg [5:0] ctrl_readRegA, ctrl_readRegB, ctrl_writeReg;
-    reg [31:0] data_writeReg;
-    reg ctrl_writeEnable;
+	 
+	 // Settings
+	 input [31:0] mass1, mass2;
+	 input [63:0] startPos1, startPos2;
 
     // Input to Engine
-    reg [31:0] operation;
+    input [63:0] force1, force2;
+	 input freeze1, freeze2, paralyze1, paralyze2;
+	 
+	 // Output from Engine
+	 output [63:0] pos1, pos2;
 
     // Players
-    player_physics player1(.clock(clock), .reset(reset), .mass(), .gravity(), 
-    	.start_Position(), .force_in(), .freeze_in(), .paralyze_in(), 
-    	.paralyze_const(), .position());
-    player_physics player2(.clock(clock), .reset(reset), .mass(), .gravity(), 
-    	.start_Position(), .force_in(), .freeze_in(), .paralyze_in(), 
-    	.paralyze_const(), .position());
+    player_physics player1(.clock(clock), .reset(reset), 
+		.mass(mass1), .gravity(32'd10), .wind(32'd1), .start_Position(startPos1), 
+		.wall_Left(wallL1), .wall_Right(wallR1), .wall_Up(wallU1), .wall_Down(wallD1),
+		.platform_Down(platfD1), .platform_Thru(platfT1),
+		.force_in(), .freeze_in(), .paralyze_in(), .paralyze_const(32'd1000000), .position(pos1));
+		
+    player_physics player2(.clock(clock), .reset(reset), 
+		.mass(mass2), .gravity(32'd10), .wind(32'd1), .start_Position(startPos2), 
+		.wall_Left(wallL2), .wall_Right(wallR2), .wall_Up(wallU2), .wall_Down(wallD2),
+		.platform_Down(platfD2), .platform_Thru(platfT2),
+		.force_in(), .freeze_in(), .paralyze_in(), .paralyze_const(32'd1000000), .position(pos2));
 
     always@(posedge call) begin
-  		@(posedge clock);
-    	assign ctrl_readRegA = 5'b00001;
-    	@(posedge clock);
-    	assign operation = data_readRegA;
 
     end
 
 endmodule // physics_coprocessor
 
 module player_physics(
-	clock, reset 			// Master clock, reset signals
+	clock, reset, 			// Master clock, reset signals
 
-	mass, gravity, 			// Constants set for the player
+	mass, gravity, wind, // Constants set for the player
 
 	start_Position, 		// Starting position
 
@@ -74,7 +78,7 @@ module player_physics(
 
 	// Inputs
 	input clock, reset;
-	input [31:0] mass, gravity;
+	input [31:0] mass, gravity, wind;
 	input [63:0] start_Position, force_in;
 	input wall_Left, wall_Right, wall_Up, wall_Down, platform_Down, platform_Thru;
 	input freeze_in, paralyze_in;
@@ -85,7 +89,7 @@ module player_physics(
 
 	// X, Y components
     reg [31:0] pos_x, pos_y;
-    wire [31:0] force_x, force_Y;
+    wire [31:0] force_x, force_y;
 
     // Stored Values
     reg [31:0] vel_x, vel_y;
@@ -97,8 +101,8 @@ module player_physics(
     assign vibr_dir = (pos_y < vibr_pos_y + paralyze_const)? 1'b1 : 1'b0;
 
     // Separate input, output components
-    assign force_in[63:32] = force_x;
-    assign force_in[31:0] = force_y;
+    assign force_x = force_in[63:32];
+    assign force_y =  force_in[31:0];
     assign position[63:32] = pos_x;
     assign position[31:0] = pos_y;
 
@@ -125,8 +129,8 @@ module player_physics(
     	end
 
     	// Acceleration, velocity update
-    	accel_x <= force_x * mass;
-    	accel_y <= (gravity - force_y) * mass;
+    	accel_x <= force_x / mass - vel_x * vel_x * vel_x / wind;
+    	accel_y <= gravity - force_y / mass - vel_y * vel_y * vel_y / wind;
     	vel_x <= vel_x + accel_x;
     	vel_y <= vel_y  + accel_y;
 
@@ -139,7 +143,7 @@ module player_physics(
     	end
 
     	// Freeze
-    	else if(~freeze_in) begin
+    	else if(~freeze_in | ~paralyze_in) begin
     		pos_x <= pos_x + vel_x;
     		pos_y <= pos_y + vel_y;
     	end
