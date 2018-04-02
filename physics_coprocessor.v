@@ -5,13 +5,15 @@ module physics_coprocessor(
 	start_Position, 		// Starting position [x, y]
 
 	controller_in, 			// Input from controller joystick
+	knockback_in,			// Input from attack coprocessor
+	attack_in,				// Input from attack coprocessor
+
 
 	wall_Left, wall_Right, 	// Hitting walls (left, right)
 	wall_Up, wall_Down,		// Hitting walls (up, down)
 	platform_Down,			// Landing on platform
 
 	freeze_in,				// Holds player still
-	paralyze_in,			// Vibrates player
 
 	position 				// Output position [x, y]
 );
@@ -20,7 +22,8 @@ module physics_coprocessor(
 	input clock, reset;
 	input [31:0] mass, gravity, wind;
 	input [31:0] start_Position;
-	input [31:0] controller_in;
+	input [31:0] controller_in, knockback_in;
+	input attack_in;
 	input wall_Left, wall_Right, wall_Up, wall_Down, platform_Down;
 	input freeze_in, paralyze_in;
 
@@ -36,14 +39,20 @@ module physics_coprocessor(
 	assign platform_Thru = ~joytcick_y[7] & ~joystick_y[6] & ~joystick_y[5] & ~joystick_y[4]; // Joystick Y 0 to 15 (down)
 
 	// Input Physics Parameters
-	wire [31:0] force_x, force_y;
-	assign force_x[7:0] = joystick_x - 8'b10000000; // Map joystick values to -128 to 127
-	assign force_y[7:0] = joystick_y - 8'b10000000; // Map joystick values to -128 to 127
+	wire [31:0] move_x, move_y, knockback_x, knockback_y;
+	assign move_x[7:0] = joystick_x - 8'b10000000; // Map joystick values to -128 to 127
+	assign move_y[7:0] = joystick_y - 8'b10000000; // Map joystick values to -128 to 127
+	assign knockback_x[15:0] = knockback_in[31:16]; // Split knockback into x, y
+	assign knockback_y[15:0] = knockback_in[31:16];
 	genvar i;
-	generate // Extend joystick value to 32 bit signed values
-		for(i = 8; i < 32; i = i + 1) begin: signextend
-			assign force_x[i] = ~joystick_x[8];
-			assign force_y[i] = ~joystick_y[8];
+	generate // Extend joystick, knockback values to 32 bit signed values
+		for(i = 8; i < 32; i = i + 1) begin: signextend1
+			assign move_x[i] = ~joystick_x[8];
+			assign move_y[i] = ~joystick_y[8];
+		end
+		for(i = 16; i < 32; i = i + 1) begin: signextend2
+			assign knockback_x[i] = knockback_in[31];
+			assign knockback_y[i] = knockback_in[15];
 		end
 	endgenerate
 
@@ -59,6 +68,9 @@ module physics_coprocessor(
     wire vibr_dir;
     assign vibr_dir = (pos_y < vibr_pos_y + 32'd10000000)? 1'b1 : 1'b0;
 
+    // Attack start, end value
+    reg attack_prev;
+
     // Separate input, output components
     assign position[31:16] = pos_x[31:16];
     assign position[15:0] = pos_y[31:16];
@@ -67,9 +79,9 @@ module physics_coprocessor(
     always@(posedge clock) begin
 
     	// Acceleration, velocity update for in air
-    	if(~freeze_in & ~paralyze_in & ~wall_Down) begin
-    		accel_x <= force_x / mass - vel_x * vel_x * vel_x / wind;
-    		accel_y <= gravity - force_y / mass + vel_y * vel_y * vel_y / wind;
+    	if(~freeze_in & ~attack_in & ~wall_Down & ~platform_Down) begin
+    		accel_x <= move_x / mass - vel_x * vel_x * vel_x / wind;
+    		accel_y <= move_y / mass - gravity - vel_y * vel_y * vel_y / wind;
     		vel_x <= vel_x + accel_x;
     		vel_y <= vel_y  + accel_y;
     		pos_x <= pos_x + vel_x;
@@ -77,12 +89,34 @@ module physics_coprocessor(
     	end
 
     	// Acceleration, velocity update for on ground
-    	if(~freeze_in & ~paralyze_in & wall_Down) begin
+    	if(~freeze_in & ~attack_in & (wall_Down | platform_Down)) begin
     		accel_x <= 32'b0;
     		accel_y <= 32'b0;
-    		vel_x <= force_x / mass;
+    		vel_x <= move_x / mass;
     		vel_y <= 32'b0;
     		pos_x <= pos_x + vel_x;
+    	end
+
+    	// Start of attack
+    	if(attack_in & ~attack_prev) begin
+    		attack_prev <= attack_in;
+	    	vibr_pos_y <= pos_y + 32'h00010000; // Start up 1 pixel to be off the ground
+	    	pos_y <= pos_y + 32'h00010000;
+	    end
+
+    	// During Attack
+    	if(attack_prev) begin
+    		accel_x <= 32'b0;
+	    	accel_y <= 32'b0;
+	    	attack_prev <= attack_in;
+    		// Knockback velocity
+    		vel_x <= knockback_x / mass;
+	    	vel_y <= knockback_y / mass;
+     		// Attack vibration
+    		if(vibr_dir)
+    			pos_y <= pos_y + 32'd2;
+    		else
+    			pos_y <= pos_y - 32'd2; 
     	end
 
     	// Wall hitting calculations
@@ -92,24 +126,16 @@ module physics_coprocessor(
     	if(wall_Right & vel_x > 0) begin
     		vel_x <= 0;
     	end
-    	if(wall_Up & vel_y < 0) begin
+    	if(wall_Up & vel_y > 0) begin
     		vel_y <= 0;
     	end
-    	if(wall_Down & vel_y > 0) begin
+    	if(wall_Down & vel_y < 0) begin
     		vel_y <= 0;
     	end
 
     	// Platform calculations
-    	if(platform_Down & ~platform_Thru & vel_y > 0) begin
+    	if(platform_Down & ~platform_Thru & vel_y < 0) begin
     		vel_y <= 0;
-    	end
-
-    	// Paralyzer Vibration
-    	if(paralyze_in) begin
-    		if(vibr_dir)
-    			pos_y <= pos_y + 32'd2;
-    		else
-    			pos_y <= pos_y - 32'd2; 
     	end
 
     end
@@ -124,11 +150,6 @@ module physics_coprocessor(
     	pos_x [15:0] <= 16'b0;
     	pos_y [31:16] <= start_Position[15:0];
     	pos_y [15:0] <= 16'b0;
-    end
-
-    // Store paralyzer position
-    always@(posedge paralyze_in) begin
-    	vibr_pos_y <= pos_y;
     end
 
 endmodule
