@@ -79,7 +79,7 @@ module processor(
     input [31:0] q_imem;
 
     // Dmem
-    output [11:0] address_dmem;
+    output [12:0] address_dmem;
     output [31:0] data;
     output wren;
     input [31:0] q_dmem;

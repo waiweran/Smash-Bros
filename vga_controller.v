@@ -41,24 +41,27 @@ begin
   else if (cBLANK_n==1'b1)
      ADDR<=ADDR+1;
 end
-//////////////////////////
-//////INDEX addr.
+
+/************** OUR CODE STARTS HERE ************/
+
+// Load background
 assign VGA_CLK_n = ~iVGA_CLK;
 img_data	img_data_inst (
 	.address ( ADDR ),
 	.clock ( VGA_CLK_n ),
 	.q ( index )
-	);
+);
 	
-/////////////////////////
-//////Add switch-input logic here
+	
+/************** OUR CODE ENDS HERE **************/
+
 	
 //////Color table output
 img_index	img_index_inst (
 	.address ( index ),
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw)
-	);	
+);	
 //////
 //////latch valid data at falling edge;
 always@(posedge VGA_CLK_n) bgr_data <= bgr_data_raw;
@@ -75,19 +78,3 @@ begin
 end
 
 endmodule
- 	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
