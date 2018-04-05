@@ -32,10 +32,10 @@ module physics_coprocessor(
 	wire [7:0] joystick_x, joystick_y; // Unsigned values from 0 to 255 representing joystick position
 	assign joystick_x = controller_in[15:8];
 	assign joystick_y = controller_in[7:0];
-	wire jump;
-	wire platform_Thru;
-	assign jump = joystick_y[7] & joystick_y[6] & joystick_y[5] & joystick_y[4]; // Joystick Y 240 to 255 (up)
+	wire jump, joystick_jumpPos, platform_Thru;
+	assign joystick_jumpPos = joystick_y[7] & joystick_y[6] & joystick_y[5] & joystick_y[4]; // Joystick Y 240 to 255 (up)
 	assign platform_Thru = ~joystick_y[7] & ~joystick_y[6] & ~joystick_y[5] & ~joystick_y[4]; // Joystick Y 0 to 15 (down)
+	assign jump = controller_in[20]; // TODO add option to jump with stick
 	
 	// Input from Collisions
 	wire wall_Left, wall_Right, wall_Up, wall_Down, platform_Down;
