@@ -53,6 +53,16 @@ module mmio(
 		.position(pos2)
 	);
 	
+	// Collision
+	reg [31:0] x_pos, y_pos, x_size, y_size;
+	wire [3:0] coll;
+	collision collision1(
+		.x_pos(x_pos), .y_pos(y_pos),
+		.x_size(x_size), .y_size(y_size),
+		
+		.coll(coll)
+	);
+	
 	// Game Controller Manager
 	
 	
@@ -99,11 +109,20 @@ module mmio(
 			if (co_spec[6]) attack2 <= data_in;
 			if (co_spec[7]) collis2 <= data_in;
 		end
+		// Game Controller Manager
 		if (co_sel[4]) begin
-			// Game Controller Manager
+			
 		end
+		// VGA Controller
 		if (co_sel[8]) begin
-			// VGA Controller
+			
+		end
+		// Collision
+		if (co_sel[12]) begin
+			if (co_spec[0]) x_pos <= data_in;
+			if (co_spec[1]) y_pos <= data_in;
+			if (co_spec[2]) x_size <= data_in;
+			if (co_spec[3]) y_size <= data_in;
 		end
 	end
 	
@@ -111,7 +130,7 @@ module mmio(
 	wire [31:0] coprocessor_out;
 	tristate_32 outmux(.sel(co_sel), .in0(pos1), .in1(pos2), .in2(32'b0), .in3(32'b0), 
 			.in4(32'b0), .in5(32'b0), .in6(32'b0), .in7(32'b0), .in8(32'b0), .in9(32'b0), 
-			.in10(32'b0), .in11(32'b0), .in12(32'b0), .in13(32'b0), .in14(32'b0), .in15(32'b0), 
+			.in10(32'b0), .in11(32'b0), .in12(coll), .in13(32'b0), .in14(32'b0), .in15(32'b0), 
 			.in16(32'b0), .in17(32'b0), .in18(32'b0), .in19(32'b0), .in20(32'b0), .in21(32'b0), 
 			.in22(32'b0), .in23(32'b0), .in24(32'b0), .in25(32'b0), .in26(32'b0), .in27(32'b0), 
 			.in28(32'b0), .in29(32'b0), .in30(32'b0), .in31(32'b0), .out(coprocessor_out));
