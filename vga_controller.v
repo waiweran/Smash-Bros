@@ -5,7 +5,10 @@ module vga_controller(iRST_n,
                       oVS,
                       b_data,
                       g_data,
-                      r_data);
+                      r_data,
+							 p1VGA,
+							 p2VGA,
+							 stageVGA);
 
 	
 input iRST_n;
@@ -15,7 +18,10 @@ output reg oHS;
 output reg oVS;
 output [7:0] b_data;
 output [7:0] g_data;  
-output [7:0] r_data;                        
+output [7:0] r_data;
+
+input [63:0] p1VGA, p2VGA, stageVGA;
+                        
 ///////// ////                     
 reg [18:0] ADDR;
 reg [23:0] bgr_data;
@@ -41,24 +47,65 @@ begin
   else if (cBLANK_n==1'b1)
      ADDR<=ADDR+1;
 end
-//////////////////////////
-//////INDEX addr.
+
+/************** OUR CODE STARTS HERE ************/
+
+// Convert ADDR to pixel (x, y)
+wire[18:0] myXLong, myYLong;
+assign myXLong = ADDR % 18'd640;
+assign myYLong = (ADDR / 18'd640) - 18'd1;
+
+wire[15:0] myX, myY;
+assign myX = myXLong[15:0];
+assign myY = myYLong[15:0];
+
+// Test if inside any sprite
+wire isInsideP1, isInsideP2, isInsideStage;
+isInsideSprite insideP1(p1VGA, myX, myY, isInsideP1);
+isInsideSprite insideP2(p2VGA, myX, myY, isInsideP2);
+isInsideSprite insideStage(stageVGA, myX, myY, isInsideStage);
+
+wire[23:0] bgr_data_raw_background;
+wire[23:0] bgr_data_raw_p1;
+wire[23:0] bgr_data_raw_p2;
+wire[23:0] bgr_data_raw_stage;
+
+// Load background
 assign VGA_CLK_n = ~iVGA_CLK;
 img_data	img_data_inst (
 	.address ( ADDR ),
 	.clock ( VGA_CLK_n ),
 	.q ( index )
-	);
-	
-/////////////////////////
-//////Add switch-input logic here
-	
-//////Color table output
+);
+
 img_index	img_index_inst (
 	.address ( index ),
 	.clock ( iVGA_CLK ),
-	.q ( bgr_data_raw)
-	);	
+	.q ( bgr_data_raw_background)
+);	
+
+// Load P1 image
+//TEMP color it red
+assign bgr_data_raw_p1 = 24'b000000000000000011111111;
+
+// Load P2 Image
+//TEMP Color it blue
+assign bgr_data_raw_p2 = 24'b111111110000000000000000;
+
+// Load Stage Image
+//TEMP Color it white
+assign bgr_data_raw_stage = 24'b111111111111111111111111;
+
+//Choose the color of the frontmost object (can change layering via order of muxes here)
+wire[23:0] w1, w2;
+assign w1 = isInsideStage ? bgr_data_raw_stage : bgr_data_raw_background;
+assign w2 = isInsideP2 ? bgr_data_raw_p2 : w1;
+assign bgr_data_raw = isInsideP1 ? bgr_data_raw_p1 : w2;
+	
+/************** OUR CODE ENDS HERE **************/
+
+	
+
 //////
 //////latch valid data at falling edge;
 always@(posedge VGA_CLK_n) bgr_data <= bgr_data_raw;
@@ -75,19 +122,3 @@ begin
 end
 
 endmodule
- 	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

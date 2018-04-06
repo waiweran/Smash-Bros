@@ -18,7 +18,8 @@ module skeleton(
 	VGA_SYNC,														//	VGA SYNC
 	VGA_R,   														//	VGA Red[9:0]
 	VGA_G,	 														//	VGA Green[9:0]
-	VGA_B																//	VGA Blue[9:0]
+	VGA_B,																//	VGA Blue[9:0]
+	gpio
 );
 		
 	////////////////////////	VGA	////////////////////////////
@@ -32,10 +33,12 @@ module skeleton(
 	output	[7:0]	VGA_B;   				//	VGA Blue[9:0]
 	
 	input clock, reset;
-
+	inout[39:0] gpio;
+	
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
+	 /*
     wire [11:0] address_imem;
     wire [31:0] q_imem;
     imem my_imem(
@@ -43,24 +46,34 @@ module skeleton(
         .clock      (~clock),                  // you may need to invert the clock
         .q          (q_imem)                   // the raw instruction
     );
+	 */
 
     /** DMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
-    wire [11:0] address_dmem;
+	 /*
+    wire [12:0] address_dmem;
     wire [31:0] data;
     wire wren;
     wire [31:0] q_dmem;
-    dmem my_dmem(
+	 wire [63:0] p1VGA, p2VGA, stageVGA;
+    mmio my_mem(
+		  .clock		  (clock),
+		  .reset		  (reset),
         .address    (address_dmem),  	// address of data
-        .clock      (~clock),   			// may need to invert the clock
-        .data	    (data),    			// data you want to write
-        .wren	    (wren),      			// write enable
-        .q          (q_dmem)    			// data from dmem
+        .data_in    (data),    			// data you want to write
+        .wren	     (wren),      		// write enable
+        .data_out   (q_dmem),    			// data from memory module
+		  .gpio		  (gpio),					//For controller IO
+		  .p1VGA		  (p1VGA),
+		  .p2VGA		  (p2VGA),
+		  .stageVGA   (stageVGA)
     );
+	 */
 
     /** REGFILE **/
     // Instantiate your regfile
+	 /*
     wire ctrl_writeEnable;
     wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     wire [31:0] data_writeReg;
@@ -76,8 +89,10 @@ module skeleton(
         data_readRegA,
         data_readRegB
     );
+	 */
 
-    // Processor
+    /** Processor **/
+	 /*
     processor my_processor(
         // Control signals
         clock,                          // I: The master clock
@@ -102,14 +117,26 @@ module skeleton(
         data_readRegA,                  // I: Data from port A of regfile
         data_readRegB                   // I: Data from port B of regfile
     );
+	 */
 	 
-	 physics_coprocessor physics(
-		  .clock(clock), 
-		  .reset(reset), 
-		  
-	 );
+	 //HARDCODED VALUES FOR TESTING
+	 wire [63:0] p1VGA, p2VGA, stageVGA;
+	 assign p1VGA[51:48] = 16'd200;
+	 assign p1VGA[47:32] = 16'd200;
+	 assign p1VGA[31:17] = 16'd100;
+	 assign p1VGA[16:0] = 16'd100;
 	 
-	// VGA
+	 assign p2VGA[51:48] = 16'd400;
+	 assign p2VGA[47:32] = 16'd200;
+	 assign p2VGA[31:17] = 16'd50;
+	 assign p2VGA[16:0] = 16'd100;
+	 
+	 assign stageVGA[51:48] = 16'd200;
+	 assign stageVGA[47:32] = 16'd400;
+	 assign stageVGA[31:17] = 16'd400;
+	 assign stageVGA[16:0] = 16'd30;
+	 
+	/** VGA **/
 	Reset_Delay			r0	(.iCLK(clock),.oRESET(DLY_RST)	);
 	VGA_Audio_PLL 		p1	(.areset(~DLY_RST),.inclk0(clock),.c0(VGA_CTRL_CLK),.c1(AUD_CTRL_CLK),.c2(VGA_CLK)	);
 	vga_controller vga_ins(.iRST_n(DLY_RST),
@@ -119,7 +146,10 @@ module skeleton(
 								 .oVS(VGA_VS),
 								 .b_data(VGA_B),
 								 .g_data(VGA_G),
-								 .r_data(VGA_R)
+								 .r_data(VGA_R),
+								 .p1VGA(p1VGA),
+								 .p2VGA(p2VGA),
+								 .stageVGA(stageVGA)
 	);
 	
 
