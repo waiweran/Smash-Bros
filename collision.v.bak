@@ -1,0 +1,7 @@
+module collision(x_top, x_right, x_width, x_height, y_top, y_right, y_width, y_height, out);
+	input [31:0] x_topright, x_width, x_height, y_topright, y_width, y_height;
+	output out;
+	
+	assign out = ~((x_top > (y_top+y_height)) | ((x_top+x_height) < y_top) | (x_right < (y_right-y_width)) | ((x_right-x_width) > y_right));
+	
+endmodule

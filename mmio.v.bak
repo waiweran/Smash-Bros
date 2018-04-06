@@ -1,0 +1,44 @@
+module mmio(clock, reset, address, data_in, wren, data_out);
+	
+	input clock, reset;
+	input [12:0] address;
+	input [31:0] data_in;
+	input wren;
+	output [31:0] data_out;
+	
+	// Physics Coprocessor
+	physics_coprocessor phys(
+			clock, reset, 			// Master clock, reset signals
+
+	mass, gravity, wind, 	// Constants set for the player
+	start_Position, 		// Starting position [x, y]
+
+	controller_in, 			// Input from controller joystick
+	knockback_in,			// Input from attack coprocessor
+	attack_in,				// Input from attack coprocessor
+
+
+	wall_Left, wall_Right, 	// Hitting walls (left, right)
+	wall_Up, wall_Down,		// Hitting walls (up, down)
+	platform_Down,			// Landing on platform
+
+	freeze_in,				// Holds player still
+
+	position 				// Output position [x, y]
+	);
+
+	// DMEM
+   wire [11:0] address_dmem;
+   wire [31:0] data;
+   wire wren_dmem;
+   wire [31:0] q_dmem;
+   dmem my_dmem(
+        .address    (address_dmem),  	// address of data
+        .clock      (~clock),   			// may need to invert the clock
+        .data	    (data),    			// data you want to write
+        .wren	    (wren_dmem),      	// write enable
+        .q          (q_dmem)    			// data from dmem
+   );
+
+endmodule
+	 
