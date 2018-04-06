@@ -16,7 +16,7 @@ module alu(data_operandA, data_operandB, ctrl_ALUopcode, ctrl_shiftamt, data_res
 	sub_comp subtractor(.inA(data_operandA), .inB(data_operandB), .lt(isLessThan), 
 		.neq(isNotEqual), .ovf(ovfsub), .sum(sub_out));
 	assign and_out = data_operandA & data_operandB;
-	assign or_out = data_operandA | daba_operandB;
+	assign or_out = data_operandA | data_operandB;
 	assign sll_out = data_operandA << ctrl_shiftamt;
 	assign sra_out = data_operandA >>> ctrl_shiftamt;
 		

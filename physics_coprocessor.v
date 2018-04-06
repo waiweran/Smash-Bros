@@ -1,91 +1,70 @@
 module physics_coprocessor(
-    // Control signals
-    clock,                          // I: The master clock
-    reset,                          // I: A reset signal
-    call,							// I: Call to the coprocessor
+	clock, reset, 			// Master clock, reset signals
 
-    // Regfile
-    ctrl_writeEnable,               // O: Write enable for regfile
-    ctrl_writeReg,                  // O: Register to write to in regfile
-    ctrl_readRegA,                  // O: Register to read from port A of regfile
-    ctrl_readRegB,                  // O: Register to read from port B of regfile
-    data_writeReg,                  // O: Data to write to for regfile
-    data_readRegA,                  // I: Data from port A of regfile
-    data_readRegB                   // I: Data from port B of regfile
-);
+	mass, gravity, wind, 	// Constants set for the player
+	start_Position, 		// Starting position [x, y]
 
-    // Control signals
-    input clock, reset, call;
+	controller_in, 			// Input from controller joystick
+	knockback_in,			// Input from attack coprocessor
+	attack_in,				// Input from attack coprocessor
 
-    // Regfile
-    output ctrl_writeEnable;
-    output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-    output [31:0] data_writeReg;
-    input [31:0] data_readRegA, data_readRegB;
 
-    /* YOUR CODE STARTS HERE */
-
-    // Regfile Controls
-    reg [5:0] ctrl_readRegA, ctrl_readRegB, ctrl_writeReg;
-    reg [31:0] data_writeReg;
-    reg ctrl_writeEnable;
-
-    // Input to Engine
-    reg [31:0] operation;
-
-    // Players
-    player_physics player1(.clock(clock), .reset(reset), .mass(), .gravity(), 
-    	.start_Position(), .force_in(), .freeze_in(), .paralyze_in(), 
-    	.paralyze_const(), .position());
-    player_physics player2(.clock(clock), .reset(reset), .mass(), .gravity(), 
-    	.start_Position(), .force_in(), .freeze_in(), .paralyze_in(), 
-    	.paralyze_const(), .position());
-
-    always@(posedge call) begin
-  		@(posedge clock);
-    	assign ctrl_readRegA = 5'b00001;
-    	@(posedge clock);
-    	assign operation = data_readRegA;
-
-    end
-
-endmodule // physics_coprocessor
-
-module player_physics(
-	clock, reset 			// Master clock, reset signals
-
-	mass, gravity, 			// Constants set for the player
-
-	start_Position, 		// Starting position
-
-	force_in, 				// Input force
-
-	wall_Left, wall_Right, 	// Hitting walls (left, right)
-	wall_Up, wall_Down,		// Hitting walls (up, down)
-	platform_Down,			// Landing on platform
-	platform_Thru, 			// Going through platform
+	wall, 					// Hitting walls
 
 	freeze_in,				// Holds player still
-	paralyze_in,			// Vibrates player
-	paralyze_const, 		// Sets amplitude of vibration
 
-	position 				// Output position
+	position 				// Output position [x, y]
 );
 
 	// Inputs
 	input clock, reset;
-	input [31:0] mass, gravity;
-	input [63:0] start_Position, force_in;
-	input wall_Left, wall_Right, wall_Up, wall_Down, platform_Down, platform_Thru;
-	input freeze_in, paralyze_in;
-	input [31:0] paralyze_const;
+	input [31:0] mass, gravity, wind;
+	input [31:0] start_Position;
+	input [31:0] controller_in, knockback_in;
+	input [3:0] wall;
+	input attack_in;
+	input freeze_in;
 
 	// Output Position
-	output [63:0] position;
+	output [31:0] position;
 
-	// X, Y components
+	// Input from Controller
+	wire [7:0] joystick_x, joystick_y; // Unsigned values from 0 to 255 representing joystick position
+	assign joystick_x = controller_in[15:8];
+	assign joystick_y = controller_in[7:0];
+	wire jump, joystick_jumpPos, platform_Thru;
+	assign joystick_jumpPos = joystick_y[7] & joystick_y[6] & joystick_y[5] & joystick_y[4]; // Joystick Y 240 to 255 (up)
+	assign platform_Thru = ~joystick_y[7] & ~joystick_y[6] & ~joystick_y[5] & ~joystick_y[4]; // Joystick Y 0 to 15 (down)
+	assign jump = controller_in[20]; // TODO add option to jump with stick
+	
+	// Input from Collisions
+	wire wall_Left, wall_Right, wall_Up, wall_Down, platform_Down;
+	assign wall_Left = wall[2] & wall[1] & ~wall[0];
+	assign wall_Right = wall[2] & wall[1] & wall[0];
+	assign wall_Up = wall[2] & ~wall[1] & wall[0];
+	assign wall_Down = wall[2] & ~wall[1] & ~wall[0];
+	assign platform_Down = wall[2] & wall[3];
+
+	// Input Physics Parameters
+	wire [31:0] move_x, move_y, knockback_x, knockback_y;
+	assign move_x[7:0] = joystick_x - 8'b10000000; // Map joystick values to -128 to 127
+	assign move_y[7:0] = joystick_y - 8'b10000000; // Map joystick values to -128 to 127
+	assign knockback_x[15:0] = knockback_in[31:16]; // Split knockback into x, y
+	assign knockback_y[15:0] = knockback_in[31:16];
+	genvar i;
+	generate // Extend joystick, knockback values to 32 bit signed values
+		for(i = 8; i < 32; i = i + 1) begin: signextend1
+			assign move_x[i] = ~joystick_x[7];
+			assign move_y[i] = ~joystick_y[7];
+		end
+		for(i = 16; i < 32; i = i + 1) begin: signextend2
+			assign knockback_x[i] = knockback_in[31];
+			assign knockback_y[i] = knockback_in[15];
+		end
+	endgenerate
+
+	 // X, Y position components
     reg [31:0] pos_x, pos_y;
-    wire [31:0] force_x, force_Y;
 
     // Stored Values
     reg [31:0] vel_x, vel_y;
@@ -94,71 +73,71 @@ module player_physics(
     // Vibration Values
     reg [31:0] vibr_pos_y;
     wire vibr_dir;
-    assign vibr_dir = (pos_y < vibr_pos_y + paralyze_const)? 1'b1 : 1'b0;
+    assign vibr_dir = (pos_y < vibr_pos_y + 32'd10000000)? 1'b1 : 1'b0;
+
+    // Attack start, end value
+    reg attack_prev;
 
     // Separate input, output components
-    assign force_in[63:32] = force_x;
-    assign force_in[31:0] = force_y;
-    assign position[63:32] = pos_x;
-    assign position[31:0] = pos_y;
+    assign position[31:16] = pos_x[31:16];
+    assign position[15:0] = pos_y[31:16];
 
     // Update values every cycle
     always@(posedge clock) begin
+	 
+		// Reset
+		if(reset) begin
+		   accel_x <= 32'b0;
+			accel_y <= 32'b0;
+			vel_x <= 32'b0;
+			vel_y <= 32'b0;
+			pos_x [31:16] <= start_Position[31:16];
+			pos_x [15:0] <= 16'b0;
+			pos_y [31:16] <= start_Position[15:0];
+			pos_y [15:0] <= 16'b0;
+		end
 
-    	// Wall hitting calculations
-    	if(wall_Left & vel_x < 0) begin
-    		vel_x <= 0;
-    	end 
-    	if(wall_Right & vel_x > 0) begin
-    		vel_x <= 0;
-    	end
-    	if(wall_Up & vel_y < 0) begin
-    		vel_y <= 0;
-    	end
-    	if(wall_Down & vel_y > 0) begin
-    		vel_y <= 0;
-    	end
-
-    	// Platform calculations
-    	if(platform_Down & ~platform_Thru & vel_y > 0) begin
-    		vel_y <= 0;
-    	end
-
-    	// Acceleration, velocity update
-    	accel_x <= force_x * mass;
-    	accel_y <= (gravity - force_y) * mass;
-    	vel_x <= vel_x + accel_x;
-    	vel_y <= vel_y  + accel_y;
-
-    	// Paralyzer
-    	if(paralyze_in) begin
-    		if(vibr_dir)
-    			pos_y <= pos_y + 31'd100;
-    		else
-    			pos_y <= pos_y - 31'd100; 
-    	end
-
-    	// Freeze
-    	else if(~freeze_in) begin
+    	// Acceleration, velocity update for in air
+    	else if(~freeze_in & ~attack_in & ~wall_Down & ~platform_Down) begin
+    		accel_x <= move_x / mass - vel_x * vel_x * vel_x / wind;
+    		accel_y <= move_y / mass - gravity - vel_y * vel_y * vel_y / wind;
+    		vel_x <= vel_x + accel_x; // TODO Fix for Collisions L, R
+    		vel_y <= vel_y  + accel_y; // TODO Fix for collisions U, jumps
     		pos_x <= pos_x + vel_x;
     		pos_y <= pos_y + vel_y;
     	end
 
-    end
+    	// Acceleration, velocity update for on ground
+    	else if(~freeze_in & ~attack_in & (wall_Down | platform_Down)) begin
+    		accel_x <= 32'b0;
+    		accel_y <= 32'b0;
+    		vel_x <= move_x / mass; // TODO Fix for Collisions L, R
+    		vel_y <= 32'b0; // TODO Fix for platform thru, jumps
+    		pos_x <= pos_x + vel_x;
+    	end
 
-    // Reset values
-    always@(posedge reset) begin
-    	accel_x <= 0;
-    	accel_y <= 0;
-    	vel_x <= 0;
-    	vel_y <= 0;
-    	pos_x <= start_Position[63:32];
-    	pos_y <= start_Position[31:0];
-    end
+    	// Start of attack
+    	if(~reset & attack_in & ~attack_prev) begin
+    		attack_prev <= attack_in;
+	    	vibr_pos_y <= pos_y + 32'h00010000; // Start up 1 pixel to be off the ground
+	    	pos_y <= pos_y + 32'h00010000;
+	    end
 
-    // Store paralyzer position
-    always@(posedge paralyze_in) begin
-    	vibr_pos_y <= pos_y;
+    	// During Attack
+    	if(~reset & attack_prev) begin
+    		accel_x <= 32'b0;
+	    	accel_y <= 32'b0;
+	    	attack_prev <= attack_in;
+    		// Knockback velocity
+    		vel_x <= knockback_x / mass;
+	    	vel_y <= knockback_y / mass;
+     		// Attack vibration
+    		if(vibr_dir)
+    			pos_y <= pos_y + 32'd2;
+    		else
+    			pos_y <= pos_y - 32'd2; 
+    	end
+
     end
 
 endmodule

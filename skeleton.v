@@ -9,8 +9,29 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module skeleton(clock, reset);
-    input clock, reset;
+module skeleton(
+	clock, reset, 
+	VGA_CLK,   														//	VGA Clock
+	VGA_HS,															//	VGA H_SYNC
+	VGA_VS,															//	VGA V_SYNC
+	VGA_BLANK,														//	VGA BLANK
+	VGA_SYNC,														//	VGA SYNC
+	VGA_R,   														//	VGA Red[9:0]
+	VGA_G,	 														//	VGA Green[9:0]
+	VGA_B																//	VGA Blue[9:0]
+);
+		
+	////////////////////////	VGA	////////////////////////////
+	output			VGA_CLK;   				//	VGA Clock
+	output			VGA_HS;					//	VGA H_SYNC
+	output			VGA_VS;					//	VGA V_SYNC
+	output			VGA_BLANK;				//	VGA BLANK
+	output			VGA_SYNC;				//	VGA SYNC
+	output	[7:0]	VGA_R;   				//	VGA Red[9:0]
+	output	[7:0]	VGA_G;	 				//	VGA Green[9:0]
+	output	[7:0]	VGA_B;   				//	VGA Blue[9:0]
+	
+	input clock, reset;
 
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
@@ -26,16 +47,17 @@ module skeleton(clock, reset);
     /** DMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
-    wire [11:0] address_dmem;
+    wire [12:0] address_dmem;
     wire [31:0] data;
     wire wren;
     wire [31:0] q_dmem;
-    dmem my_dmem(
+    mmio my_mem(
+		  .clock		  (clock),
+		  .reset		  (reset),
         .address    (address_dmem),  	// address of data
-        .clock      (~clock),   			// may need to invert the clock
-        .data	    (data),    			// data you want to write
-        .wren	    (wren),      			// write enable
-        .q          (q_dmem)    			// data from dmem
+        .data_in    (data),    			// data you want to write
+        .wren	     (wren),      		// write enable
+        .data_out   (q_dmem)    			// data from memory module
     );
 
     /** REGFILE **/
@@ -56,7 +78,7 @@ module skeleton(clock, reset);
         data_readRegB
     );
 
-    /** PROCESSOR **/
+    /** Processor **/
     processor my_processor(
         // Control signals
         clock,                          // I: The master clock
@@ -81,5 +103,19 @@ module skeleton(clock, reset);
         data_readRegA,                  // I: Data from port A of regfile
         data_readRegB                   // I: Data from port B of regfile
     );
+	 
+	/** VGA **/
+	Reset_Delay			r0	(.iCLK(clock),.oRESET(DLY_RST)	);
+	VGA_Audio_PLL 		p1	(.areset(~DLY_RST),.inclk0(clock),.c0(VGA_CTRL_CLK),.c1(AUD_CTRL_CLK),.c2(VGA_CLK)	);
+	vga_controller vga_ins(.iRST_n(DLY_RST),
+								 .iVGA_CLK(VGA_CLK),
+								 .oBLANK_n(VGA_BLANK),
+								 .oHS(VGA_HS),
+								 .oVS(VGA_VS),
+								 .b_data(VGA_B),
+								 .g_data(VGA_G),
+								 .r_data(VGA_R)
+	);
+	
 
 endmodule
