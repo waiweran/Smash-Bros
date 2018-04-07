@@ -78,7 +78,7 @@ module mmio(
 	wire[31:0] gameControllerInputP2;
 	gameControllerManager controllerP2(.mmioBoardOutput(gameControllerOutputP2),
 												  .mmioBoardInput(gameControllerInputP2),
-												  .halfgpio(gpio[40:21]));
+												  .halfgpio(gpio[39:20]));
 	
 	// VGA Coprocessor Player 1
 	reg[31:0] posP1InVGA, whP1InVGA;
@@ -91,10 +91,8 @@ module mmio(
 	// VGA Coprocessor Stage
 	reg[31:0] posStageInVGA, whStageInVGA;
 	vga_coprocessor vgaStage(.posIn(posStageInVGA), .whIn(posStageInVGA), .poswhOut(stageVGA));
-	
-	
-	
 
+	
 	// DMEM
    wire [11:0] address_dmem;
    wire wren_dmem;
@@ -106,6 +104,7 @@ module mmio(
         .wren	    (wren_dmem),      	// write enable
         .q          (q_dmem)    			// data from dmem
    );
+	
 	
 	// Module Inputs
 	wire [31:0] co_sel, co_spec;
@@ -162,14 +161,43 @@ module mmio(
 		end
 	end
 	
+	
 	// Module Outputs
 	wire [31:0] coprocessor_out;
-	tristate_32 outmux(.sel(co_sel), .in0(pos1), .in1(pos2), .in2(32'b0), .in3(32'b0), 
-			.in4(gameControllerInputP1), .in5(gameControllerInputP2), .in6(32'b0), .in7(32'b0), .in8(32'b0), .in9(32'b0), 
-			.in10(32'b0), .in11(32'b0), .in12(coll), .in13(32'b0), .in14(32'b0), .in15(32'b0), 
-			.in16(32'b0), .in17(32'b0), .in18(32'b0), .in19(32'b0), .in20(32'b0), .in21(32'b0), 
-			.in22(32'b0), .in23(32'b0), .in24(32'b0), .in25(32'b0), .in26(32'b0), .in27(32'b0), 
-			.in28(32'b0), .in29(32'b0), .in30(32'b0), .in31(32'b0), .out(coprocessor_out));
+	tristate_32 outmux(.sel(co_sel),
+			.in0(pos1),								// Player 1 Physics Coprocessor
+			.in1(pos2),								// Player 2 Physics Coprocessor
+			.in2(32'b0),							// Player 3 Physics Coprocessor (Unused)
+			.in3(32'b0),							// Player 4 Physics Coprocessor (Unused)
+			.in4(gameControllerInputP1), 		// Player 1 Game Controller Manager
+			.in5(gameControllerInputP2), 		// Player 2 Game Controller Manager 
+			.in6(32'b0),  							// Player 3 Game Controller Manager (Unused)
+			.in7(32'b0),  							// Player 4 Game Controller Manager (Unused)
+			.in8(32'b0),  							// Player 1 VGA Coprocessor (Unused)
+			.in9(32'b0), 							// Player 2 VGA Coprocessor (Unused)
+			.in10(32'b0),  						// Player 3 VGA Coprocessor (Unused)
+			.in11(32'b0),  						// Player 4 VGA Coprocessor (Unused)
+			.in12(coll), 							// Collision Coprocessor
+			.in13(32'b0), 							// Unused
+			.in14(32'b0), 							// Unused
+			.in15(32'b0), 							// Unused
+			.in16(32'b0),							// Unused
+			.in17(32'b0), 							// Unused
+			.in18(32'b0), 							// Unused
+			.in19(32'b0), 							// Unused
+			.in20(32'b0), 							// Unused
+			.in21(32'b0), 							// Unused
+			.in22(32'b0), 							// Unused
+			.in23(32'b0), 							// Unused
+			.in24(32'b0), 							// Unused
+			.in25(32'b0), 							// Unused
+			.in26(32'b0), 							// Unused
+			.in27(32'b0), 							// Unused
+			.in28(32'b0), 							// Unused
+			.in29(32'b0), 							// Unused
+			.in30(32'b0), 							// Unused
+			.in31(32'b0), 							// Unused
+			.out(coprocessor_out));
 	assign data_out = address[12]? coprocessor_out : q_dmem;
 
 endmodule

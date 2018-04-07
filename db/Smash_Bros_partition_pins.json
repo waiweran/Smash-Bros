@@ -112,7 +112,51 @@
 					"strict" : false
 				},
 				{
+					"name" : "gpio[0]",
+					"strict" : false
+				},
+				{
+					"name" : "gpio[12]",
+					"strict" : false
+				},
+				{
+					"name" : "gpio[13]",
+					"strict" : false
+				},
+				{
+					"name" : "gpio[14]",
+					"strict" : false
+				},
+				{
+					"name" : "gpio[15]",
+					"strict" : false
+				},
+				{
+					"name" : "gpio[16]",
+					"strict" : false
+				},
+				{
+					"name" : "gpio[17]",
+					"strict" : false
+				},
+				{
+					"name" : "gpio[18]",
+					"strict" : false
+				},
+				{
+					"name" : "gpio[19]",
+					"strict" : false
+				},
+				{
+					"name" : "gpio[20]",
+					"strict" : false
+				},
+				{
 					"name" : "clock",
+					"strict" : false
+				},
+				{
+					"name" : "reset",
 					"strict" : false
 				}
 			]
