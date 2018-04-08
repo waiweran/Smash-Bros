@@ -15,7 +15,7 @@ module mmio(
 	// Player 1 Physics Coprocessor
 	reg [31:0] mass1, grav1, wind1, startPos1;
 	reg [31:0] ctrl1, knock1, attack1, collis1;
-	wire [13:0] pos1;
+	wire [31:0] pos1;
 	physics_coprocessor physP1(
 		.clock(clock), .reset(reset),
 
@@ -37,7 +37,7 @@ module mmio(
 	// Player 2 Physics Coprocessor
 	reg [31:0] mass2, grav2, wind2, startPos2;
 	reg [31:0] ctrl2, knock2, attack2, collis2;
-	wire [13:0] pos2;
+	wire [31:0] pos2;
 	physics_coprocessor physP2(
 		.clock(clock), .reset(reset),
 
@@ -113,8 +113,33 @@ module mmio(
 	decoder_32 coprocessor_select(.in(address[11:7]), .out(co_sel));
 	decoder_32 coprocessor_inspec(.in(address[6:2]), .out(co_spec));
 	
+	reg [31:0] foo;
+	always @(posedge reset) begin
+		
+		// Testing, delete later
+		
+		mass1 <= 32'h00000080;
+		grav1 <= 32'h0000000A;
+		wind1 <= 32'h00000010;
+		startPos1 <= 32'h01000050;
+		
+		whP1InVGA <= 32'h00300080;
+
+	
+	end
+	
 	always @(negedge clock) begin
-		if (co_sel[0]) begin // physics player 1
+	
+		// Testing, delete later
+		ctrl1 <= 32'h0000FF00;
+		knock1 <= 32'h00000000;
+		attack1 <= 32'h00000000;
+		collis1 <= 32'h00000004;
+		foo <= foo + 32'h00010000;
+		posP1InVGA <= startPos1 + foo;
+		
+		/*
+		if (wren & co_sel[0]) begin // physics player 1
 			if (co_spec[0]) mass1 <= data_in;
 			if (co_spec[1]) grav1 <= data_in;
 			if (co_spec[2]) wind1 <= data_in;
@@ -124,7 +149,7 @@ module mmio(
 			if (co_spec[6]) attack1 <= data_in;
 			if (co_spec[7]) collis1 <= data_in;
 		end
-		if (co_sel[1]) begin // physics player 2
+		if (wren & co_sel[1]) begin // physics player 2
 			if (co_spec[0]) mass2 <= data_in;
 			if (co_spec[1]) grav2 <= data_in;
 			if (co_spec[2]) wind2 <= data_in;
@@ -134,31 +159,32 @@ module mmio(
 			if (co_spec[6]) attack2 <= data_in;
 			if (co_spec[7]) collis2 <= data_in;
 		end
-		if (co_sel[4]) begin // Game Controller Manager for player 1
+		if (wren & co_sel[4]) begin // Game Controller Manager for player 1
 			if (co_spec[0]) gameControllerOutputP1 <= data_in;
 		end
-		if (co_sel[5]) begin // Game Controller Manager for player 2
+		if (wren & co_sel[5]) begin // Game Controller Manager for player 2
 			if (co_spec[0]) gameControllerOutputP2 <= data_in;
 		end
-		if (co_sel[8]) begin // VGA Coprocessor P1
+		if (wren & co_sel[8]) begin // VGA Coprocessor P1
 			if (co_spec[0])  posP1InVGA <= data_in;
 			if (co_spec[1])  whP1InVGA <= data_in;
 		end
-		if (co_sel[9]) begin // VGA Coprocessor P2
+		if (wren & co_sel[9]) begin // VGA Coprocessor P2
 			if (co_spec[0])  posP2InVGA <= data_in;
 			if (co_spec[1])  whP2InVGA <= data_in;
 		end
-		if (co_sel[10]) begin // VGA Coprocessor Stage
+		if (wren & co_sel[10]) begin // VGA Coprocessor Stage
 			if (co_spec[0])  posStageInVGA <= data_in;
 			if (co_spec[1])  whStageInVGA <= data_in;
 		end
 		// Collision
-		if (co_sel[12]) begin
+		if (wren & co_sel[12]) begin
 			if (co_spec[0]) x_pos <= data_in;
 			if (co_spec[1]) y_pos <= data_in;
 			if (co_spec[2]) x_size <= data_in;
 			if (co_spec[3]) y_size <= data_in;
 		end
+		*/
 	end
 	
 	

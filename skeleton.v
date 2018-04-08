@@ -56,8 +56,8 @@ module skeleton(
         .address    (address_dmem),  	// address of data
         .data_in    (data),    			// data you want to write
         .wren	     (wren),      		// write enable
-        .data_out   (q_dmem),    			// data from memory module
-		  .gpio		  (gpio),					//For controller IO
+        .data_out   (q_dmem),    		// data from memory module
+		  .gpio		  (gpio),				// For controller IO
 		  .p1VGA		  (p1VGA),
 		  .p2VGA		  (p2VGA),
 		  .stageVGA   (stageVGA)
