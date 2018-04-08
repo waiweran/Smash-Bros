@@ -1,0 +1,10 @@
+//Sends the data for position, widthHeight to vga_controller
+//I think: while VGA updates screen, need to send nops to the processor then signal once done to move on?
+//Unless the processor clock is much slower than VGA clock - this seems challenging!
+module vga_coprocessor(posP1In, whP1In, posP1Out, whP1Out, posP2In, whP2In, posP2Out, whP2Out, posStageIn, whStageIn, posP2Out, whP2Out)
+	input[31:0] position, widthHeight;
+	output[31:0] position, w
+	
+	
+  //TODO
+endmodule

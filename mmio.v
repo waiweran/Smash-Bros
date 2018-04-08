@@ -117,6 +117,7 @@ output pos1;
 	assign wren_dmem = wren & ~address[12];
 	assign address_dmem = address[11:0];
 	decoder_32 coprocessor_select(.in(address[11:7]), .out(co_sel));
+<<<<<<< HEAD
 	decoder_32 coprocessor_inspec(.in(address[6:2]), .out(co_spec));	
 		
 	
@@ -153,6 +154,34 @@ output pos1;
 
 		// VGA Inputs
 		posP1InVGA <= pos1;
+=======
+	decoder_32 coprocessor_inspec(.in(address[6:2]), .out(co_spec));
+	
+	reg [31:0] foo;
+	always @(posedge reset) begin
+		
+		// Testing, delete later
+		
+		mass1 <= 32'h00000080;
+		grav1 <= 32'h0000000A;
+		wind1 <= 32'h00000010;
+		startPos1 <= 32'h01000050;
+		
+		whP1InVGA <= 32'h00300080;
+
+	
+	end
+	
+	always @(negedge clock) begin
+	
+		// Testing, delete later
+		ctrl1 <= 32'h0000FF00;
+		knock1 <= 32'h00000000;
+		attack1 <= 32'h00000000;
+		collis1 <= 32'h00000004;
+		foo <= foo + 32'h00010000;
+		posP1InVGA <= startPos1 + foo;
+>>>>>>> e5cd9597fa1ef2080713959f715c9ea1c64108df
 		
 		/*
 		if (wren & co_sel[0]) begin // physics player 1
@@ -200,7 +229,11 @@ output pos1;
 			if (co_spec[2]) x_size <= data_in;
 			if (co_spec[3]) y_size <= data_in;
 		end
+<<<<<<< HEAD
 		*/
+=======
+		*/
+>>>>>>> e5cd9597fa1ef2080713959f715c9ea1c64108df
 	end
 	
 	
