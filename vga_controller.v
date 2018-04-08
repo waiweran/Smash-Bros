@@ -48,12 +48,19 @@ begin
      ADDR<=ADDR+1;
 end
 
+assign VGA_CLK_n = ~iVGA_CLK;
+img_index	img_index_inst (
+	.address ( index ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_background)
+);	
+
 /************** OUR CODE STARTS HERE ************/
 
 // Convert ADDR to pixel (x, y)
 wire[18:0] myXLong, myYLong;
-assign myXLong = ADDR % 18'd640;
-assign myYLong = (ADDR / 18'd640) - 18'd1;
+assign myXLong = ADDR % 19'd640;
+assign myYLong = ADDR / 19'd640;
 
 wire[15:0] myX, myY;
 assign myX = myXLong[15:0];
@@ -71,18 +78,11 @@ wire[23:0] bgr_data_raw_p2;
 wire[23:0] bgr_data_raw_stage;
 
 // Load background
-assign VGA_CLK_n = ~iVGA_CLK;
 img_data	img_data_inst (
 	.address ( ADDR ),
 	.clock ( VGA_CLK_n ),
 	.q ( index )
 );
-
-img_index	img_index_inst (
-	.address ( index ),
-	.clock ( iVGA_CLK ),
-	.q ( bgr_data_raw_background)
-);	
 
 // Load P1 image
 //TEMP color it red
