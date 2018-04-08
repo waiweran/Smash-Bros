@@ -1,13 +1,13 @@
-Analysis & Synthesis Status : Successful - Thu Apr 05 22:04:46 2018
-Quartus Prime Version : 17.1.0 Build 590 10/25/2017 SJ Lite Edition
+Analysis & Synthesis Status : Successful - Sat Apr 07 19:57:00 2018
+Quartus Prime Version : 16.0.0 Build 211 04/27/2016 SJ Standard Edition
 Revision Name : Smash_Bros
 Top-level Entity Name : skeleton
 Family : Cyclone IV E
-Total logic elements : 390
-    Total combinational functions : 357
-    Dedicated logic registers : 97
-Total registers : 97
-Total pins : 31
+Total logic elements : 988
+    Total combinational functions : 972
+    Dedicated logic registers : 128
+Total registers : 128
+Total pins : 71
 Total virtual pins : 0
 Total memory bits : 2,463,744
 Embedded Multiplier 9-bit elements : 0
