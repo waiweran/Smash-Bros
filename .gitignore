@@ -4,4 +4,4 @@
 !*.mif
 !*.pdf
 !*.md
-!Models/*
+!/Models/*
