@@ -112,6 +112,7 @@ output pos1;
    );
 	
 	
+	
 	// Module Inputs
 	wire [31:0] co_sel, co_spec;
 	assign wren_dmem = wren & ~address[12];
@@ -150,7 +151,6 @@ output pos1;
 		// Collision Inputs
 		player_pos <= pos1;
 		
-
 		// VGA Inputs
 		posP1InVGA <= pos1;
 		
@@ -204,6 +204,7 @@ output pos1;
 	end
 	
 	
+	
 	// Module Outputs
 	wire [31:0] coprocessor_out;
 	tristate_32 outmux(.sel(co_sel),
@@ -219,7 +220,7 @@ output pos1;
 			.in9(32'b0), 							// Player 2 VGA Coprocessor (Unused)
 			.in10(32'b0),  						// Player 3 VGA Coprocessor (Unused)
 			.in11(32'b0),  						// Player 4 VGA Coprocessor (Unused)
-			.in12(coll), 							// Collision Coprocessor
+			.in12(collision_out), 				// Collision Coprocessor
 			.in13(32'b0), 							// Unused
 			.in14(32'b0), 							// Unused
 			.in15(32'b0), 							// Unused

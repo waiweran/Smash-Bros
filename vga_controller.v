@@ -50,12 +50,6 @@ end
 
 assign VGA_CLK_n = ~iVGA_CLK;
 
-// Load background
-img_data	img_data_inst (
-	.address ( ADDR ),
-	.clock ( VGA_CLK_n ),
-	.q ( index )
-);
 img_index	img_index_inst (
 	.address ( index ),
 	.clock ( iVGA_CLK ),
@@ -83,6 +77,13 @@ wire[23:0] bgr_data_raw_background;
 wire[23:0] bgr_data_raw_p1;
 wire[23:0] bgr_data_raw_p2;
 
+
+// Load background
+img_data	img_data_inst (
+	.address ( ADDR ),
+	.clock ( VGA_CLK_n ),
+	.q ( index )
+);
 
 // Load P1 image
 //TEMP color it red
