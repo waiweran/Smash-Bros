@@ -1,0 +1,14 @@
+db/
+incremental_db/
+simulation/
+output_files/
+*.v.bak
+*.bsf
+*.cmp
+*.ppf
+*.qip
+*.qpf
+*.json
+*.rpt
+*.qdf
+._*

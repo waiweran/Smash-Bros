@@ -26,7 +26,7 @@ input [63:0] p1VGA, p2VGA, stageVGA;
 reg [18:0] ADDR;
 reg [23:0] bgr_data;
 wire VGA_CLK_n;
-wire [7:0] index;
+wire [7:0] index, indexc1, indexc2;
 wire [23:0] bgr_data_raw;
 wire cBLANK_n,cHS,cVS,rst;
 ////
@@ -48,12 +48,26 @@ begin
      ADDR<=ADDR+1;
 end
 
+assign VGA_CLK_n = ~iVGA_CLK;
+
+// Load background
+img_data	img_data_inst (
+	.address ( ADDR ),
+	.clock ( VGA_CLK_n ),
+	.q ( index )
+);
+img_index	img_index_inst (
+	.address ( index ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_background)
+);	
+
 /************** OUR CODE STARTS HERE ************/
 
 // Convert ADDR to pixel (x, y)
 wire[18:0] myXLong, myYLong;
-assign myXLong = ADDR % 18'd640;
-assign myYLong = (ADDR / 18'd640) - 18'd1;
+assign myXLong = ADDR % 19'd640;
+assign myYLong = ADDR / 19'd640;
 
 wire[15:0] myX, myY;
 assign myX = myXLong[15:0];
@@ -68,39 +82,49 @@ isInsideSprite insideStage(stageVGA, myX, myY, isInsideStage);
 wire[23:0] bgr_data_raw_background;
 wire[23:0] bgr_data_raw_p1;
 wire[23:0] bgr_data_raw_p2;
-wire[23:0] bgr_data_raw_stage;
 
-// Load background
-assign VGA_CLK_n = ~iVGA_CLK;
-img_data	img_data_inst (
-	.address ( ADDR ),
-	.clock ( VGA_CLK_n ),
-	.q ( index )
-);
-
-img_index	img_index_inst (
-	.address ( index ),
-	.clock ( iVGA_CLK ),
-	.q ( bgr_data_raw_background)
-);	
 
 // Load P1 image
 //TEMP color it red
-assign bgr_data_raw_p1 = 24'b000000000000000011111111;
+//assign bgr_data_raw_p1 = 24'b000000000000000011111111;
 
 // Load P2 Image
 //TEMP Color it blue
 assign bgr_data_raw_p2 = 24'b111111110000000000000000;
 
-// Load Stage Image
-//TEMP Color it white
-assign bgr_data_raw_stage = 24'b111111111111111111111111;
+
+// Load P1 image
+character1_data	character1_data_inst (
+	.address ( ADDR ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexc1 )
+);
+character1_index	character1_index_inst (
+	.address ( indexc1 ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_p1)
+);	
+
+// Load P2 image
+//character2_data	character2_data_inst (
+//	.address ( ADDR ),
+//	.clock ( VGA_CLK_n ),
+//	.q ( indexc2 )
+//);
+//character2_index	character2_index_inst (
+//	.address ( indexc2 ),
+//	.clock ( iVGA_CLK ),
+//	.q ( bgr_data_raw_p2)
+//);	
+
 
 //Choose the color of the frontmost object (can change layering via order of muxes here)
-wire[23:0] w1, w2;
-assign w1 = isInsideStage ? bgr_data_raw_stage : bgr_data_raw_background;
-assign w2 = isInsideP2 ? bgr_data_raw_p2 : w1;
-assign bgr_data_raw = isInsideP1 ? bgr_data_raw_p1 : w2;
+wire[23:0] w1;
+//assign w1 = isInsideStage ? bgr_data_raw_stage : bgr_data_raw_background;
+//assign w1 = isInsideP2 ? bgr_data_raw_p2 : bgr_data_raw_background;
+//assign bgr_data_raw = isInsideP1 ? bgr_data_raw_p1 : w1;
+	
+assign bgr_data_raw = isInsideP1 ? bgr_data_raw_p1 : bgr_data_raw_background;
 	
 /************** OUR CODE ENDS HERE **************/
 

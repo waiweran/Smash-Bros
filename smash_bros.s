@@ -35,9 +35,7 @@ initPlayer1:
     # Mass
     sw $r1 4096($r0) # address: 1000000000000
     # Gravity
-    addi $r5 $r0 98
-    addi $r6 $r0 10
-    div $r5 $r5 $r6 # gravity
+    addi $r5 $r0 10
     sw $r5 4100($r0) # address: 1000000000100
     # Wind Resistance
     addi $r5 10
