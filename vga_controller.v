@@ -45,7 +45,7 @@ begin
   else if (cHS==1'b0 && cVS==1'b0)
      ADDR<=19'd0;
   else if (cBLANK_n==1'b1)
-     ADDR<=ADDR+1;
+     ADDR<=ADDR+19'd1;
 end
 
 assign VGA_CLK_n = ~iVGA_CLK;
@@ -59,19 +59,16 @@ img_index	img_index_inst (
 /************** OUR CODE STARTS HERE ************/
 
 // Convert ADDR to pixel (x, y)
-wire[18:0] myXLong, myYLong;
-assign myXLong = ADDR % 19'd640;
-assign myYLong = ADDR / 19'd640;
+wire[18:0] myX, myY;
+assign myX = ADDR % 19'd640;
+assign myY = ADDR / 19'd640;
 
-wire[15:0] myX, myY;
-assign myX = myXLong[15:0];
-assign myY = myYLong[15:0];
 
 // Test if inside any sprite
-wire isInsideP1, isInsideP2, isInsideStage;
-isInsideSprite insideP1(p1VGA, myX, myY, isInsideP1);
-isInsideSprite insideP2(p2VGA, myX, myY, isInsideP2);
-isInsideSprite insideStage(stageVGA, myX, myY, isInsideStage);
+wire isInsideP1, isInsideP2;
+wire [18:0] indexP1, indexP2;
+isInsideSprite insideP1(p1VGA, myX, myY, isInsideP1, indexP1);
+isInsideSprite insideP2(p2VGA, myX, myY, isInsideP2, indexP2);
 
 wire[23:0] bgr_data_raw_background;
 wire[23:0] bgr_data_raw_p1;
@@ -84,6 +81,7 @@ img_data	img_data_inst (
 	.clock ( VGA_CLK_n ),
 	.q ( index )
 );
+//assign bgr_data_raw_background = 24'b000000000000000011111111;
 
 // Load P1 image
 //TEMP color it red
@@ -95,12 +93,12 @@ assign bgr_data_raw_p2 = 24'b111111110000000000000000;
 
 
 // Load P1 image
-character1_data	character1_data_inst (
-	.address ( ADDR ),
+bowser_data	character1_data_inst (
+	.address ( indexP1 ),
 	.clock ( VGA_CLK_n ),
 	.q ( indexc1 )
 );
-character1_index	character1_index_inst (
+bowser_index	character1_index_inst (
 	.address ( indexc1 ),
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_p1)
@@ -121,11 +119,11 @@ character1_index	character1_index_inst (
 
 //Choose the color of the frontmost object (can change layering via order of muxes here)
 wire[23:0] w1;
-//assign w1 = isInsideStage ? bgr_data_raw_stage : bgr_data_raw_background;
 //assign w1 = isInsideP2 ? bgr_data_raw_p2 : bgr_data_raw_background;
 //assign bgr_data_raw = isInsideP1 ? bgr_data_raw_p1 : w1;
 	
-assign bgr_data_raw = isInsideP1 ? bgr_data_raw_p1 : bgr_data_raw_background;
+assign bgr_data_raw = isInsideP1 & (bgr_data_raw_p1 !== 24'b0) ? bgr_data_raw_p1 : bgr_data_raw_background;
+//assign bgr_data_raw = bgr_data_raw_p1;
 	
 /************** OUR CODE ENDS HERE **************/
 

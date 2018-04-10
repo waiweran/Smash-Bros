@@ -1,10 +1,7 @@
 module mmio(
 	clock, reset,
-	address, data_in, wren, data_out, gpio, p1VGA, p2VGA, stageVGA,
-	pos1
+	address, data_in, wren, data_out, gpio, p1VGA, p2VGA, stageVGA
 );
-
-output pos1;
 	
 	input clock, reset;
 	input [12:0] address;
@@ -129,15 +126,15 @@ output pos1;
 		mass1 <= 32'h00000010;
 		grav1 <= 32'h00010000;
 		wind1 <= 32'h00000010;
-		startPos1 <= 32'h00600168;
+		startPos1 <= 32'h006000fa;
 		
 		// Collision Constants
-		player_size <= 32'h00320032;
+		player_size <= 32'h0085007d;
 		stage_pos <= 32'h00430014;
 		stage_size <= 32'h01fa00c8;
 
 		// VGA Constants
-		whP1InVGA <= 32'h00320032;
+		whP1InVGA <= 32'h0085007d;
 		posStageInVGA <= 32'h00430014;
 		whStageInVGA <= 32'h01fa00c8;
 
