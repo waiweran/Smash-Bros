@@ -1,10 +1,7 @@
 module mmio(
 	clock, reset,
-	address, data_in, wren, data_out, gpio, p1VGA, p2VGA, stageVGA,
-	pos1
+	address, data_in, wren, data_out, gpio, p1VGA, p2VGA, stageVGA
 );
-
-output pos1;
 	
 	input clock, reset;
 	input [12:0] address;
@@ -123,22 +120,23 @@ output pos1;
 	
 	always @(negedge clock) begin
 		
+		/*
 		// Testing, Remove Later
 		
 		// Physics Constants
 		mass1 <= 32'h00000010;
 		grav1 <= 32'h00010000;
 		wind1 <= 32'h00000010;
-		startPos1 <= 32'h00600168;
+		startPos1 <= 32'h016000fa;
 		
 		// Collision Constants
-		player_size <= 32'h00320032;
-		stage_pos <= 32'h00430014;
+		player_size <= 32'h0085007d;
+		stage_pos <= 32'h01430014;
 		stage_size <= 32'h01fa00c8;
 
 		// VGA Constants
-		whP1InVGA <= 32'h00320032;
-		posStageInVGA <= 32'h00430014;
+		whP1InVGA <= 32'h0085007d;
+		posStageInVGA <= 32'h01430014;
 		whStageInVGA <= 32'h01fa00c8;
 
 		
@@ -154,7 +152,7 @@ output pos1;
 		// VGA Inputs
 		posP1InVGA <= pos1;
 		
-		/*
+		*/
 		if (wren & co_sel[0]) begin // physics player 1
 			if (co_spec[0]) mass1 <= data_in;
 			if (co_spec[1]) grav1 <= data_in;
@@ -200,7 +198,7 @@ output pos1;
 			if (co_spec[2]) player_size <= data_in;
 			if (co_spec[3]) stage_size <= data_in;
 		end
-		*/
+		
 	end
 	
 	

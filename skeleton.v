@@ -42,10 +42,7 @@ module skeleton(
 	input[39:0] gpio;
 	
 	// LEDs for Testing
-	wire [31:0] pos1;
 	output[17:0] LEDs;
-	assign LEDs[3:0] = gpio[7:4];
-	assign LEDs[17:6] = pos1[31:16];
 	
     /** IMEM **/
     wire [11:0] address_imem;
@@ -73,7 +70,6 @@ module skeleton(
 		  .p1VGA		  (p1VGA),
 		  .p2VGA		  (p2VGA),
 		  .stageVGA   (stageVGA),
-		  .pos1(pos1)
     );
 
     /** REGFILE **/
@@ -93,7 +89,7 @@ module skeleton(
         data_readRegB
     );
 
-    /** Processor **/ /*
+    /** Processor **/
     processor my_processor(
         // Control signals
         clock,                          // I: The master clock
@@ -135,5 +131,8 @@ module skeleton(
 								 .stageVGA(stageVGA)
 	);
 	
+	/** LEDs **/
+	assign LEDs[12:0] = address_dmem;
+	assign LEDs[17:13] = 6'b0;
 
 endmodule
