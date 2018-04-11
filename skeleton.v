@@ -20,6 +20,7 @@ module skeleton(
 	VGA_G,	 														//	VGA Green[9:0]
 	VGA_B,															//	VGA Blue[9:0]
 	gpio,
+	gpioOutput,
 	LEDs
 );
 		
@@ -39,13 +40,11 @@ module skeleton(
 	assign reset = ~reset_btn;
 	
 	// GPIO Pins
-	input[39:0] gpio;
+	input[35:0] gpio;
+	output[2:0] gpioOutput;
 	
 	// LEDs for Testing
-	wire [31:0] pos1;
 	output[17:0] LEDs;
-	assign LEDs[3:0] = gpio[7:4];
-	assign LEDs[17:6] = pos1[31:16];
 	
     /** IMEM **/
     wire [11:0] address_imem;
@@ -70,10 +69,10 @@ module skeleton(
         .wren	     (wren),      		// write enable
         .data_out   (q_dmem),    		// data from memory module
 		  .gpio		  (gpio),				// For controller IO
+		  .gpioOutput (gpioOutput),
 		  .p1VGA		  (p1VGA),
 		  .p2VGA		  (p2VGA),
 		  .stageVGA   (stageVGA),
-		  .pos1(pos1)
     );
 
     /** REGFILE **/
@@ -93,7 +92,7 @@ module skeleton(
         data_readRegB
     );
 
-    /** Processor **/ /*
+    /** Processor **/
     processor my_processor(
         // Control signals
         clock,                          // I: The master clock
@@ -119,6 +118,7 @@ module skeleton(
         data_readRegB                   // I: Data from port B of regfile
     );
 	 
+	 
 	/** VGA **/
 	Reset_Delay			r0	(.iCLK(clock),.oRESET(DLY_RST)	);
 	VGA_Audio_PLL 		p1	(.areset(~DLY_RST),.inclk0(clock),.c0(VGA_CTRL_CLK),.c1(AUD_CTRL_CLK),.c2(VGA_CLK)	);
@@ -135,5 +135,8 @@ module skeleton(
 								 .stageVGA(stageVGA)
 	);
 	
+	/** LEDs **/
+	assign LEDs[12:0] = address_dmem;
+	assign LEDs[17:13] = 6'b0;
 
 endmodule
