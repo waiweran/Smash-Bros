@@ -71,6 +71,7 @@ module processor(
     data_readRegA,                  // I: Data from port A of regfile
     data_readRegB                   // I: Data from port B of regfile
 );
+
     // Control signals
     input clock, reset;
 
