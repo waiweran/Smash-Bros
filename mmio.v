@@ -121,7 +121,7 @@ module mmio(
 
 	always @(negedge clock) begin
 
-		/*
+		
 		// Testing, Remove Later
 
 		// Physics Constants
@@ -153,7 +153,7 @@ module mmio(
 		// VGA Inputs
 		posP1InVGA <= pos1;
 
-		*/
+		/*
 		if (wren & co_sel[0]) begin // physics player 1
 			if (co_spec[0]) mass1 <= data_in;
 			if (co_spec[1]) grav1 <= data_in;
@@ -199,7 +199,7 @@ module mmio(
 			if (co_spec[2]) player_size <= data_in;
 			if (co_spec[3]) stage_size <= data_in;
 		end
-
+		*/
 	end
 
 

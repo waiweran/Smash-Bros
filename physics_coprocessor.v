@@ -29,7 +29,7 @@ module physics_coprocessor(
 	output [31:0] position;
 
 	// Input from Controller
-	wire [8:0] joystick_x, joystick_y; // Unsigned values from 0 to 255 representing joystick position
+	wire signed [8:0] joystick_x, joystick_y; // Unsigned values from 0 to 255 representing joystick position
 	assign joystick_x[7:0] = controller_in[15:8];
 	assign joystick_x[8] = 1'b0;
 	assign joystick_y[7:0] = controller_in[7:0];
@@ -48,16 +48,17 @@ module physics_coprocessor(
 	assign platform_Down = wall[4];
 
 	// Input Physics Parameters
-	wire [47:0] mass, gravity, wind, move_x, move_y, knockback_x, knockback_y;
+	wire [47:0] mass, gravity, wind;
+	wire signed [47:0] move_x, move_y, knockback_x, knockback_y;
 	assign mass[31:0] = mass_in;
 	assign mass[47:32] = 16'b0;
 	assign gravity[31:0] = gravity_in;
 	assign gravity[47:32] = 16'b0;
 	assign wind[31:0] = wind_in;
 	assign wind[47:32] = 16'b0;
-	assign move_x[16:8] = joystick_x; // Map joystick values to -128 to 127
+	assign move_x[16:8] = joystick_x - 9'b001110000; // Map joystick values to -128 to 127
 	assign move_x[7:0] = 8'b0;
-	assign move_y[16:8] = joystick_y; // Map joystick values to -128 to 127
+	assign move_y[16:8] = joystick_y - 9'b001110000; // Map joystick values to -128 to 127
 	assign move_y[7:0] = 8'b0;
 	assign knockback_x[15:0] = knockback_in[31:16]; // Split knockback into x, y
 	assign knockback_y[15:0] = knockback_in[15:0];
@@ -77,8 +78,8 @@ module physics_coprocessor(
     reg [47:0] pos_x, pos_y;
 
     // Stored Values
-    reg [47:0] vel_x, vel_y;
-    reg [47:0] accel_x, accel_y;
+    reg signed [47:0] vel_x, vel_y;
+    reg signed [47:0] accel_x, accel_y;
 
     // Vibration Values
     reg [47:0] vibr_pos_y;
