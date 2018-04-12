@@ -80,9 +80,10 @@ module mmio(
 	// Player 2 Game Controller Manager
 	reg[31:0] gameControllerOutputP2;
 	wire[31:0] gameControllerInputP2;
+    wire unused;
 	gameControllerManager controllerP2(.mmioBoardOutput(gameControllerOutputP2),
 												  .mmioBoardInput(gameControllerInputP2),
-												  .halfgpio(gpio[31:16]), .halfoverflowgpio(gpio[35:34]), .ledMotorOut(gpioOutput[1]), .fastClock(clock), .slowClock(gpioOutput[2]));
+												  .halfgpio(gpio[31:16]), .halfoverflowgpio(gpio[35:34]), .ledMotorOut(gpioOutput[1]), .fastClock(clock), .slowClock(unused));
 
 	// VGA Coprocessor Player 1
 	reg[31:0] posP1InVGA, whP1InVGA;

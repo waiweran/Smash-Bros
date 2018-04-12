@@ -92,7 +92,7 @@ module skeleton(
         data_readRegB
     );
 
-    /** Processor **/
+    /** Processor **/ /*
     processor my_processor(
         // Control signals
         clock,                          // I: The master clock

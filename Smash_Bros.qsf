@@ -128,10 +128,6 @@ set_location_assignment PIN_AF20 -to gpio[32]
 set_location_assignment PIN_AH26 -to gpio[33]
 set_location_assignment PIN_AH23 -to gpio[34]
 set_location_assignment PIN_AG26 -to gpio[35]
-set_location_assignment PIN_J10 -to gpio[36]
-set_location_assignment PIN_J14 -to gpio[37]
-set_location_assignment PIN_H13 -to gpio[38]
-set_location_assignment PIN_H14 -to gpio[39]
 set_location_assignment PIN_M23 -to reset_btn
 set_location_assignment PIN_H15 -to LEDs[17]
 set_location_assignment PIN_G16 -to LEDs[16]
@@ -151,8 +147,6 @@ set_location_assignment PIN_F21 -to LEDs[3]
 set_location_assignment PIN_E19 -to LEDs[2]
 set_location_assignment PIN_F19 -to LEDs[1]
 set_location_assignment PIN_G19 -to LEDs[0]
-set_global_assignment -name VERILOG_FILE isInsideSpriteTestbench.v
-set_global_assignment -name VERILOG_FILE insideTester.v
 set_global_assignment -name VERILOG_FILE character2_data.v
 set_global_assignment -name VERILOG_FILE character1_data.v
 set_global_assignment -name VERILOG_FILE tristate_32.v
@@ -237,4 +231,7 @@ set_global_assignment -name MIF_FILE kirby1_data.mif
 set_global_assignment -name MIF_FILE kirby1_index.mif
 set_global_assignment -name QIP_FILE bowser_data.qip
 set_global_assignment -name QIP_FILE bowser_index.qip
+set_location_assignment PIN_J10 -to gpioOutput[0]
+set_location_assignment PIN_J14 -to gpioOutput[1]
+set_location_assignment PIN_H13 -to gpioOutput[2]
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
