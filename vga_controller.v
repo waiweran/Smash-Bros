@@ -24,6 +24,8 @@ input [63:0] p1VGA, p2VGA, stageVGA;
                         
 ///////// ////                     
 reg [18:0] ADDR;
+reg [16:0] stage_addr;
+reg [8:0] count;
 reg [23:0] bgr_data;
 wire VGA_CLK_n;
 wire [7:0] index, indexc1, indexc2;
@@ -37,26 +39,55 @@ video_sync_generator LTM_ins (.vga_clk(iVGA_CLK),
                               .HS(cHS),
                               .VS(cVS));
 ////
-////Addresss generator
+////Address generator
 always@(posedge iVGA_CLK,negedge iRST_n)
 begin
-  if (!iRST_n)
-     ADDR<=19'd0;
-  else if (cHS==1'b0 && cVS==1'b0)
-     ADDR<=19'd0;
-  else if (cBLANK_n==1'b1)
-     ADDR<=ADDR+19'd1;
+	if (!iRST_n)
+		ADDR<=19'd0;
+		count<=9'd0;
+		stage_addr<=17'd0;
+	else if (cHS==1'b0 && cVS==1'b0)
+		ADDR<=19'd0;
+		count<=9'd0;
+		stage_addr<=17'd0;
+	else if (cBLANK_n==1'b1)
+		ADDR<=ADDR+19'd1;
+		
+	if (ADDR % 640 == 1'b0) // increase the count for each line that passes
+		count<=count+9'd1;
+	if (ADDR % 2 == 1'b0) //increment stage addr every other pixel
+		stage_addr<=stage_addr+9'd1;
+	if (count % 2 == 1'b1)
+		stage_addr<=stage_addr-9'd320;
 end
 
 assign VGA_CLK_n = ~iVGA_CLK;
 
-img_index	img_index_inst (
-	.address ( index ),
-	.clock ( iVGA_CLK ),
-	.q ( bgr_data_raw_background)
-);	
 
 /************** OUR CODE STARTS HERE ************/
+
+assign stage_addr = ADDR %2
+// Load background
+stage_data	stage_data_inst (
+	.address ( stage_addr ),
+	.clock ( VGA_CLK_n ),
+	.q ( index )
+);
+stage_index stage_index_inst (
+	.address ( index ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_background )
+);	
+//img_data	img_data_inst (
+//	.address ( ADDR ),
+//	.clock ( VGA_CLK_n ),
+//	.q ( index )
+//);
+//img_index	img_index_inst (
+//	.address ( index ),
+//	.clock ( iVGA_CLK ),
+//	.q ( bgr_data_raw_background)
+//);	
 
 // Convert ADDR to pixel (x, y)
 wire[18:0] myX, myY;
@@ -75,33 +106,16 @@ wire[23:0] bgr_data_raw_p1;
 wire[23:0] bgr_data_raw_p2;
 
 
-// Load background
-img_data	img_data_inst (
-	.address ( ADDR ),
-	.clock ( VGA_CLK_n ),
-	.q ( index )
-);
-//assign bgr_data_raw_background = 24'b000000000000000011111111;
-
-// Load P1 image
-//TEMP color it red
-//assign bgr_data_raw_p1 = 24'b000000000000000011111111;
-
-// Load P2 Image
-//TEMP Color it blue
-assign bgr_data_raw_p2 = 24'b111111110000000000000000;
-
-
 // Load P1 image
 bowser_data	character1_data_inst (
 	.address ( indexP1 ),
 	.clock ( VGA_CLK_n ),
 	.q ( indexc1 )
 );
-bowser_index	character1_index_inst (
+bowser_index character1_index_inst (
 	.address ( indexc1 ),
 	.clock ( iVGA_CLK ),
-	.q ( bgr_data_raw_p1)
+	.q ( bgr_data_raw_p1 )
 );	
 
 // Load P2 image
