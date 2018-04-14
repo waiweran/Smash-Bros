@@ -1,13 +1,28 @@
 .text
 main:
-    # Initialization
+    # --------Initialization--------
     jal initCharacters
     jal selectCharacter
     jal initPlayer1
     #jal initPlayer2
 
-    # Game loop`
-    
+    # --------Game loop------------
+    addi $r1 $r1 0
+    bne $r0 $r1 terminateGame:
+      # Controller Coprocessor
+      lw $r2 4736($r0)   #address: 100101xxxxxxx
+
+      # Collision Coprocessor - for input: (gameControllerInputP1 or pos1? ask Nathaniel, assuming former now)
+      sw $r2 5632($r0) # position, address: 1011000000000
+      lw $r3 1($r0)    # load width/height (size) into $r3
+      sw $r3 5640($r0) # width/height, address: 1011000001000
+      lw $r4 5632($r0) # collision_output, address: 101100xxxxxxx
+      
+
+
+    # --------- Game Termination----------
+terminateGame: #TODO once a player loses all health
+
 
 # initialize sizes of different characters, average size around 60X120
 # stores mass in Mem[0] and width/height in Mem[1]
@@ -98,7 +113,7 @@ initPlayer2:
     sw $r5 4236($r0) # address: 1000010001100
 
     # Controller
-
+    # TODO finish this function when necessary
 
     # Knockback
 
@@ -106,6 +121,3 @@ initPlayer2:
 
     # Collision
     jr $rd
-
-initStage:
-    addi
