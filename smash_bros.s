@@ -14,11 +14,19 @@ main:
 
       # Collision Coprocessor - for input: (gameControllerInputP1 or pos1? ask Nathaniel, assuming former now)
       sw $r2 5632($r0) # position, address: 1011000000000
-      lw $r3 1($r0)    # load width/height (size) into $r3
-      sw $r3 5640($r0) # width/height, address: 1011000001000
+      #lw $r3 1($r0)    # load width/height (size) into $r3
+      #sw $r3 5640($r0) # width/height, address: 1011000001000
       lw $r4 5632($r0) # collision_output, address: 101100xxxxxxx
-      
 
+     # Physics Coprocessor
+     sw $r2 4112($r0)  # gameControllerInputP1, address: 1000000010000
+     sw $r4 4124($r0)  # collision_output, address: 1000000011100
+     lw $r5 4096($r0)  # pos1, address: 100000xxxxxxx
+
+     # VGA Coprocessor (display new image)
+     sw $r5 5120($r0)  # pos1, address: 1010000000000
+
+     # Check game termination condition
 
     # --------- Game Termination----------
 terminateGame: #TODO once a player loses all health
@@ -88,8 +96,8 @@ initPlayer1:
     addi $r5 $r0 0      # address: 1000000011100
     sw $r5 4124($r0)
 
-    # Controller, Collision iniital input parameters are not constant and
-    # will be set in game loop; for now, set them to 0
+    # Controller, Collision have iniital input parameters that are not constant and
+    # will be set in game loop; for now, set those parameters to 0
 
     jr $rd
 
