@@ -30,7 +30,8 @@ main:
 
     # --------- Game Termination----------
 terminateGame: #TODO once a player loses all health
-
+    # Probably need a signal here to tell the processor to stop cycling.
+    # Alternatively, could have an infinite loop here.
 
 # initialize sizes of different characters, average size around 60X120
 # stores mass in Mem[0] and width/height in Mem[1]
