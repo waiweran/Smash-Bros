@@ -1,4 +1,3 @@
-.text
 main:
     # --------Initialization--------
     jal initCharacters
@@ -7,8 +6,8 @@ main:
     #jal initPlayer2
 
     # --------Game loop------------
-    addi $r1 $r1 0
-    bne $r0 $r1 terminateGame:
+    addi $r1 $r0 0
+    bne $r0 $r1 terminateGame
       # Controller Coprocessor
       lw $r2 4736($r0)   #address: 100101xxxxxxx
 
@@ -48,7 +47,7 @@ initCharacters:
     addi $r1 $r1 125 # height in bottom order
     sw $r1 1($r0)
 
-    jr $rd
+    jr $r31
 
 # load up sizes, for now just character 1
 # Loads mass (Mem[0]) and width/height (Mem[1]) into $r1 and $r2
@@ -60,7 +59,7 @@ selectCharacter:
     # lw $r3 0($r0)
     # lw $r4 1($r0)
 
-    jr $rd
+    jr $r31
 
 # initialize player constants
 # Executes sw's to mmio addresses to load initial constants for the coprocessors
@@ -135,7 +134,7 @@ initPlayer1:
     # Controller, Collision have iniital input parameters that are not constant and
     # will be set in game loop; for now, set those parameters to 0
 
-    jr $rd
+    jr $r31
 
 initPlayer2:
     # Mass
@@ -164,4 +163,4 @@ initPlayer2:
     # Attack
 
     # Collision
-    jr $rd
+    jr $r31
