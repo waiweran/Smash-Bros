@@ -17,14 +17,12 @@ jal initPlayerOne
 addi $r1 $r0 0
 bne $r0 $r1 12
 # Controller Coprocessor
-lw $r2 4736($r0)
-#address: 100101xxxxxxx
+lw $r2 4608($r0)
+#address: 100100xxxxxxx
 
 # Collision Coprocessor - for input: (gameControllerInputP1 or pos1? ask Nathaniel, assuming former now)
 sw $r2 5632($r0)
 # position, address: 1011000000000
-#lw $r3 1($r0)    # load width/height (size) into $r3
-#sw $r3 5640($r0) # width/height, address: 1011000001000
 lw $r4 5632($r0)
 # collision_out, address: 101100xxxxxxx
 
@@ -33,11 +31,11 @@ sw $r2 4112($r0)
 # gameControllerInputP1, address: 1000000010000
 sw $r4 4124($r0)
 # collision_out, address: 1000000011100
-lw $r5 4096($r0)
+lw $r6 4096($r0)
 # pos1, address: 100000xxxxxxx
 
 # VGA Coprocessor (display new image)
-sw $r5 5120($r0)
+sw $r6 5120($r0)
 # pos1, address: 1010000000000
 
 # Check game termination condition

@@ -15,7 +15,7 @@ jal initPlayerTwo
 
 # --------Game loop------------
 addi $r1 $r0 0
-bne $r0 $r1 ___TODO NEED UPDATE___
+bne $r0 $r1 20
 # Controller Coprocessor, P1
 lw $r2 4608($r0)
 #address: 100100xxxxxxx
