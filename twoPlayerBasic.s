@@ -177,17 +177,17 @@ sw $r2 5124($r0)
 
 #posStageInVGA - TODO will likely remove later
 addi $r5 $r0 323
-# address: 101010001000
+# address: 1010100000000
 sll $r5 $r5 16
 addi $r5 $r0 20
-sw $r5 5128($r0)
+sw $r5 5376($r0)
 
 #whStageInVGA - TODO will likely remove later
 addi $r5 $r0 506
-# address: 101010001100
+# address: 1010100000100
 sll $r5 $r5 16
 addi $r5 $r0 200
-sw $r5 5132($r0)
+sw $r5 5380($r0)
 
 # Controller, Collision have iniital input parameters that are not constant and
 # will be set in game loop; for now, set those parameters to 0
@@ -200,85 +200,75 @@ jr $r31
 
 #---------Physics-----------
 # Mass
-initPlayerTwo: sw $r3 ($r0)
+initPlayerTwo: sw $r3 4224($r0)
 # address: 1000010000000 #Precondition: $r3 has mass (p2)
 # Gravity
 addi $r5 $r0 65536
-sw $r5 ____($r0)
-#address: 1000000000100
+sw $r5 4228($r0)
+#address: 1000010000100
 # Wind Resistance
 addi $r5 $r0 16
-sw $r5 ____($r0)
-# address: 1000000001000
+sw $r5 4232($r0)
+# address: 1000010001000
 # Position
-addi $r5 $r0 ____
+addi $r5 $r0 425
 # xpos
 sll $r5 $r5 16
 # shift to top order
-addi $r5 $r5 ____
+addi $r5 $r5 250
 # ypos in bottom order
-sw $r5 ____($r0)
-# address: 1000000001100
+sw $r5 4236($r0)
+# address: 1000010001100
 
 # Controller
 addi $r5 $r0 0
-sw $r5 _____($r0)
-# address: 1000000010000
+sw $r5 4240($r0)
+# address: 1000010010000
 
 # Knockback
 addi $r5 $r0 0
-sw $r5 ____($r0)
-# address: 1000000010100
+sw $r5 4244($r0)
+# address: 1000010010100
 
 # Attack
 addi $r5 $r0 0
-sw $r5 ____($r0)
-# address: 1000000011000
+sw $r5 4248($r0)
+# address: 1000010011000
 
 # Collision
 addi $r5 $r0 0
-# address: 1000000011100
-sw $r5 ____($r0)
+# address: 1000010011100
+sw $r5 4252($r0)
 
 #-----------Controller----------
 #no constants!
 
 #----------Collision-------------
 #Player size
-sw $r4 ____($r0)
-# address: 1011000000100 #PRECONDITION: $r4 contains player size! (for p2)
+sw $r4 5764($r0)
+# address: 1011010000100 #PRECONDITION: $r4 contains player size! (for p2)
 
 #Stage position
 addi $r5 $r0 323
-# address: 1011000001000
+# address: 1011010001000
 sll $r5 $r5 16
 addi $r5 $r0 20
-sw $r5 _____($r0)
+sw $r5 5768($r0)
 
 #Stage size
 addi $r5 $r0 506
-# address: 1011000001100
+# address: 1011010001100
 sll $r5 $r5 16
 addi $r5 $r0 200
-sw $r5 _____($r0)
+sw $r5 5772($r0)
 
 #----------VGA--------------------
-#whP1InVGA      # address: 1010000000100 #PRECONDITION: $r4 contains player size! (for p2)
-sw $r4 ____($r0)
+#whP2InVGA      # address: 1010010000100 #PRECONDITION: $r4 contains player size! (for p2)
+sw $r4 5252($r0)
 
 #posStageInVGA - TODO will likely remove later
-addi $r5 $r0 323
-# address: 101010001000
-sll $r5 $r5 16
-addi $r5 $r0 20
-sw $r5 _____($r0)
-
 #whStageInVGA - TODO will likely remove later
-addi $r5 $r0 506
-# address: 101010001100
-sll $r5 $r5 16
-addi $r5 $r0 200
-sw $r5 _____($r0)
+# No need to repeat these again! Just once needed because same vga coprocessor!
 
 # Controller, Collision have iniital input parameters that are not constant and
 # will be set in game loop; for now, set those parameters to 0

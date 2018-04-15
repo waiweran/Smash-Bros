@@ -156,17 +156,17 @@ sw $r2 5124($r0)
 
 #posStageInVGA - TODO will likely remove later
 addi $r5 $r0 323
-# address: 101010001000
+# address: 1010100000000
 sll $r5 $r5 16
 addi $r5 $r0 20
-sw $r5 5128($r0)
+sw $r5 5376($r0)
 
 #whStageInVGA - TODO will likely remove later
 addi $r5 $r0 506
-# address: 101010001100
+# address: 1010100000100
 sll $r5 $r5 16
 addi $r5 $r0 200
-sw $r5 5132($r0)
+sw $r5 5380($r0)
 
 # Controller, Collision have iniital input parameters that are not constant and
 # will be set in game loop; for now, set those parameters to 0
