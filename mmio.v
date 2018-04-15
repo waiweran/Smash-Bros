@@ -57,17 +57,30 @@ module mmio(
 		.position(pos2)
 	);
 
-	// Collision
-	reg [31:0] player_pos, stage_pos, player_size, stage_size;
-	wire [3:0] coll;
-	wire [31:0] collision_out;
-	assign collision_out[31:4] = 28'b0;
-	assign collision_out[3:0] = coll;
+	// Collision Player 1
+	reg [31:0] player_pos_p1, stage_pos, player_size_p1, stage_size;
+	wire [3:0] coll_p1;
+	wire [31:0] collision_out_p1;
+	assign collision_out_p1[31:4] = 28'b0;
+	assign collision_out_p1[3:0] = coll_p1;
 	collision collision1(
-		.player_pos(player_pos), .stage_pos(stage_pos),
-		.player_size(player_size), .stage_size(stage_size),
+		.player_pos(player_pos_p1), .stage_pos(stage_pos),
+		.player_size(player_size_p1), .stage_size(stage_size),
 
-		.coll(coll)
+		.coll(coll_p1)
+	);
+	
+	// Collision Player 2
+	reg [31:0] player_pos_p2, player_size_p2;  //Note: also reuses stage_pos and stage_size from Collision Player 1 - Is this OK? - Matthew
+	wire [3:0] coll_p2;
+	wire [31:0] collision_out_p2;
+	assign collision_out_p2[31:4] = 28'b0;
+	assign collision_out_p2[3:0] = coll_p2;
+	collision collision2(
+		.player_pos(player_pos_p2), .stage_pos(stage_pos),
+		.player_size(player_size_p2), .stage_size(stage_size),
+
+		.coll(coll_p2)
 	);
 
 	// Player 1 Game Controller Manager
@@ -123,7 +136,7 @@ module mmio(
 	always @(negedge clock) begin
 
 		
-		// Testing, Remove Later
+		// Testing, Remove Later - Currently does not assign inputs needed for second player
 
 		// Physics Constants
 		mass1 <= 32'h00000010;
@@ -132,7 +145,7 @@ module mmio(
 		startPos1 <= 32'h016000fa;
 
 		// Collision Constants
-		player_size <= 32'h0085007d;
+		player_size_p1 <= 32'h0085007d;
 		stage_pos <= 32'h01430014;
 		stage_size <= 32'h01fa00c8;
 
@@ -146,14 +159,13 @@ module mmio(
 		ctrl1 <= gameControllerInputP1;
 		knock1 <= 32'h00000000;
 		attack1 <= 32'h00000000;
-		collis1 <= collision_out;
+		collis1 <= collision_out_p1;
 
 		// Collision Inputs
-		player_pos <= pos1;
+		player_pos_p1 <= pos1;
 
 		// VGA Inputs
 		posP1InVGA <= pos1;
-
 		/*
 		if (wren & co_sel[0]) begin // physics player 1
 			if (co_spec[0]) mass1 <= data_in;
@@ -193,16 +205,20 @@ module mmio(
 			if (co_spec[0])  posStageInVGA <= data_in;
 			if (co_spec[1])  whStageInVGA <= data_in;
 		end
-		// Collision
-		if (wren & co_sel[12]) begin
-			if (co_spec[0]) player_pos <= data_in;
+		if (wren & co_sel[12]) begin  // Collision P1
+			if (co_spec[0]) player_pos_p1 <= data_in;
 			if (co_spec[1]) stage_pos <= data_in;
-			if (co_spec[2]) player_size <= data_in;
+			if (co_spec[2]) player_size_p1 <= data_in;
 			if (co_spec[3]) stage_size <= data_in;
 		end
-		*/
+		if (wren & co_sel[13]) begin // Collision P2
+			if (co_spec[0]) player_pos_p2 <= data_in;
+			if (co_spec[1]) stage_pos <= data_in;
+			if (co_spec[2]) player_size_p2 <= data_in;
+			if (co_spec[3]) stage_size <= data_in;
+		end
 	end
-
+	*/
 
 
 	// Module Outputs
@@ -220,8 +236,8 @@ module mmio(
 			.in9(32'b0), 							// Player 2 VGA Coprocessor (Unused)
 			.in10(32'b0),  						// Player 3 VGA Coprocessor (Unused)
 			.in11(32'b0),  						// Player 4 VGA Coprocessor (Unused)
-			.in12(collision_out), 				// Collision Coprocessor
-			.in13(32'b0), 							// Unused
+			.in12(collision_out_p1), 			// Player 1 Collision Coprocessor
+			.in13(collision_out_p2), 			// Player 2 Collision Coprocessor
 			.in14(32'b0), 							// Unused
 			.in15(32'b0), 							// Unused
 			.in16(32'b0),							// Unused
