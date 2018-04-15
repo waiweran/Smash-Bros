@@ -8,37 +8,61 @@
 # --------Initialization--------
 main: jal initCharacters
 jal selectCharacter
+# PRECONDITION: $r1 = P1 mass, $r2 = P1 size,
 jal initPlayerOne
-#cannot use a number in function name!
-# PRECONDITION: $r1 = P1 mass, $r2 = P1 size, $r3 = P2 mass, $r4 = P2 size
+# PRECONDITION: $r3 = P2 mass, $r4 = P2 size
 jal initPlayerTwo
 
 # --------Game loop------------
 addi $r1 $r0 0
-bne $r0 $r1 12
-# Controller Coprocessor
-lw $r2 4736($r0)
+bne $r0 $r1 ___TODO NEED UPDATE___
+# Controller Coprocessor, P1
+lw $r2 4608($r0)
+#address: 100100xxxxxxx
+
+# Controller Coprocessor, P2
+lw $r3 4736($r0)
 #address: 100101xxxxxxx
 
-# Collision Coprocessor - for input: (gameControllerInputP1 or pos1? ask Nathaniel, assuming former now)
+# $r2 = gameControllerInputP1, $r3 = gameControllerInputP2
+
+# Collision Coprocessor, P1 - for input: (gameControllerInputP1 or pos1? ask Nathaniel, assuming former now)
 sw $r2 5632($r0)
 # position, address: 1011000000000
-#lw $r3 1($r0)    # load width/height (size) into $r3
-#sw $r3 5640($r0) # width/height, address: 1011000001000
 lw $r4 5632($r0)
 # collision_out, address: 101100xxxxxxx
 
-# Physics Coprocessor
+# Collision Coprocessor, P2
+# position, address: 1011010000000
+sw $r3 5760($r0)
+# collision_out, address: 101101xxxxxxx
+lw $r5 5760($r0)
+
+# $r4 = collision_out, p1; $r5 = collision_out, p2
+
+# Physics Coprocessor, P1
 sw $r2 4112($r0)
 # gameControllerInputP1, address: 1000000010000
 sw $r4 4124($r0)
 # collision_out, address: 1000000011100
-lw $r5 4096($r0)
+lw $r6 4096($r0)
 # pos1, address: 100000xxxxxxx
 
+# Physics Coprocessor, P2
+sw $r3 4240($r0)
+# gameControllerInputP2, address: 1000010010000
+sw $r5 4252($r0)
+# collision_out, address: 1000010011100
+lw $r7 4224($r0)
+# pos2, address: 100001xxxxxxx
+
+# $r6 = pos1, $r7 = pos2
+
 # VGA Coprocessor (display new image)
-sw $r5 5120($r0)
+sw $r6 5120($r0)
 # pos1, address: 1010000000000
+sw $r7 5376($r0)
+# pos2, address: 1010100000000
 
 # Check game termination condition
 
