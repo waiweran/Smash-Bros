@@ -49,36 +49,52 @@ terminateGame: nop
 # Alternatively, could have an infinite loop here.
 
 # initialize sizes of different characters, average size around 60X120
-# stores mass in Mem[0] and width/height in Mem[1]
-# TODO change the immediate values in here to bowser
+# stores: Mem[0] = P1 mass, Mem[1] = P1 size, Mem[2] = P2 mass, Mem[3] = P2 size
 
-# Kirby
+# Bowser - Player 1
 # mass
 initCharacters: addi $r1 $r0 16
 sw $r1 0($r0)
 
 # size
 addi $r1 $r0 133
-# width                    #Is this width and height right? (got it from player_size for collision constants)
+# width                    #TODO Is this width and height right? (got it from player_size for collision constants)
 sll $r1 $r1 16
 # shift to top order
 addi $r1 $r1 125
 # height in bottom order
 sw $r1 1($r0)
 
+# ______ - Player 2
+# mass
+addi $r1 $r0 ____P2 MASS HERE____  #TODO
+sw $r1 2($r0)
+
+# size
+addi $r1 $r0 ___P2 WIDTH HERE____  #TODO
+# width                    #TODO Is this width and height right? (got it from player_size for collision constants)
+sll $r1 $r1 16
+# shift to top order
+addi $r1 $r1 ____P2 HEIGHT HERE____  #TODO
+# height in bottom order
+sw $r1 3($r0)
+
 jr $r31
 
 # load up sizes, for now just character 1
-# Loads mass (Mem[0]) and width/height (Mem[1]) into $r1 and $r2
+# Loads Mem[0] into $r1, Mem[1] into $r2, Mem[2] into $r3, Mem[4] into $r4
 
+selectCharacter:
 # player 1
-selectCharacter: lw $r1 0($r0)
 # mass
-lw $r2 1($r0)
+lw $r1 0($r0)
 # size
+lw $r2 1($r0)
 # player 2
-# lw $r3 0($r0)
-# lw $r4 1($r0)
+# mass
+lw $r3 3($r0)
+# size
+lw $r4 4($r0)
 
 jr $r31
 
