@@ -101,8 +101,8 @@ assign myY = ADDR / 19'd640;
 // Test if inside any sprite
 wire isInsideP1, isInsideP2;
 wire [18:0] indexP1, indexP2;
-isInsideSprite insideP1(p1VGA, myX, myY, isInsideP1, indexP1);
-isInsideSprite insideP2(p2VGA, myX, myY, isInsideP2, indexP2);
+isInsideSprite insideP1(p1VGA, myX, myY, isInsideP1, indexP1, p1Controller);
+isInsideSprite insideP2(p2VGA, myX, myY, isInsideP2, indexP2, p2Controller);
 
 wire[23:0] bgr_data_raw_background;
 wire[23:0] bgr_data_raw_p1;

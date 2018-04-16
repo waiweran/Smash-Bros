@@ -101,7 +101,7 @@ module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfover
 	initial begin
 		lastDirection <= 1'b1;
 	end
-	always@(posedge fastClock) begin
+	always@(posedge slowClock) begin
 		if(tiltL) lastDirection <= 1'b0;
 		if(tiltR) lastDirection <= 1'b1;
 	end

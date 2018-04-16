@@ -62,7 +62,7 @@ module skeleton(
     wire wren;
     wire [31:0] q_dmem;
 	 wire [63:0] p1VGA, p2VGA, stageVGA;
-	 wire [31:0] p1controller, p2Controller;
+	 wire [31:0] p1Controller, p2Controller;
     mmio my_mem(
 		  .clock		  (clock),
 		  .reset		  (reset),
@@ -143,7 +143,10 @@ module skeleton(
 	);
 	
 	/** LEDs **/
-	assign LEDs[12:0] = address_dmem;
-	assign LEDs[17:13] = 6'b0;
+	//assign LEDs[12:0] = address_dmem;
+	assign LEDs[0] = p1Controller[26];
+	assign LEDs[4:3] = p1Controller[15:14];
+	assign LEDs[2:1] = 2'b0;
+	assign LEDs[17:5] = 13'b0;
 
 endmodule
