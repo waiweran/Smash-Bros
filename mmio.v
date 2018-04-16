@@ -104,14 +104,6 @@ module mmio(
 	
 	// Attack Coprocessor Player 2
 	
-	
-	// VGA Coprocessor Player 1
-	reg[31:0] posP1InVGA, whP1InVGA;
-	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .poswhOut(p1VGA));
-
-	// VGA Coprocessor Player 2
-	reg[31:0] posP2InVGA, whP2InVGA;
-	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(whP2InVGA), .poswhOut(p2VGA));
 
 	reg[31:0] posP1InVGA, whP1InVGA;
 	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .poswhOut(p1VGA), .controller(gameControllerInputP1), .controller_out(p1Controller));
