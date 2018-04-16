@@ -1,6 +1,7 @@
-module isInsideSprite(spriteData, myX, myY, isInside, index);
+module isInsideSprite(spriteData, myX, myY, isInside, index, controller);
 	input[63:0] spriteData;
 	input[18:0] myX, myY;
+	input [31:0] controller;
 	output isInside;
 	output[18:0] index;
 	
@@ -15,14 +16,19 @@ module isInsideSprite(spriteData, myX, myY, isInside, index);
 	assign bottomLeftX[18:16] = 3'b0;
 	assign bottomLeftY[15:0] = spriteData[47:32];
 	assign bottomLeftY[18:16] = 3'b0;
-	assign topRightX = bottomLeftX + spriteData[31:16];
-	assign topRightY = bottomLeftY + spriteData[15:0];
+	assign topRightX = bottomLeftX + 18'd256;//spriteData[31:16];
+	assign topRightY = bottomLeftY + 18'd125;//spriteData[15:0];
 	
 	//Test the condition
 	assign isInside = (transX > bottomLeftX) & (transX < topRightX) & (transY > bottomLeftY) & (transY < topRightY); 
 	
+	wire [18:0] normal_index, flipped_index;
 	//Calculate Index
-	assign index = myX - bottomLeftX + (myY - (19'd480 - topRightY))*spriteData[31:16];
+	assign normal_index = myX - bottomLeftX + (myY - (19'd480 - topRightY))*18'd256;//spriteData[31:16];
 	
+	//Flipped Index
+	assign flipped_index = topRightX - myX + (myY - (19'd480 - topRightY))*18'd256;
+	
+	assign index = controller[26] ? normal_index : flipped_index;
 
 endmodule
