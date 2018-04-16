@@ -178,6 +178,15 @@ module attack_coprocessor(
 	assign smashR_out = lastSR & longTimer[24];
 	assign smashU_out = lastSU & longTimer[24];
 	assign smashD_out = lastSD & longTimer[24];
+	assign jabNL_out = lastJNL & shortTimer[23];
+	assign jabNR_out = lastJNR & shortTimer[23];
+	assign specialNL_out = lastBNL & longTimer[24];
+	assign specialNR_out = lastBNR & longTimer[24];
+	assign specialL_out = lastBL & longTimer[24];
+	assign specialR_out = lastBR & longTimer[24];
+	assign specialU_out = lastBU & longTimer[24];
+	assign specialD_out = lastBD & longTimer[24];
+
 
 	// Attack output
 	assign attack[1] = anyHit & smashU_out;
@@ -194,7 +203,7 @@ module attack_coprocessor(
 						 | attack[6] | attack[7] | attack[8] | attack[9] | attack[10];
 
 	// Giving Knockback
-
+	
 
 	// Moving the Characters
 
