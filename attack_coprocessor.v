@@ -178,25 +178,45 @@ module attack_coprocessor(
 	assign smashR_out = lastSR & longTimer[24];
 	assign smashU_out = lastSU & longTimer[24];
 	assign smashD_out = lastSD & longTimer[24];
+	assign jabNL_out = lastJNL & shortTimer[23];
+	assign jabNR_out = lastJNR & shortTimer[23];
+	assign specialNL_out = lastBNL & longTimer[24];
+	assign specialNR_out = lastBNR & longTimer[24];
+	assign specialL_out = lastBL & longTimer[24];
+	assign specialR_out = lastBR & longTimer[24];
+	assign specialU_out = lastBU & longTimer[24];
+	assign specialD_out = lastBD & longTimer[24];
+
 
 	// Attack output
-	assign attack[1] = anyHit & smashU_out;
-	assign attack[2] = anyHit & smashD_out;
-	assign attack[3] = anyHit & smashL_out;
-	assign attack[4] = anyHit & smashR_out;
-	assign attack[5] = anyHit & (jabNL_out | jabNR_out);
-	assign attack[6] = anyHit & specialU_out;
-	assign attack[7] = anyHit & specialD_out;
-	assign attack[8] = anyHit & specialL_out;
-	assign attack[9] = anyHit & specialR_out;
-	assign attack[10] = anyHit & (specialNL_out | specialNR_out);
-	assign attack[0] = attack[1] | attack[2] | attack[3] | attack[4] | attack[5]
-						 | attack[6] | attack[7] | attack[8] | attack[9] | attack[10];
+	assign attack[1] = smashU_out;
+	assign attack[2] = smashD_out;
+	assign attack[3] = smashL_out;
+	assign attack[4] = smashR_out;
+	assign attack[5] = jabNL_out | jabNR_out;
+	assign attack[6] = specialU_out;
+	assign attack[7] = specialD_out;
+	assign attack[8] = specialL_out;
+	assign attack[9] = specialR_out;
+	assign attack[10] = specialNL_out | specialNR_out;
+	assign attack[11] = smashU_out | smashD_out | smashL_out | smashR_out | jabNL_out
+						 | jabNR_out | specialU_out | specialD_out | specialL_out 
+						 | specialR_out | specialNL_out | specialNR_out;
+	assign attack[0] = attack[11] & anyHit;
 
 	// Giving Knockback
-
+	reg knockback
+	always@(posedge clock) begin
+		if(smashU_out) knockback <= 32'h00000800;
+		if(smashD_out) knockback <= 32'h0000F7FE;
+		if(smashL_out) knockback <= 32'hF7FE00E0;
+		if(smashR_out) knockback <= 32'h080000E0;
+	end
 
 	// Moving the Characters
-
+	reg movement
+	always@(posedge clock) begin
+		if(specialU_out) movement <= 32'h00000010;
+	end
 
 endmodule // attack_coprocessor
