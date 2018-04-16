@@ -153,8 +153,114 @@ module mmio(
 	assign address_dmem = address[11:0];
 	decoder_32 coprocessor_select(.in(address[11:7]), .out(co_sel));
 	decoder_32 coprocessor_inspec(.in(address[6:2]), .out(co_spec));
-
-
+	
+	//Physics P1
+	register reg_mass1(data_in, wren && co_sel[0] && co_spec[0], reset, clock, mass1);
+	register reg_grav1(data_in, wren && co_sel[0] && co_spec[1], reset, clock, grav1);
+	register reg_wind1(data_in, wren && co_sel[0] && co_spec[2], reset, clock, wind1);
+	register reg_startPos1(data_in, wren && co_sel[0] && co_spec[3], reset, clock, startPos1);
+	register reg_ctrl1(data_in, wren && co_sel[0] && co_spec[4], reset, clock, ctrl1);
+	register reg_knock1(data_in, wren && co_sel[0] && co_spec[5], reset, clock, knock1);
+	register reg_attack1(data_in, wren && co_sel[0] && co_spec[6], reset, clock, attack1);
+	register reg_collis1(data_in, wren && co_sel[0] && co_spec[7], reset, clock, collis1);
+	
+	//Physics P2
+	register reg_mass2(data_in, wren && co_sel[1] && co_spec[0], reset, clock, mass2);
+	register reg_grav2(data_in, wren && co_sel[1] && co_spec[1], reset, clock, grav2);
+	register reg_wind2(data_in, wren && co_sel[1] && co_spec[2], reset, clock, wind2);
+	register reg_startPos2(data_in, wren && co_sel[1] && co_spec[3], reset, clock, startPos2);
+	register reg_ctrl2(data_in, wren && co_sel[1] && co_spec[4], reset, clock, ctrl2);
+	register reg_knock2(data_in, wren && co_sel[1] && co_spec[5], reset, clock, knock2);
+	register reg_attack2(data_in, wren && co_sel[1] && co_spec[6], reset, clock, attack2);
+	register reg_collis2(data_in, wren && co_sel[1] && co_spec[7], reset, clock, collis2);
+	
+	//Game Controller Manager P1
+	register reg_gameControllerOutputP1(data_in, wren && co_sel[4] && co_spec[0], reset, clock, gameControllerOutputP1);
+	
+	//Game Controller Manager P2
+	register reg_gameControllerOutputP2(data_in, wren && co_sel[5] && co_spec[0], reset, clock, gameControllerOutputP2);	
+	
+	//VGA Coprocessor P1
+	register reg_posP1InVGA(data_in, wren && co_sel[8] && co_spec[0], reset, clock, posP1InVGA);
+	register reg_whP1InVGA(data_in, wren && co_sel[8] && co_spec[1], reset, clock, whP1InVGA);
+	
+	//VGA Coprocessor P2
+	register reg_posP2InVGA(data_in, wren && co_sel[9] && co_spec[0], reset, clock, posP2InVGA);
+	register reg_whP2InVGA(data_in, wren && co_sel[9] && co_spec[1], reset, clock, whP2InVGA);
+	
+	//VGA Coprocessor Stage
+	register reg_posStageInVGA(data_in, wren && co_sel[10] && co_spec[0], reset, clock, posStageInVGA);
+	register reg_whStageInVGA(data_in, wren && co_sel[10] && co_spec[1], reset, clock, whStageInVGA);
+	
+	//Collision Coprocessor P1
+	register reg_player_pos_p1(data_in, wren && co_sel[12] && co_spec[0], reset, clock, player_pos_p1);
+	register reg_stage_pos(data_in, wren && co_sel[12] && co_spec[1], reset, clock, stage_pos);
+	register reg_player_size_p1(data_in, wren && co_sel[12] && co_spec[2], reset, clock, player_size_p1);
+	register reg_stage_size(data_in, wren && co_sel[12] && co_spec[3], reset, clock, stage_size);
+	
+	//Collision Coprocessor P2 - change stage_pos and stage_size through Collision Coprocessor P1
+	register reg_player_pos_p1(data_in, wren && co_sel[12] && co_spec[0], reset, clock, player_pos_p1);
+	register reg_player_size_p1(data_in, wren && co_sel[12] && co_spec[2], reset, clock, player_size_p1);	
+	
+	//Attack Coprocessor P1
+	
+	//Attack Coprocessor P2
+	
+	//TODO change reg's in above code to wires!
+	
+		if (wren & co_sel[0]) begin // physics player 1
+			if (co_spec[0]) mass1 <= data_in;
+			if (co_spec[1]) grav1 <= data_in;
+			if (co_spec[2]) wind1 <= data_in;
+			if (co_spec[3]) startPos1 <= data_in;
+			if (co_spec[4]) ctrl1 <= data_in;
+			if (co_spec[5]) knock1 <= data_in;
+			if (co_spec[6]) attack1 <= data_in;
+			if (co_spec[7]) collis1 <= data_in;
+		end
+		if (wren & co_sel[1]) begin // physics player 2
+			if (co_spec[0]) mass2 <= data_in;
+			if (co_spec[1]) grav2 <= data_in;
+			if (co_spec[2]) wind2 <= data_in;
+			if (co_spec[3]) startPos2 <= data_in;
+			if (co_spec[4]) ctrl2 <= data_in;
+			if (co_spec[5]) knock2 <= data_in;
+			if (co_spec[6]) attack2 <= data_in;
+			if (co_spec[7]) collis2 <= data_in;
+		end
+		if (wren & co_sel[4]) begin // Game Controller Manager for player 1
+			if (co_spec[0]) gameControllerOutputP1 <= data_in;
+		end
+		if (wren & co_sel[5]) begin // Game Controller Manager for player 2
+			if (co_spec[0]) gameControllerOutputP2 <= data_in;
+		end
+		if (wren & co_sel[8]) begin // VGA Coprocessor P1
+			if (co_spec[0])  posP1InVGA <= data_in;
+			if (co_spec[1])  whP1InVGA <= data_in;
+		end
+		if (wren & co_sel[9]) begin // VGA Coprocessor P2
+			if (co_spec[0])  posP2InVGA <= data_in;
+			if (co_spec[1])  whP2InVGA <= data_in;
+		end
+		if (wren & co_sel[10]) begin // VGA Coprocessor Stage
+			if (co_spec[0])  posStageInVGA <= data_in;
+			if (co_spec[1])  whStageInVGA <= data_in;
+		end
+		if (wren & co_sel[12]) begin  // Collision P1
+			if (co_spec[0]) player_pos_p1 <= data_in;
+			if (co_spec[1]) stage_pos <= data_in;
+			if (co_spec[2]) player_size_p1 <= data_in;
+			if (co_spec[3]) stage_size <= data_in;
+		end
+		if (wren & co_sel[13]) begin // Collision P2
+			if (co_spec[0]) player_pos_p2 <= data_in;
+			if (co_spec[1]) stage_pos <= data_in;
+			if (co_spec[2]) player_size_p2 <= data_in;
+			if (co_spec[3]) stage_size <= data_in;
+		end	
+	
+	
+	/*
 	always @(negedge clock) begin
 
 		
@@ -254,8 +360,8 @@ module mmio(
 			if (co_spec[2]) player_size_p2 <= data_in;
 			if (co_spec[3]) stage_size <= data_in;
 		end
-		*/
 	end
+	*/
 	
 
 
