@@ -93,18 +93,24 @@ module mmio(
 	// Player 2 Game Controller Manager
 	reg[31:0] gameControllerOutputP2;
 	wire[31:0] gameControllerInputP2;
-    wire unused;
+   wire unused;
 	gameControllerManager controllerP2(.mmioBoardOutput(gameControllerOutputP2),
 												  .mmioBoardInput(gameControllerInputP2),
 												  .halfgpio(gpio[31:16]), .halfoverflowgpio(gpio[35:34]), .ledMotorOut(gpioOutput[1]), .fastClock(clock), .slowClock(unused));
-
+	
+	// Attack Coprocessor Player 1
+	
+	
+	// Attack Coprocessor Player 2
+	
+	
 	// VGA Coprocessor Player 1
-	reg[31:0] posP1InVGA; //whP1InVGA; no need, use player_size_p1 instead
-	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(player_size_p1), .poswhOut(p1VGA));
+	reg[31:0] posP1InVGA, whP1InVGA;
+	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .poswhOut(p1VGA));
 
 	// VGA Coprocessor Player 2
-	reg[31:0] posP2InVGA; //whP2InVGA; no need, use player_size_p2 instead
-	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(player_size_p2), .poswhOut(p2VGA));
+	reg[31:0] posP2InVGA, whP2InVGA;
+	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(whP2InVGA), .poswhOut(p2VGA));
 
 	// VGA Coprocessor Stage
 	reg[31:0] posStageInVGA, whStageInVGA;
@@ -158,7 +164,8 @@ module mmio(
 		//No need for stage_pos and stage_size again
 
 		// VGA Constants
-		//whP1InVGA, whP2InVGA no longer exist, use player_size_p1 and player_size_p2
+		whP1InVGA <= player_size_p1;
+		whP2InVGA <= player_size_p2;
 		posStageInVGA <= 32'h01430014;
 		whStageInVGA <= 32'h01fa00c8;
 
