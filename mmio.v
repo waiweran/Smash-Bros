@@ -100,11 +100,27 @@ module mmio(
 												  .halfgpio(gpio[31:16]), .halfoverflowgpio(gpio[35:34]), .ledMotorOut(gpioOutput[1]), .fastClock(clock), .slowClock(unused));
 	
 	// Attack Coprocessor Player 1
+	wire[31:0] movement1;  //TODO Ask Nathaniel what this is for and update??
 	
+	attackCoprocessor attackP1(.clock(clock), .reset(reset), .char1pos(pos1), .char1size(player_size_p1),
+																				.char2pos(pos2), .char2size(player_size_p2),
+																				.controls(gameControllerInputP1),
+																				.attack(attack1),
+																				.movement(movement1),
+																				.knockback(knock1));
+																									
 	
 	// Attack Coprocessor Player 2
+	wire[31:0] movement2;
 	
-
+	attackCoprocessor attackP2(.clock(clock), .reset(reset), .char1pos(pos1), .char1size(player_size_p1),
+																			.char2pos(pos2), .char2size(player_size_p2),
+																			.controls(gameControllerInputP2),
+																			.attack(attack2),
+																			.movement(movement2),
+																			.knockback(knock2));
+	
+	// VGA Coprocessor Player 1
 	reg[31:0] posP1InVGA, whP1InVGA;
 	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .poswhOut(p1VGA), .controller(gameControllerInputP1), .controller_out(p1Controller));
 
@@ -238,7 +254,7 @@ module mmio(
 			if (co_spec[2]) player_size_p2 <= data_in;
 			if (co_spec[3]) stage_size <= data_in;
 		end
-	*/
+		*/
 	end
 	
 
@@ -262,8 +278,8 @@ module mmio(
 			.in13(collision_out_p2), 			// Player 2 Collision Coprocessor
 			.in14(32'b0), 							// Unused
 			.in15(32'b0), 							// Unused
-			.in16(32'b0),							// Unused
-			.in17(32'b0), 							// Unused
+			.in16(attack1),						// Player 1 Attack Coprocessor
+			.in17(attack2), 						// Player 2 Attack Coprocessor
 			.in18(32'b0), 							// Unused
 			.in19(32'b0), 							// Unused
 			.in20(32'b0), 							// Unused
