@@ -15,8 +15,8 @@ module mmio(
 	output [31:0] p1Controller, p2Controller;
 
 	// Player 1 Physics Coprocessor
-	reg [31:0] mass1, grav1, wind1, startPos1;
-	reg [31:0] ctrl1, knock1, attack1, collis1;
+	wire [31:0] mass1, grav1, wind1, startPos1;
+	wire [31:0] ctrl1, knock1, attack1, collis1;
 	wire [31:0] pos1;
 	physics_coprocessor physP1(
 		.clock(clock), .reset(reset),
@@ -37,8 +37,8 @@ module mmio(
 	);
 
 	// Player 2 Physics Coprocessor
-	reg [31:0] mass2, grav2, wind2, startPos2;
-	reg [31:0] ctrl2, knock2, attack2, collis2;
+	wire [31:0] mass2, grav2, wind2, startPos2;
+	wire [31:0] ctrl2, knock2, attack2, collis2;
 	wire [31:0] pos2;
 	physics_coprocessor physP2(
 		.clock(clock), .reset(reset),
@@ -59,7 +59,7 @@ module mmio(
 	);
 
 	// Collision Player 1
-	reg [31:0] player_pos_p1, stage_pos, player_size_p1, stage_size;
+	wire [31:0] player_pos_p1, stage_pos, player_size_p1, stage_size;
 	wire [3:0] coll_p1;
 	wire [31:0] collision_out_p1;
 	assign collision_out_p1[31:4] = 28'b0;
@@ -72,7 +72,7 @@ module mmio(
 	);
 	
 	// Collision Player 2
-	reg [31:0] player_pos_p2, player_size_p2;  //Note: also reuses stage_pos and stage_size from Collision Player 1 - Is this OK? - Matthew
+	wire [31:0] player_pos_p2, player_size_p2;  //Note: also reuses stage_pos and stage_size from Collision Player 1 - Is this OK? - Matthew
 	wire [3:0] coll_p2;
 	wire [31:0] collision_out_p2;
 	assign collision_out_p2[31:4] = 28'b0;
@@ -85,14 +85,14 @@ module mmio(
 	);
 
 	// Player 1 Game Controller Manager
-	reg[31:0] gameControllerOutputP1;
+	wire[31:0] gameControllerOutputP1;
 	wire[31:0] gameControllerInputP1;
 	gameControllerManager controllerP1(.mmioBoardOutput(gameControllerOutputP1),
 												  .mmioBoardInput(gameControllerInputP1),
 												  .halfgpio(gpio[15:0]), .halfoverflowgpio(gpio[33:32]), .ledMotorOut(gpioOutput[0]), .fastClock(clock), .slowClock(gpioOutput[2]));
 
 	// Player 2 Game Controller Manager
-	reg[31:0] gameControllerOutputP2;
+	wire[31:0] gameControllerOutputP2;
 	wire[31:0] gameControllerInputP2;
    wire unused;
 	gameControllerManager controllerP2(.mmioBoardOutput(gameControllerOutputP2),
@@ -121,15 +121,15 @@ module mmio(
 																			.knockback(knock2));
 	
 	// VGA Coprocessor Player 1
-	reg[31:0] posP1InVGA, whP1InVGA;
+	wire[31:0] posP1InVGA, whP1InVGA;
 	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .poswhOut(p1VGA), .controller(gameControllerInputP1), .controller_out(p1Controller));
 
 	// VGA Coprocessor Player 2
-	reg[31:0] posP2InVGA, whP2InVGA;
+	wire[31:0] posP2InVGA, whP2InVGA;
 	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(whP2InVGA), .poswhOut(p2VGA), .controller(gameControllerInputP2), .controller_out(p2Controller));
 
 	// VGA Coprocessor Stage
-	reg[31:0] posStageInVGA, whStageInVGA;
+	wire[31:0] posStageInVGA, whStageInVGA;
 	vga_coprocessor vgaStage(.posIn(posStageInVGA), .whIn(whStageInVGA), .poswhOut(stageVGA));
 
 
@@ -199,65 +199,12 @@ module mmio(
 	register reg_stage_size(data_in, wren && co_sel[12] && co_spec[3], reset, clock, stage_size);
 	
 	//Collision Coprocessor P2 - change stage_pos and stage_size through Collision Coprocessor P1
-	register reg_player_pos_p1(data_in, wren && co_sel[12] && co_spec[0], reset, clock, player_pos_p1);
-	register reg_player_size_p1(data_in, wren && co_sel[12] && co_spec[2], reset, clock, player_size_p1);	
+	register reg_player_pos_p2(data_in, wren && co_sel[13] && co_spec[0], reset, clock, player_pos_p1);
+	register reg_player_size_p2(data_in, wren && co_sel[13] && co_spec[2], reset, clock, player_size_p1);	
 	
 	//Attack Coprocessor P1
 	
 	//Attack Coprocessor P2
-	
-	//TODO change reg's in above code to wires!
-	
-		if (wren & co_sel[0]) begin // physics player 1
-			if (co_spec[0]) mass1 <= data_in;
-			if (co_spec[1]) grav1 <= data_in;
-			if (co_spec[2]) wind1 <= data_in;
-			if (co_spec[3]) startPos1 <= data_in;
-			if (co_spec[4]) ctrl1 <= data_in;
-			if (co_spec[5]) knock1 <= data_in;
-			if (co_spec[6]) attack1 <= data_in;
-			if (co_spec[7]) collis1 <= data_in;
-		end
-		if (wren & co_sel[1]) begin // physics player 2
-			if (co_spec[0]) mass2 <= data_in;
-			if (co_spec[1]) grav2 <= data_in;
-			if (co_spec[2]) wind2 <= data_in;
-			if (co_spec[3]) startPos2 <= data_in;
-			if (co_spec[4]) ctrl2 <= data_in;
-			if (co_spec[5]) knock2 <= data_in;
-			if (co_spec[6]) attack2 <= data_in;
-			if (co_spec[7]) collis2 <= data_in;
-		end
-		if (wren & co_sel[4]) begin // Game Controller Manager for player 1
-			if (co_spec[0]) gameControllerOutputP1 <= data_in;
-		end
-		if (wren & co_sel[5]) begin // Game Controller Manager for player 2
-			if (co_spec[0]) gameControllerOutputP2 <= data_in;
-		end
-		if (wren & co_sel[8]) begin // VGA Coprocessor P1
-			if (co_spec[0])  posP1InVGA <= data_in;
-			if (co_spec[1])  whP1InVGA <= data_in;
-		end
-		if (wren & co_sel[9]) begin // VGA Coprocessor P2
-			if (co_spec[0])  posP2InVGA <= data_in;
-			if (co_spec[1])  whP2InVGA <= data_in;
-		end
-		if (wren & co_sel[10]) begin // VGA Coprocessor Stage
-			if (co_spec[0])  posStageInVGA <= data_in;
-			if (co_spec[1])  whStageInVGA <= data_in;
-		end
-		if (wren & co_sel[12]) begin  // Collision P1
-			if (co_spec[0]) player_pos_p1 <= data_in;
-			if (co_spec[1]) stage_pos <= data_in;
-			if (co_spec[2]) player_size_p1 <= data_in;
-			if (co_spec[3]) stage_size <= data_in;
-		end
-		if (wren & co_sel[13]) begin // Collision P2
-			if (co_spec[0]) player_pos_p2 <= data_in;
-			if (co_spec[1]) stage_pos <= data_in;
-			if (co_spec[2]) player_size_p2 <= data_in;
-			if (co_spec[3]) stage_size <= data_in;
-		end	
 	
 	
 	/*
