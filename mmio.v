@@ -1,6 +1,6 @@
 module mmio(
 	clock, reset,
-	address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA, stageVGA
+	address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA, stageVGA, p1Controller, p2Controller
 );
 	
 	input clock, reset;
@@ -12,6 +12,7 @@ module mmio(
 	input [35:0] gpio;
 	output[2:0] gpioOutput;
 	output [63:0] p1VGA, p2VGA, stageVGA;
+	output [31:0] p1Controller, p2Controller;
 
 	// Player 1 Physics Coprocessor
 	reg [31:0] mass1, grav1, wind1, startPos1;
@@ -111,6 +112,13 @@ module mmio(
 	// VGA Coprocessor Player 2
 	reg[31:0] posP2InVGA, whP2InVGA;
 	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(whP2InVGA), .poswhOut(p2VGA));
+
+	reg[31:0] posP1InVGA, whP1InVGA;
+	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .poswhOut(p1VGA), .controller(gameControllerInputP1), .controller_out(p1Controller));
+
+	// VGA Coprocessor Player 2
+	reg[31:0] posP2InVGA, whP2InVGA;
+	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(whP2InVGA), .poswhOut(p2VGA), .controller(gameControllerInputP2), .controller_out(p2Controller));
 
 	// VGA Coprocessor Stage
 	reg[31:0] posStageInVGA, whStageInVGA;
@@ -238,8 +246,9 @@ module mmio(
 			if (co_spec[2]) player_size_p2 <= data_in;
 			if (co_spec[3]) stage_size <= data_in;
 		end
-	end
 	*/
+	end
+	
 
 
 	// Module Outputs

@@ -93,7 +93,21 @@ module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfover
 	
 	assign slowClock = slowClockReg;
 	
-	
+	// Direction last pointed
+	reg lastDirection;
+	wire tiltL, tiltR;
+	assign tiltL = ~mmioBoardInput[15] & ~mmioBoardInput[14];
+	assign tiltR = mmioBoardInput[15] & mmioBoardInput[14];
+	initial begin
+		lastDirection <= 1'b1;
+	end
+	always@(posedge slowClock) begin
+		if(tiltL) lastDirection <= 1'b0;
+		if(tiltR) lastDirection <= 1'b1;
+	end
+	assign mmioBoardInput[26] = lastDirection;
+
+
 	
 	
 	/*
