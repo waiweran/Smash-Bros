@@ -205,7 +205,7 @@ module attack_coprocessor(
 	assign attack[0] = attack[11] & anyHit;
 
 	// Giving Knockback
-	reg knockback
+	reg knockback;
 	always@(posedge clock) begin
 		if(smashU_out) knockback <= 32'h00000800;
 		if(smashD_out) knockback <= 32'h0000F7FE;
@@ -214,7 +214,7 @@ module attack_coprocessor(
 	end
 
 	// Moving the Characters
-	reg movement
+	reg movement;
 	always@(posedge clock) begin
 		if(specialU_out) movement <= 32'h00000010;
 	end
