@@ -1,5 +1,5 @@
 module attack_coprocessor(
-	clock, reset
+	clock, reset,
 
 	// Inputs
 	char1pos, char1size,
@@ -12,7 +12,7 @@ module attack_coprocessor(
 	knockback
 );
 
-	input clock, reset,
+	input clock, reset;
 	input [31:0] char1pos, char1size;
 	input [31:0] char2pos, char2size;
 	input [31:0] controls;
@@ -46,9 +46,9 @@ module attack_coprocessor(
 	assign specialD = pushB & tiltD;
 
 	// Hit Boxes
-	wire[15:0] c1posX, c1posY;
-	assign c1posX = char1pos[31:16];
-	assign c1posy = char1pos[15:0];
+	wire[15:0] char1posX, char1posY;
+	assign char1posX = char1pos[31:16];
+	assign char1posy = char1pos[15:0];
 	wire [31:0] lhbpos, rhbpos, uhbpos,  dhbpos, hbsize;
 	assign hbsize[31:16] = char1size[31:16] / 2;
 	assign hbsize[15:0] = char1size[15:0] / 2;
@@ -61,10 +61,10 @@ module attack_coprocessor(
 	assign dhbpos[31:16] = char1posX + hbsize[31:16] / 2;
 	assign dhbpos[15:0] = char1posY - hbsize[31:16] / 2;
 	wire [3:0] hitOutL, hitOutR, hitOutU, hitOutD;
-	collision leftHit(lhbpos, hbsize, char2pos, char2size, hitOutL);
-	collision rightHit(rhbpos, hbsize, char2pos, char2size, hitOutR);
-	collision upHit(uhbpos, hbsize, char2pos, char2size, hitOutU);
-	collision downHit(dhbpos, hbsize, char2pos, char2size, hitOutD);
+	collision leftCol(lhbpos, hbsize, char2pos, char2size, hitOutL);
+	collision rightCol(rhbpos, hbsize, char2pos, char2size, hitOutR);
+	collision upCol(uhbpos, hbsize, char2pos, char2size, hitOutU);
+	collision downCol(dhbpos, hbsize, char2pos, char2size, hitOutD);
 	wire leftHit, rightHit, upHit, downHit, anyHit;
 	assign leftHit = hitOutL[0] | hitOutL[1] | hitOutL[2] | hitOutL[3];
 	assign rightHit = hitOutR[0] | hitOutR[1] | hitOutR[2] | hitOutR[3];
@@ -111,7 +111,7 @@ module attack_coprocessor(
 			lastJNR = 1'b1;
 			shortTimer = 24'b100000000000000000000000;
 		end
-		if(speicalNL & ~lastAttack) begin
+		if(specialNL & ~lastAttack) begin
 			lastAttack = 1'b1;
 			lastBNL = 1'b1;
 			longTimer = 25'b1000000000000000000000000;

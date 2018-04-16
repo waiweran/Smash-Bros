@@ -25,7 +25,7 @@ output [7:0] r_data;
 
 input [63:0] p1VGA, p2VGA, stageVGA;
 input test_atk;
-inpu [31:0] p1Controller, p2Controller;
+input [31:0] p1Controller, p2Controller;
                         
 ///////// ////                     
 reg [18:0] ADDR;
