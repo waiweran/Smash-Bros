@@ -99,12 +99,12 @@ module mmio(
 												  .halfgpio(gpio[31:16]), .halfoverflowgpio(gpio[35:34]), .ledMotorOut(gpioOutput[1]), .fastClock(clock), .slowClock(unused));
 
 	// VGA Coprocessor Player 1
-	reg[31:0] posP1InVGA, whP1InVGA;
-	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .poswhOut(p1VGA));
+	reg[31:0] posP1InVGA; //whP1InVGA; no need, use player_size_p1 instead
+	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(player_size_p1), .poswhOut(p1VGA));
 
 	// VGA Coprocessor Player 2
-	reg[31:0] posP2InVGA, whP2InVGA;
-	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(whP2InVGA), .poswhOut(p2VGA));
+	reg[31:0] posP2InVGA; //whP2InVGA; no need, use player_size_p2 instead
+	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(player_size_p2), .poswhOut(p2VGA));
 
 	// VGA Coprocessor Stage
 	reg[31:0] posStageInVGA, whStageInVGA;
@@ -136,36 +136,50 @@ module mmio(
 	always @(negedge clock) begin
 
 		
-		// Testing, Remove Later - Currently does not assign inputs needed for second player
+		// Testing, Remove Later - Now updated for P2
 
 		// Physics Constants
 		mass1 <= 32'h00000010;
 		grav1 <= 32'h00010000;
 		wind1 <= 32'h00000010;
-		startPos1 <= 32'h016000fa;
+		startPos1 <= 32'h016000fa;  //x = 352, y = 250
+		
+		mass2 <= 32'h00000010;
+		grav2 <= 32'h00010000;
+		wind2 <= 32'h00000010;
+		startPos2 <= 32'h01a900fa;   //x = 425 y = 250
 
 		// Collision Constants
 		player_size_p1 <= 32'h0085007d;
 		stage_pos <= 32'h01430014;
 		stage_size <= 32'h01fa00c8;
+		
+		player_size_p2 <= 32'h0085007d;
+		//No need for stage_pos and stage_size again
 
 		// VGA Constants
-		whP1InVGA <= 32'h0085007d;
+		//whP1InVGA, whP2InVGA no longer exist, use player_size_p1 and player_size_p2
 		posStageInVGA <= 32'h01430014;
 		whStageInVGA <= 32'h01fa00c8;
-
 
 		// Physics Inputs
 		ctrl1 <= gameControllerInputP1;
 		knock1 <= 32'h00000000;
 		attack1 <= 32'h00000000;
 		collis1 <= collision_out_p1;
-
+		ctrl2 <= gameControllerInputP2;
+		knock2 <= 32'h00000000;
+		attack2 <= 32'h00000000;
+		collis2 <= collision_out_p2;
+		
 		// Collision Inputs
 		player_pos_p1 <= pos1;
+		player_pos_p2 <= pos2;
 
 		// VGA Inputs
 		posP1InVGA <= pos1;
+		posP2InVGA <= pos2;
+		
 		/*
 		if (wren & co_sel[0]) begin // physics player 1
 			if (co_spec[0]) mass1 <= data_in;
