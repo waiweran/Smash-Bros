@@ -100,25 +100,23 @@ module mmio(
 												  .halfgpio(gpio[31:16]), .halfoverflowgpio(gpio[35:34]), .ledMotorOut(gpioOutput[1]), .fastClock(clock), .slowClock(unused));
 	
 	// Attack Coprocessor Player 1
-	wire[31:0] movement1;  //TODO Ask Nathaniel what this is for and update??
-	
-	attackCoprocessor attackP1(.clock(clock), .reset(reset), .char1pos(pos1), .char1size(player_size_p1),
+	wire[31:0] attack_out1, move_out1, knock_out1; 
+	attack_coprocessor attackP1(.clock(clock), .reset(reset), .char1pos(pos1), .char1size(player_size_p1),
 																				.char2pos(pos2), .char2size(player_size_p2),
 																				.controls(gameControllerInputP1),
-																				.attack(attack1),
-																				.movement(movement1),
-																				.knockback(knock1));
+																				.attack(attack_out1),
+																				.movement(move_out1),
+																				.knockback(knock_out1));
 																									
 	
 	// Attack Coprocessor Player 2
-	wire[31:0] movement2;
-	
-	attackCoprocessor attackP2(.clock(clock), .reset(reset), .char1pos(pos1), .char1size(player_size_p1),
+	wire[31:0] attack_out2, move_out2, knock_out2; 
+	attack_coprocessor attackP2(.clock(clock), .reset(reset), .char1pos(pos1), .char1size(player_size_p1),
 																			.char2pos(pos2), .char2size(player_size_p2),
 																			.controls(gameControllerInputP2),
-																			.attack(attack2),
-																			.movement(movement2),
-																			.knockback(knock2));
+																			.attack(attack_out2),
+																			.movement(move_out2),
+																			.knockback(knock_out2));
 	
 	// VGA Coprocessor Player 1
 	reg[31:0] posP1InVGA, whP1InVGA;
