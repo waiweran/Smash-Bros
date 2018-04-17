@@ -19,7 +19,7 @@ addi $r4 $r0 0
 addi $r5 $r0 0
 
 addi $r1 $r0 0
-bne $r0 $r1 20
+bne $r0 $r1 22
 # Controller Coprocessor, P1
 lw $r2 4608($r0)
 #address: 100100xxxxxxx
@@ -142,7 +142,11 @@ jr $r31
 initPlayerOne: sw $r1 4096($r0)
 # address: 1000000000000 #Precondition: $r1 has mass
 # Gravity
-addi $r5 $r0 65536
+#addi $r5 $r0 65536
+ #1000000000000000 (15 0's)
+addi $r5 $r0 32768
+#hack to avoid sign extender issues with 17th bit of immediate, now is 1 and 16 0's
+sll $r5 $r5 1
 sw $r5 4100($r0)
 #address: 1000000000100
 # Wind Resistance
@@ -233,8 +237,10 @@ jr $r31
 initPlayerTwo: sw $r3 4224($r0)
 # address: 1000010000000 #Precondition: $r3 has mass (p2)
 # Gravity
-addi $r5 $r0 65536
-sw $r5 4228($r0)
+#1000000000000000 (15 0's)
+addi $r5 $r0 32768
+#hack to avoid sign extender issues with 17th bit of immediate, now is 1 and 16 0's
+sll $r5 $r5 1
 #address: 1000010000100
 # Wind Resistance
 addi $r5 $r0 16

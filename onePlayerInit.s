@@ -9,56 +9,9 @@
 main: jal initCharacters
 jal selectCharacter
 # PRECONDITION: $r1 = P1 mass, $r2 = P1 size,
-jal initPlayerOne
-# PRECONDITION: $r3 = P2 mass, $r4 = P2 size
-#jal initPlayerTwo
+jal initPlayerOne #Also displays on VGA
 
-# --------Game loop------------
-# Just a precaution since these registers are used on first iteration without being set properly
-addi $r4 $r0 0
-addi $r5 $r0 0
 
-addi $r1 $r0 0
-bne $r0 $r1 15
-# Controller Coprocessor, P1
-lw $r2 4608($r0)
-#address: 100100xxxxxxx
-
-# $r2 = gameControllerInputP1, $r3 = gameControllerInputP2
-
-# Skipping $r4 and $r5 (collision_out) since they are calculated at end from previous cycle
-
-# Physics Coprocessor, P1
-sw $r2 4112($r0)
-# gameControllerInputP1, address: 1000000010000
-sw $r4 4124($r0)
-# collision_out, address: 1000000011100
-lw $r6 4096($r0)
-# pos1, address: 100000xxxxxxx
-
-# $r6 = pos1, $r7 = pos2
-
-# VGA Coprocessor (display new image)
-sw $r6 5120($r0)
-# pos1, address: 1010000000000
-sw $r7 5376($r0)
-# pos2, address: 1010100000000
-
-# Collision Coprocessor, P1
-sw $r6 5632($r0)
-# pos1, address: 1011000000000
-lw $r4 5632($r0)
-# collision_out, address: 101100xxxxxxx
-
-# $r4 = collision_out, p1; $r5 = collision_out, p2
-
-# Check game termination condition
-
-# --------- Game Termination----------
-terminateGame: nop
-#TODO once a player loses all health
-# Probably need a signal here to tell the processor to stop cycling.
-# Alternatively, could have an infinite loop here.
 
 
 # ---------------------------------------------------------
@@ -141,6 +94,9 @@ addi $r5 $r5 250
 sw $r5 4108($r0)
 # address: 1000000001100
 
+#Also store initial position in $r10 for later
+add $r10 $r0 $r5
+
 # Controller
 addi $r5 $r0 0
 sw $r5 4112($r0)
@@ -184,6 +140,9 @@ addi $r5 $r0 200
 sw $r5 5644($r0)
 
 #----------VGA--------------------
+#P1 position (store so displays in initial position rather than (0, 0))
+sw $r10 5120($r0)
+
 #whP1InVGA      # address: 1010000000100 #PRECONDITION: $r2 contains player size!
 sw $r2 5124($r0)
 
@@ -205,7 +164,3 @@ sw $r5 5380($r0)
 # will be set in game loop; for now, set those parameters to 0
 
 jr $r31
-
-# initialize player constants
-# Executes sw's to mmio addresses to load initial constants for the coprocessors
-# Precondition: $r3 has mass, $r4 has width and height (for P2)

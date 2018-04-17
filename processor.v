@@ -80,7 +80,7 @@ module processor(
     input [31:0] q_imem;
 
     // Dmem
-    output [12:0] address_dmem;
+    output [11:0] address_dmem;
     output [31:0] data;
     output wren;
     input [31:0] q_dmem;
@@ -90,128 +90,188 @@ module processor(
     output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     output [31:0] data_writeReg;
     input [31:0] data_readRegA, data_readRegB;
-
-    /* YOUR CODE STARTS HERE */
-	 assign ctrl_writeEnable = 1'b1;
+	
+	 //-----------MY CODE BEGINS HERE----------
 	 
-    // Jump Controls
-    wire[31:0] jump_target;
-    wire ctrl_jump;
+	 //------------Control------------
+	 //Decode
+	 wire rtrd_Select; //0 = rt, 1 = rd
+
+	 //Execute
+	 wire bImmedMux_Select; //0 = let B through, 1 = let signExtensionOutput through
+	 wire[4:0] alu_Opcode;
+	 wire bne;
+	 wire blt;
+	 wire j_or_jal;
+	 wire jr;
 	 
-    // Stall, Bypass Controls
-	 wire ctrl_load, ctrl_store, ctrl_mult, ctrl_div, ctrl_link; // Bypass Control Inputs
-	 wire [1:0] bypass_aluinA, bypass_aluinB, bypass_readRegB; // Bypass Control Outputs
-    wire multdiv_start, multdiv_ready; 	 // Multdiv Stall Inputs
-	 wire ctrl_ew, ctrl_er;						 // Exception Stall Inputs
-    wire [4:0] writeReg_decode; 				 // Data Bypass/Stall Input
-    wire stall, multdiv_stall; 				 // Stall Control Signals
-    stall stall_logic(.readRegA(ctrl_readRegA), .readRegB(ctrl_readRegB), .writeReg(writeReg_decode), 
-        .multdiv_start(multdiv_start), .multdiv_ready(multdiv_ready), .ctrl_ew(ctrl_ew), .ctrl_er(ctrl_er),
-		  .ctrl_load(ctrl_load), .ctrl_store(ctrl_store), .ctrl_mult(ctrl_mult), .ctrl_div(ctrl_div), .ctrl_link(ctrl_link),		  
-		  .by_aluinA(bypass_aluinA), .by_aluinB(bypass_aluinB), .by_regB(bypass_readRegB),
-		  .clock(clock), .reset(reset), .stall(stall), .multdiv_stall(multdiv_stall));
-
-	 // Branch Predictor
-    wire branch_actual, branch_prediction, branch_in, mispredict, ctrl_branch_e;
-	 wire [31:0] branch_target_actual, branch_target_predict, branch_target_in, branch_target_corrected;
-	 wire [31:0] pc_f, pc_e;
-    branch_predictor pred(.pc_read(pc_f), .pc_write(pc_e), 
-		  .branch_result(branch_actual), .branch_address(branch_target_actual), 
-		  .reset(reset), .write(ctrl_branch_e), .clock(clock), 
-		  .branch_prediction(branch_prediction), .branch_target(branch_target_predict), 
-		  .mispredict(mispredict));  
-	 or branch_or(branch_in, branch_prediction, mispredict);
-	 mux_2 target_corrector(.sel(branch_actual), .in0(pc_e), .in1(branch_target_actual), 
-		  .out(branch_target_corrected));
-	 mux_2 predict_selector(.sel(mispredict), .in0(branch_target_predict), .in1(branch_target_corrected), 
-		  .out(branch_target_in));
-		  	 
-
-    // Fetch
-	 wire [31:0] instruction_f;
-    fetch f(.jump(jump_target), .ctrl_jump(ctrl_jump), .branchPC(branch_target_in), .ctrl_branch(branch_in),
-    	.reset(reset), .stall(stall), .clock(clock), .q_imem(q_imem), .insn_address(address_imem), 
-        .instruction(instruction_f), .pc(pc_f));
-
-    // Latch instruction, PC
-	 wire [31:0] instruction_d, pc_d;
-    wire noop_d;
-    or noop_or_d(noop_d, reset, mispredict, ctrl_jump);
-    register insn_fd_reg(.write(instruction_f), .we(~stall), .clr(noop_d), .clk(clock), .read(instruction_d));
-    register pc_fd_reg(   .write(pc_f),         .we(~stall), .clr(noop_d), .clk(clock), .read(pc_d));
-
+	 //Memory
+	 wire dmem_WE;
 	 
-    // Decode
-	 wire [31:0] data_aluinA_d, data_aluinB_d;
-    decode d(.instruction(instruction_d), .data_readRegA(data_readRegA), .data_readRegB(data_readRegB),
-		  .ctrl_ew(ctrl_ew), .ctrl_er(ctrl_er),
-		  .ctrl_load(ctrl_load), .ctrl_store(ctrl_store), .ctrl_mult(ctrl_mult), .ctrl_div(ctrl_div), .ctrl_link(ctrl_link),		  
-        .ctrl_readRegA(ctrl_readRegA), .ctrl_readRegB(ctrl_readRegB), .ctrl_writeReg(writeReg_decode), 
-        .data_aluinA(data_aluinA_d), .data_aluinB(data_aluinB_d), .jump_target(jump_target), .ctrl_jump(ctrl_jump));
-
-    // Latch instruction, PC, data_aluinA, data_aluinB, data_readRegB
-	 wire [31:0] instruction_e, data_aluinA_e, data_aluinB_e, data_readRegB_e, insn_noop_d;
-	 mux_2 noop_insert(.sel(stall), .in0(instruction_d), .in1(32'b0), .out(insn_noop_d));
-	 wire noop_e;
-	 or noop_or_e(noop_e, reset, mispredict);
-    register insn_de_reg(  .write(insn_noop_d),   .we(~multdiv_stall), .clr(noop_e), .clk(clock), .read(instruction_e));
-    register pc_de_reg(    .write(pc_d),          .we(~multdiv_stall), .clr(noop_e), .clk(clock), .read(pc_e));
-    register aluinA_de_reg(.write(data_aluinA_d), .we(~multdiv_stall), .clr(noop_e), .clk(clock), .read(data_aluinA_e));
-    register aluinB_de_reg(.write(data_aluinB_d), .we(~multdiv_stall), .clr(noop_e), .clk(clock), .read(data_aluinB_e));
-    register regB_de_reg(  .write(data_readRegB), .we(~multdiv_stall), .clr(noop_e), .clk(clock), .read(data_readRegB_e));
-    
-	 // Bypass In
-	 wire [31:0] data_aluOut_m, data_memOut_w, data_multdiv_w; // Bypass Inputs
-	 wire [31:0] data_aluinA_bp, data_aluinB_bp, data_readRegB_bp; // Bypass Outputs
-	 mux_4 by_aluA(.sel(bypass_aluinA), .in0(data_aluinA_e), .in1(data_aluOut_m), 
-		.in2(data_memOut_w), .in3(data_multdiv_w), .out(data_aluinA_bp));
-	 mux_4 by_aluB(.sel(bypass_aluinB), .in0(data_aluinB_e), .in1(data_aluOut_m), 
-		.in2(data_memOut_w), .in3(data_multdiv_w), .out(data_aluinB_bp));
-	 mux_4 by_regB(.sel(bypass_readRegB), .in0(data_readRegB_e), .in1(data_aluOut_m), 
-		.in2(data_memOut_w), .in3(data_multdiv_w), .out(data_readRegB_bp));
+	 //Writeback
+	 wire[1:0] writebackMux_Select; //0 = O, 1 = D
+	 wire regfile_WE;
+	 wire[1:0] writePortMux_Select;
 	 
-
-    // Execute
-	 wire [31:0] data_aluOut_e, exception_alu_e, data_multdiv_em, exception_multdiv_em;
-    execute e(.instruction(instruction_e), .data_aluinA(data_aluinA_bp), .data_aluinB(data_aluinB_bp), 
-    	.data_multdiv(data_multdiv_em), .ctrl_md_start(multdiv_start), .ctrl_md_ready(multdiv_ready), 
-		.pc(pc_e), .clock(clock), .reset(reset), .data_aluOut(data_aluOut_e), .nextPC(branch_target_actual), 
-		.branch_taken(branch_actual), .ctrl_branch(ctrl_branch_e), 
-		.exception_ALU(exception_alu_e), .exception_MultDiv(exception_multdiv_em));
-
-    // Latch instruction, PC, data_readRegB, data_aluOut, exception_alu
-	 wire [31:0] instruction_m, pc_m, data_readRegB_m, exception_alu_m;
-	 wire noop_m;
-	 or noop_or_m(noop_m, reset, multdiv_ready);
-    register insn_em_reg(  .write(instruction_e),   .we(1'b1), .clr(noop_m), .clk(clock), .read(instruction_m));
-    register pc_em_reg(    .write(pc_e),            .we(1'b1), .clr(noop_m), .clk(clock), .read(pc_m));
-    register regB_em_reg(  .write(data_readRegB_bp), .we(1'b1), .clr(noop_m), .clk(clock), .read(data_readRegB_m));
-    register aluout_em_reg(.write(data_aluOut_e),   .we(1'b1), .clr(noop_m), .clk(clock), .read(data_aluOut_m));
-    register excep_em_reg( .write(exception_alu_e), .we(1'b1), .clr(noop_m), .clk(clock), .read(exception_alu_m));
-		
+	 //Decode
+	 /*
+	 wire rtrd_Select_D; //0 = rt, 1 = rd
+	 wire bImmedMux_Select_D; //0 = let B through, 1 = let signExtensionOutput through
+	 wire[4:0] alu_Opcode_D;
+	 wire dmem_WE_D;
+	 wire writebackMux_Select_D; //0 = O, 1 = D
+	 wire regfile_WE_D;
 	 
-    // Memory
-	 wire [31:0] data_memOut_m;
-    memory m(.instruction(instruction_m), .data_aluOut(data_aluOut_m), .data_readRegB(data_readRegB_m), 
-        .q_dmem(q_dmem), .wren_dmem(wren), .address_dmem(address_dmem), .write_dmem(data), 
-        .data_memOut(data_memOut_m));
-
-    // Latch instruction, PC, data_memOut, data_multdiv, (exception_alu & exception_multdiv)
-    wire [31:0] instruction_w, pc_w, insn_noop_m, exception_alu_w, exception_multdiv_w;
-	 wire delay_md_stall;
-	 dff_c md_stall_delay(.d(multdiv_stall), .clr(reset), .en(1'b1), .clk(clock), .q(delay_md_stall));
-	 mux_2 noop_insert_w(.sel(multdiv_stall & delay_md_stall), .in0(instruction_m), .in1(32'b0), .out(insn_noop_m));
-    register insn_mw_reg(   .write(insn_noop_m),   .we(1'b1), .clr(reset), .clk(clock), .read(instruction_w));
-    register pc_mw_reg(     .write(pc_m),            .we(1'b1), .clr(reset), .clk(clock), .read(pc_w));
-    register regB_mw_reg(   .write(data_memOut_m),   .we(1'b1), .clr(reset), .clk(clock), .read(data_memOut_w));
-    register aluout_mw_reg( .write(data_multdiv_em), .we(1'b1), .clr(reset), .clk(clock), .read(data_multdiv_w));
-    register excepa_mw_reg( .write(exception_alu_m), .we(1'b1), .clr(reset), .clk(clock), .read(exception_alu_w));
-    register excepm_mw_reg( .write(exception_multdiv_em), .we(1'b1), .clr(reset), .clk(clock), .read(exception_multdiv_w));
-
+	 //Execute
+	 wire bImmedMux_Select_X; //0 = let B through, 1 = let signExtensionOutput through
+	 wire[4:0] alu_Opcode_X;
+	 wire dmem_WE_X;
+	 wire writebackMux_Select_X; //0 = O, 1 = D
+	 wire regfile_WE_X;
 	 
-    // Writeback
-    writeback w(.instruction(instruction_w), .pc(pc_w), .data_memOut(data_memOut_w), .data_multdiv(data_multdiv_w), 
-    	.data_exception_alu(exception_alu_w), .data_exception_multdiv(exception_multdiv_w), 
-		.ctrl_writeReg(ctrl_writeReg), .data_writeReg(data_writeReg));
-
+	 //Memory
+	 wire dmem_WE_M;
+	 wire writebackMux_Select_M; //0 = O, 1 = D
+	 wire regfile_WE_M;
+	 
+	 //Writeback
+	 wire writebackMux_Select_W; //0 = O, 1 = D
+	 wire regfile_WE_W;
+	 */
+	 
+    //----------Fetch-----------
+	 wire[31:0] pcRegIn, pcRegOut, irFetch_beforeMux, irFetch_afterMux;
+	 
+	 //PC Register 
+	 wire pcReg_WE;
+	 pcRegister pcReg(reset, clock, pcReg_WE, pcRegIn, pcRegOut); //Current clocking: Double edge
+	 
+	 //IMEM Connection
+	 assign address_imem = pcRegOut[11:0];
+	 
+	 //PC Incrementer
+	 wire[31:0] incrementedPC;
+	 wire dummy0, dummy1, dummy2;
+	 alu pcALU(pcRegOut, 32'b00000000000000000000000000000001, 5'b00000, 5'b00000, incrementedPC, dummy0, dummy1, dummy2);
+	 
+	 assign irFetch_beforeMux = q_imem;
+	 
+	 //nop mux (Control flow hazards)
+	 wire controlFlowHazardDetected;
+	 assign irFetch_afterMux = controlFlowHazardDetected ? 32'b00000000000000000000000000000000 : irFetch_beforeMux; 
+	 
+	 //----------FD Latch-----------
+	 wire[31:0] pcDecode, irDecode_beforeMux, irDecode_afterMux;
+	 wire latchFD_WE; 
+	 latchFD myLatchFD(incrementedPC, pcDecode, irFetch_afterMux, irDecode_beforeMux, clock, reset, latchFD_WE); 
+	 //controlDecode myControlDecode(irDecode_beforeMux, rtrd_Select_D, bImmedMux_Select_D, alu_Opcode_D, dmem_WE_D, writebackMux_Select_D, regfile_WE_D); //This is the "main" decode.
+	 controlDecode myControlDecode(irDecode_beforeMux, rtrd_Select);   //Should this be _beforeMux or _afterMux?
+	 
+	 //---------Decode----------
+	 
+	 //Regfile, including rtrdMux
+	 //assign ctrl_writeEnable = DONE IN WRITEBACK STAGE
+	 //assign ctrl_writeReg = DONE IN WRITEBACK STAGE
+	 assign ctrl_readRegA = irDecode_beforeMux[21:17];
+	 assign ctrl_readRegB = rtrd_Select ? irDecode_beforeMux[26:22] : irDecode_beforeMux[16:12];
+	 //assign data_writeReg = DONE IN WRITEBACK STAGE
+	 
+	 //nop mux (Data hazards and control flow hazards)
+	 wire dataHazardDetected;
+	 assign irDecode_afterMux = (dataHazardDetected || controlFlowHazardDetected) ? 32'b00000000000000000000000000000000 : irDecode_beforeMux; //this string of 0's is the nop
+	
+	 //---------DX Latch-----------
+	 wire[31:0] pcExecute, targetExecute, irExecute_beforeMux, irExecute_afterMux, aExecute, bExecute;
+	 //wire latchDX_reset; //See Data Hazard Section
+	 latchDX myLatchDX(pcDecode, pcExecute, irDecode_afterMux, irExecute_beforeMux, data_readRegA, aExecute, data_readRegB, bExecute, clock, reset);
+	 //controlExecute myControlExecute(PROBE_in, PROBE_out, clock, latchDX_reset, bImmedMux_Select_D, alu_Opcode_D, dmem_WE_D, writebackMux_Select_D, regfile_WE_D, bImmedMux_Select_X, alu_Opcode_X, dmem_WE_X, writebackMux_Select_X, regfile_WE_X);
+	 controlExecute myControlExecute(irExecute_beforeMux, bImmedMux_Select, alu_Opcode, bne, blt, j_or_jal, jr);
+	 
+	 //--------Execute----------
+	 
+	 //Sign Extender
+	 wire[31:0] signExtenderOutput;
+	 signExtender mySignExtender(irExecute_beforeMux[16:0], signExtenderOutput);
+	 
+	 //Immediate Mux
+	 wire[31:0] bImmedMuxOutput;
+	 assign bImmedMuxOutput = bImmedMux_Select ? signExtenderOutput : bExecute;
+	 
+	 //Main ALU
+	 wire[31:0] mainALUOutput;
+	 wire isNotEqual, isLessThan, aluOverflow;
+	 alu mainALU(aExecute, bImmedMuxOutput, alu_Opcode, irExecute_beforeMux[11:7], mainALUOutput, isNotEqual, isLessThan, aluOverflow);
+	 
+	 //~~~Branching and Control Flow~~~
+	 //shouldBranch (bne and blt)
+	 wire shouldBranch;
+	 assign shouldBranch = (bne && isNotEqual) || (blt && ((~isLessThan) && isNotEqual));
+	 
+	 //branchingNewPC (bne and blt)
+	 wire dummyBranchingALU1, dummyBranchingALU2, dummyBranchingALU3;
+	 wire[31:0] branchingNewPC;
+	 alu branchingALU(pcExecute, signExtenderOutput, 5'b00000, 5'b00000, branchingNewPC, dummyBranchingALU1, dummyBranchingALU2, dummyBranchingALU3);
+	 
+	 //Jump Target Calculation
+	 wire[11:0] shortTarget;
+	 assign shortTarget = irExecute_beforeMux[11:0];
+	 wire[31:0] target;
+	 assign target[11:0] = shortTarget;
+	 assign target[31:12] = 20'b0;
+	 assign targetExecute = target;
+	 
+	 //PC Chooser
+	 pcChooser myPCChooser(shouldBranch, j_or_jal, jr, branchingNewPC, target, bExecute, incrementedPC, pcRegIn);
+	 
+	 //nop mux (Just for multiplication) -- TODO
+	 assign irExecute_afterMux = irExecute_beforeMux;
+	 
+	 //----------XM Latch-----------
+	 wire[31:0] pcMemory, targetMemory, irMemory, oMemory, bMemory;
+	 latchXM myLatchXM(pcExecute, pcMemory, targetExecute, targetMemory, irExecute_afterMux, irMemory, mainALUOutput, oMemory, bExecute, bMemory, clock, reset);
+	 //controlMemory myControlMemory(clock, reset, dmem_WE_X, writebackMux_Select_X, regfile_WE_X, dmem_WE_M, writebackMux_Select_M, regfile_WE_M);
+	 controlMemory myControlMemory(irMemory, dmem_WE);
+	 
+	 //---------Memory-----------
+	 assign address_dmem = oMemory[11:0];
+	 assign data = bMemory;
+	 assign wren = dmem_WE;
+	 
+	 //----------MW Latch---------
+	 wire[31:0] pcWriteback, targetWriteback, irWriteback, oWriteback, dWriteback;
+	 latchMW myLatchMW(pcMemory, pcWriteback, targetMemory, targetWriteback, irMemory, irWriteback, oMemory, oWriteback, q_dmem, dWriteback, clock, reset);
+	 //controlWriteback myControlWriteback(clock, reset, writebackMux_Select_M, regfile_WE_M, writePortMux_Select_M, writebackMux_Select, regfile_WE, writePortMux_Select);
+	 controlWriteback myControlWriteback(irWriteback, writebackMux_Select, regfile_WE, writePortMux_Select);
+	 
+	 //-------Writeback----------
+	 //Writeback Mux
+	 wire[31:0] writebackMuxOutput;
+	 //assign writebackMuxOutput = writebackMux_Select ? dWriteback : oWriteback;
+	 mux4To1 writebackMux(oWriteback, dWriteback, pcWriteback, targetWriteback, writebackMux_Select, writebackMuxOutput);
+	 
+	 //Make connections to regfile (including Write Port Mux)
+	 //assign ctrl_writeReg = irWriteback[26:22];
+	 mux4To1Data5Bit writePortMux(irWriteback[26:22], 5'd30, 5'd31, 5'd31, writePortMux_Select, ctrl_writeReg);
+	 assign data_writeReg = writebackMuxOutput;
+	 assign ctrl_writeEnable = regfile_WE;
+	 
+	 //-------Hazard Detection------
+	 //Data hazard detection
+	 dataHazardDetection myHazardDetector(irDecode_beforeMux, irExecute_beforeMux, irMemory, dataHazardDetected);
+	 
+	 //Clear datapath control signals
+	 //assign latchDX_reset = reset || dataHazardDetected;
+	 
+	 //Control Flow Hazard Detection
+	 assign controlFlowHazardDetected = shouldBranch || j_or_jal || jr;
+	 
+	 //Disable FD latch and PC write enables
+	 wire notDataHazardDetected;
+	 assign notDataHazardDetected = ~dataHazardDetected;
+	 //wire notControlFlowHazardDetected;
+	 //assign notControlFlowHazardDetected = ~controlFlowHazardDetected;
+	 
+	 assign pcReg_WE = notDataHazardDetected;
+	 assign latchFD_WE = notDataHazardDetected;
+	 
 endmodule

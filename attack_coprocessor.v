@@ -17,7 +17,7 @@ module attack_coprocessor(
 	input [31:0] char2pos, char2size;
 	input [31:0] controls;
 	output [31:0] attack, movement, knockback;
-
+	/*
 	// smash attacks
 	wire smashL, smashR, smashU, smashD;
 	assign smashL = controls[23];
@@ -37,7 +37,7 @@ module attack_coprocessor(
 	assign tiltL = ~controls[15] & ~controls[14] & ~controls[13];
 	assign tiltR = controls[15] & controls[14] & controls[13];
 	assign tiltU = controls[7] & controls[6] & controls[5];
-	assign tiltD = ~controls[7] & ~controls[6] & ~controls[5];
+	assign tiltU = ~controls[7] & ~controls[6] & ~controls[5];
 	assign specialNL = pushB & ~tiltL & ~tiltR & ~ tiltU & tiltD & ~controls[26];
 	assign specialNR = pushB & ~tiltL & ~tiltR & ~ tiltU & tiltD & controls[26];
 	assign specialL = pushB & tiltL;
@@ -48,18 +48,18 @@ module attack_coprocessor(
 	// Hit Boxes
 	wire[15:0] char1posX, char1posY;
 	assign char1posX = char1pos[31:16];
-	assign char1posY = char1pos[15:0];
+	assign char1posy = char1pos[15:0];
 	wire [31:0] lhbpos, rhbpos, uhbpos,  dhbpos, hbsize;
-	assign hbsize[31:16] = char1size[31:16] / 16'd2;
-	assign hbsize[15:0] = char1size[15:0] / 16'd2;
+	assign hbsize[31:16] = char1size[31:16] / 2;
+	assign hbsize[15:0] = char1size[15:0] / 2;
 	assign lhbpos[31:16] = char1posX - hbsize[31:16];
-	assign lhbpos[15:0] = char1posY + hbsize[15:0] / 16'd2;
+	assign lhbpos[15:0] = char1posY + hbsize[15:0] / 2;
 	assign rhbpos[31:16] = char1posX + char1size[31:16];
-	assign rhbpos[15:0] = char1posY + hbsize[15:0] / 16'd2;
-	assign uhbpos[31:16] = char1posX + hbsize[31:16] / 16'd2;
+	assign rhbpos[15:0] = char1posY + hbsize[15:0] / 2;
+	assign uhbpos[31:16] = char1posX + hbsize[31:16] / 2;
 	assign uhbpos[15:0] = char1posY + char1size[15:0];
-	assign dhbpos[31:16] = char1posX + hbsize[31:16] / 16'd2;
-	assign dhbpos[15:0] = char1posY - hbsize[31:16] / 16'd2;
+	assign dhbpos[31:16] = char1posX + hbsize[31:16] / 2;
+	assign dhbpos[15:0] = char1posY - hbsize[31:16] / 2;
 	wire [3:0] hitOutL, hitOutR, hitOutU, hitOutD;
 	collision leftCol(lhbpos, hbsize, char2pos, char2size, hitOutL);
 	collision rightCol(rhbpos, hbsize, char2pos, char2size, hitOutR);
@@ -83,62 +83,62 @@ module attack_coprocessor(
 		// Attack Starts
 		if(smashL & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastSL <= 1'b1;
+			lastSL = 1'b1;
 			longTimer = 25'b0100000000000000000000000;
 		end
 		if(smashR & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastSR <= 1'b1;
+			lastSR = 1'b1;
 			longTimer = 25'b0100000000000000000000000;
 		end
 		if(smashU & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastSU <= 1'b1;
+			lastSU = 1'b1;
 			longTimer = 25'b0100000000000000000000000;
 		end
 		if(smashD & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastSD <= 1'b1;
+			lastSD = 1'b1;
 			longTimer = 25'b0100000000000000000000000;
 		end
 		if(jabNL & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastJNL <= 1'b1;
+			lastJNL = 1'b1;
 			shortTimer = 24'b100000000000000000000000;
 		end
 		if(jabNR & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastJNR <= 1'b1;
+			lastJNR = 1'b1;
 			shortTimer = 24'b100000000000000000000000;
 		end
 		if(specialNL & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastBNL <= 1'b1;
+			lastBNL = 1'b1;
 			longTimer = 25'b1000000000000000000000000;
 		end
 		if(specialNR & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastBNR <= 1'b1;
+			lastBNR = 1'b1;
 			longTimer = 25'b1000000000000000000000000;
 		end
 		if(specialL & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastBL <= 1'b1;
+			lastBL = 1'b1;
 			longTimer = 25'b1000000000000000000000000;
 		end
 		if(specialR & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastBR <= 1'b1;
+			lastBR = 1'b1;
 			longTimer = 25'b1000000000000000000000000;
 		end
 		if(specialU & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastBU <= 1'b1;
+			lastBU = 1'b1;
 			longTimer = 25'b1000000000000000000000000;
 		end
 		if(specialD & ~lastAttack) begin
 			lastAttack = 1'b1;
-			lastBD <= 1'b1;
+			lastBD = 1'b1;
 			longTimer = 25'b1000000000000000000000000;
 		end
 
@@ -203,9 +203,7 @@ module attack_coprocessor(
 						 | jabNR_out | specialU_out | specialD_out | specialL_out 
 						 | specialR_out | specialNL_out | specialNR_out;
 	assign attack[0] = attack[11] & anyHit;
-	
-	assign attack[31:12] = 20'b0;
-	
+
 	// Giving Knockback
 	reg knockback;
 	always@(posedge clock) begin
@@ -220,5 +218,5 @@ module attack_coprocessor(
 	always@(posedge clock) begin
 		if(specialU_out) movement <= 32'h00000010;
 	end
-
+	*/
 endmodule // attack_coprocessor
