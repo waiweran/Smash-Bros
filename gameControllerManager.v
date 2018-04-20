@@ -16,7 +16,7 @@ module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfover
 	assign mmioBoardInput[11:8] = 4'b0;
 	assign mmioBoardInput[15:12] = halfgpio[15:12]; //y
 	assign mmioBoardInput[19:16] = halfgpio[3:0]; //a, b, grab, shield
-	assign mmioBoardInput[23:20] = halfgpio[11:8]; //D pad
+	assign mmioBoardInput[23:20] = 4'b0;//halfgpio[11:8]; //D pad
 	assign mmioBoardInput[25:24] = halfoverflowgpio; //Reset, Jump
 	
 	//Pattern for ledMotorOut
