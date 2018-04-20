@@ -70,16 +70,16 @@ assign VGA_CLK_n = ~iVGA_CLK;
 /************** OUR CODE STARTS HERE ************/
 
  //Load background
-stage_data	stage_data_inst (
-	.address ( ADDR/19'd2 ),
-	.clock ( VGA_CLK_n ),
-	.q ( index )
-);
-stage_index stage_index_inst (
-	.address ( index ),
-	.clock ( iVGA_CLK ),
-	.q ( bgr_data_raw_background )
-);	
+//stage_data	stage_data_inst (
+//	.address ( ADDR/19'd2 ),
+//	.clock ( VGA_CLK_n ),
+//	.q ( index )
+//);
+//stage_index stage_index_inst (
+//	.address ( index ),
+//	.clock ( iVGA_CLK ),
+//	.q ( bgr_data_raw_background )
+//);	
 //img_data	img_data_inst (
 //	.address ( ADDR ),
 //	.clock ( VGA_CLK_n ),
@@ -211,8 +211,78 @@ kirby_index	character2_index_inst (
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_p2_normal)
 );	
-
-
+// Load P2 attack
+kirby_a_data	character2_attack_data_inst (
+	.address ( indexP2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexc2_a )
+);
+kirby_a_index character2_attack_index_inst (
+	.address ( indexc2_a ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_p2_a )
+);	
+// Load P2 down
+kirby_down_data	character2_down_data_inst (
+	.address ( indexP2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexc2_down )
+);
+kirby_down_index character2_down_index_inst (
+	.address ( indexc2_down ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_p2_down )
+);	// Load P2 downb
+kirby_downb_data	character2_adownb_data_inst (
+	.address ( indexP2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexc2_downb )
+);
+kirby_downb_index character2_downb_index_inst (
+	.address ( indexc2_a ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_p2_downb )
+);	// Load P2 sideb
+kirby_sideb_data	character2_sideb_data_inst (
+	.address ( indexP2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexc2_sideb )
+);
+kirby_sideb_index character2_sideb_index_inst (
+	.address ( indexc2_sideb ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_p2_sideb )
+);	// Load P2 upb
+kirby_upb_data	character2_upb_data_inst (
+	.address ( indexP2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexc2_upb )
+);
+kirby_upb_index character2_upb_index_inst (
+	.address ( indexc2_upb ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_p2_upb )
+);	// Load P2 b
+kirby_b_data	character2_b_data_inst (
+	.address ( indexP2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexc2_b )
+);
+kirby_b_index character2_b_index_inst (
+	.address ( indexc2_b ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_p2_b )
+);	// Load P2 walk
+kirby_walk_data	character2_walk_data_inst (
+	.address ( indexP2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexc2_walk )
+);
+kirby_walk_index character2_walk_index_inst (
+	.address ( indexc2_walk ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_p2_walk )
+);	
 //Choose the color of the frontmost object (can change layering via order of muxes here)
 wire[23:0] w1;
 //assign w1 = isInsideP2 ? bgr_data_raw_p2 : bgr_data_raw_background;
@@ -245,11 +315,39 @@ always@(posedge VGA_CLK_n) begin
 		bgr_data_raw_p1 <= bgr_data_raw_p1_normal;
 	end
 end
+// Choose image for p2
+always@(posedge VGA_CLK_n) begin
+	if(p2VGA[101]) begin
+		bgr_data_raw_p2 <= bgr_data_raw_p2_a;
+	end
+	else if(p2VGA[103]) begin
+		bgr_data_raw_p2 <= bgr_data_raw_p2_downb;
+	end
+	else if(p2VGA[102]) begin
+		bgr_data_raw_p2 <= bgr_data_raw_p2_upb;
+	end
+	else if(p2VGA[104] | p2VGA[105]) begin
+		bgr_data_raw_p2 <= bgr_data_raw_p2_sideb;
+	end
+	else if(p2VGA[106]) begin
+		bgr_data_raw_p2 <= bgr_data_raw_p2_b;
+	end
+	else if((p2VGA[71:69] == 3'b000) & p2VGA[113]) begin
+		bgr_data_raw_p2 <= bgr_data_raw_p2_down;
+	end	
+	else if((p2VGA[79:78] != 2'b10) & (p2VGA[79:78] != 2'b01) & p2VGA[113]) begin
+		bgr_data_raw_p2 <= bgr_data_raw_p2_walk;
+	end
+	else begin
+		bgr_data_raw_p2 <= bgr_data_raw_p2_normal;
+	end
+end
 
+assign bgr_data_raw_background = 24'b010101010101010101010101;
 
 assign w1 = isInsideP1 & (bgr_data_raw_p1 !== 24'b0) ? bgr_data_raw_p1 : bgr_data_raw_background;
 
-assign bgr_data_raw = isInsideP2 & (bgr_data_raw_p2_normal !== 24'b0) ? bgr_data_raw_p2_normal : w1;
+assign bgr_data_raw = isInsideP2 & (bgr_data_raw_p2 !== 24'b0) ? bgr_data_raw_p2 : w1;
 
 
 /************** OUR CODE ENDS HERE **************/
