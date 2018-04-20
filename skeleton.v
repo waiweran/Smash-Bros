@@ -9,6 +9,8 @@
  * inspect which signals the processor tries to assert when.
  */
 
+ 
+ 
 module skeleton(
 	clock, reset_btn, 
 	VGA_CLK,   														//	VGA Clock
@@ -24,24 +26,24 @@ module skeleton(
 	LEDs,
 	test_atk,
 	instruction,
-	/*
 	test_reg1,
 	test_reg24,
-	test_reg25,
+	test_reg25
+	/*
 	test_reg26,
 	test_reg27,
 	test_reg28,
-	test_reg29
-	*/
+	test_reg29*/
 );
 
 	//TEST OUTPUTS
 	output[31:0] instruction;
 	assign instruction = q_imem;
-	/*
+	
 	output[31:0] test_reg1,
 	test_reg24,
-	test_reg25,
+	test_reg25;
+	/*
 	test_reg26,
 	test_reg27,
 	test_reg28,
