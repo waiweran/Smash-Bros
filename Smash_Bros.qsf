@@ -1,18 +1,18 @@
 # -------------------------------------------------------------------------- #
 #
 # Copyright (C) 1991-2016 Altera Corporation. All rights reserved.
-# Your use of Altera Corporation's design tools, logic functions 
-# and other software and tools, and its AMPP partner logic 
-# functions, and any output files from any of the foregoing 
-# (including device programming or simulation files), and any 
-# associated documentation or information are expressly subject 
-# to the terms and conditions of the Altera Program License 
+# Your use of Altera Corporation's design tools, logic functions
+# and other software and tools, and its AMPP partner logic
+# functions, and any output files from any of the foregoing
+# (including device programming or simulation files), and any
+# associated documentation or information are expressly subject
+# to the terms and conditions of the Altera Program License
 # Subscription Agreement, the Altera Quartus Prime License Agreement,
-# the Altera MegaCore Function License Agreement, or other 
-# applicable license agreement, including, without limitation, 
-# that your use is for the sole purpose of programming logic 
-# devices manufactured by Altera and sold by Altera or its 
-# authorized distributors.  Please refer to the applicable 
+# the Altera MegaCore Function License Agreement, or other
+# applicable license agreement, including, without limitation,
+# that your use is for the sole purpose of programming logic
+# devices manufactured by Altera and sold by Altera or its
+# authorized distributors.  Please refer to the applicable
 # agreement for further details.
 #
 # -------------------------------------------------------------------------- #
@@ -150,7 +150,6 @@ set_location_assignment PIN_G19 -to LEDs[0]
 set_location_assignment PIN_J10 -to gpioOutput[0]
 set_location_assignment PIN_J14 -to gpioOutput[1]
 set_location_assignment PIN_H13 -to gpioOutput[2]
-set_location_assignment PIN_M21 -to test_atk
 set_global_assignment -name VERILOG_FILE tristate_32.v
 set_global_assignment -name VERILOG_FILE mux_16.v
 set_global_assignment -name VERILOG_FILE mmio.v
@@ -225,8 +224,6 @@ set_global_assignment -name VERILOG_FILE collision.v
 set_global_assignment -name CDF_FILE output_files/Chain2.cdf
 set_global_assignment -name MIF_FILE stage_data.mif
 set_global_assignment -name MIF_FILE stage_index.mif
-set_global_assignment -name VERILOG_FILE character1_index.v
-set_global_assignment -name VERILOG_FILE character2_index.v
 set_global_assignment -name MIF_FILE bowser1_data.mif
 set_global_assignment -name MIF_FILE bowser1_index.mif
 set_global_assignment -name MIF_FILE kirby1_data.mif

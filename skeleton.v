@@ -29,11 +29,10 @@ module skeleton(
 	test_reg1,
 	test_reg24,
 	test_reg25
-	/*
 	test_reg26,
 	test_reg27,
 	test_reg28,
-	test_reg29*/
+	test_reg29
 );
 
 	//TEST OUTPUTS
@@ -69,7 +68,7 @@ module skeleton(
 	output	[7:0]	VGA_B;   				//	VGA Blue[9:0]
 	
 	// Clock and Reset Inputs
-	input clock, reset_btn, test_atk;
+	input clock, reset_btn;
 	wire reset;
 	assign reset = ~reset_btn;
 	
@@ -94,8 +93,7 @@ module skeleton(
     wire [31:0] data;
     wire wren;
     wire [31:0] q_dmem;
-	 wire [63:0] p1VGA, p2VGA, stageVGA;
-	 wire [31:0] p1Controller, p2Controller;
+	 wire [127:0] p1VGA, p2VGA;
     mmio my_mem(
 		  .clock		  (clock),
 		  .reset		  (reset),
@@ -110,8 +108,7 @@ module skeleton(
 		  .stageVGA   (stageVGA),
 		  .p1Controller(p1Controller),
 		  .p2Controller(p2Controller),
-		  .reg24(reg24), .reg25(reg25), .reg26(reg26), .reg27(reg27), .reg28(reg28), .reg29(reg29)
-    );
+		  .reg24(reg24), .reg25(reg25), .reg26(reg26), .reg27(reg27), .reg28(reg28), .reg29(reg29));
 
     /** REGFILE **/
     wire ctrl_writeEnable;
@@ -129,8 +126,7 @@ module skeleton(
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB, reg1,
-		  reg24, reg25, reg26, reg27, reg28, reg29
+        data_readRegB, reg1, reg24, reg25, reg26, reg27, reg28, reg29
     );
 
     /** Processor **/
@@ -172,18 +168,12 @@ module skeleton(
 								 .g_data(VGA_G),
 								 .r_data(VGA_R),
 								 .p1VGA(p1VGA),
-								 .p2VGA(p2VGA),
-								 .stageVGA(stageVGA),
-								 .test_atk(test_atk),
-								 .p1Controller(p1Controller),
-								 .p2Controller(p2Controller)
+								 .p2VGA(p2VGA)
 	);
 	
 	/** LEDs **/
 	//assign LEDs[12:0] = address_dmem;
-	assign LEDs[0] = p1Controller[26];
-	assign LEDs[4:3] = p1Controller[15:14];
-	assign LEDs[2:1] = 2'b0;
-	assign LEDs[17:5] = 13'b0;
+	assign LEDs[10:0] = p1VGA[90:80];
+	assign LEDs[17:11] = 7'b0;
 
 endmodule

@@ -1,8 +1,6 @@
 module mmio(
-	clock, reset,
-	address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA, stageVGA, p1Controller, p2Controller,
-	reg24, reg25, reg26, reg27, reg28, reg29
-);
+	clock, reset,address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA,
+	reg24, reg25, reg26, reg27, reg28, reg29);
 	
 	input clock, reset;
 	input [12:0] address;
@@ -12,57 +10,72 @@ module mmio(
 
 	input [35:0] gpio;
 	output[2:0] gpioOutput;
-	output [63:0] p1VGA, p2VGA, stageVGA;
-	output [31:0] p1Controller, p2Controller;
 	
 	input[31:0] reg24, reg25, reg26, reg27, reg28, reg29;
+	output [127:0] p1VGA, p2VGA;
+	
+	
+	
+	/******** Physics Coprocessors ********/
+	
+	reg [31:0] gravity, wind;
 
 	// Player 1 Physics Coprocessor
-	reg [31:0] mass1, grav1, wind1, startPos1;
-	reg [31:0] ctrl1, knock1, attack1, collis1;
+	reg [31:0] mass1, startPos1;
+	reg [31:0] ctrl1_inP, knock1_inP, attack1_inP, collis1_inP;
 	wire [31:0] pos1;
 	physics_coprocessor physP1(
 		.clock(clock), .reset(reset),
 
-		.mass_in(mass1), .gravity_in(grav1), .wind_in(wind1),
+		.mass_in(mass1), .gravity_in(gravity), .wind_in(wind),
 		.start_Position(startPos1),
 
-		.controller_in(ctrl1),
-		.knockback_in(knock1),
-		.attack_in(attack1[0]),
+		.controller_in(ctrl1_inP),
+		.knockback_in(knock1_inP),
+		.attack_in(attack1_inP[0]),
 
 
-		.wall(collis1),
+		.wall(collis1_inP),
 
 		.freeze_in(1'b0),
+		
+		.ctrl_num(1'b0),
 
 		.position(pos1)
 	);
 
 	// Player 2 Physics Coprocessor
-	reg [31:0] mass2, grav2, wind2, startPos2;
-	reg [31:0] ctrl2, knock2, attack2, collis2;
+	reg [31:0] mass2, startPos2;
+	reg [31:0] ctrl2_inP, knock2_inP, attack2_inP, collis2_inP;
 	wire [31:0] pos2;
 	physics_coprocessor physP2(
 		.clock(clock), .reset(reset),
 
-		.mass_in(mass2), .gravity_in(grav2), .wind_in(wind2),
+		.mass_in(mass2), .gravity_in(gravity), .wind_in(wind),
 		.start_Position(startPos2),
 
-		.controller_in(ctrl2),
-		.knockback_in(knock2),
-		.attack_in(attack2[0]),
+		.controller_in(ctrl2_inP),
+		.knockback_in(knock2_inP),
+		.attack_in(attack2_inP[0]),
 
 
-		.wall(collis2),
+		.wall(collis2_inP),
 
 		.freeze_in(1'b0),
+		
+		.ctrl_num(1'b1),
 
 		.position(pos2)
 	);
+	
+	
+	
+	/******** Collision Coprocessors ********/
+	
+	reg [31:0] stage_pos, stage_size;
 
 	// Collision Player 1
-	reg [31:0] player_pos_p1, stage_pos, player_size_p1, stage_size;
+	reg [31:0] player_pos_p1, player_size_p1;
 	wire [3:0] coll_p1;
 	wire [31:0] collision_out_p1;
 	assign collision_out_p1[31:4] = 28'b0;
@@ -75,7 +88,7 @@ module mmio(
 	);
 	
 	// Collision Player 2
-	reg [31:0] player_pos_p2, player_size_p2;  //Note: also reuses stage_pos and stage_size from Collision Player 1 - Is this OK? - Matthew
+	reg [31:0] player_pos_p2, player_size_p2;
 	wire [3:0] coll_p2;
 	wire [31:0] collision_out_p2;
 	assign collision_out_p2[31:4] = 28'b0;
@@ -86,13 +99,18 @@ module mmio(
 
 		.coll(coll_p2)
 	);
-
+	
+	
+	
+	/******** Game Controller Managers ********/
+	
 	// Player 1 Game Controller Manager
 	reg[31:0] gameControllerOutputP1;
 	wire[31:0] gameControllerInputP1;
 	gameControllerManager controllerP1(.mmioBoardOutput(gameControllerOutputP1),
 												  .mmioBoardInput(gameControllerInputP1),
-												  .halfgpio(gpio[15:0]), .halfoverflowgpio(gpio[33:32]), .ledMotorOut(gpioOutput[0]), .fastClock(clock), .slowClock(gpioOutput[2]));
+												  .halfgpio(gpio[15:0]), .halfoverflowgpio(gpio[33:32]), .ledMotorOut(gpioOutput[0]), 
+												  .fastClock(clock), .slowClock(gpioOutput[2]), .startDir(1'b1), .reset(reset));
 
 	// Player 2 Game Controller Manager
 	reg[31:0] gameControllerOutputP2;
@@ -100,39 +118,47 @@ module mmio(
    wire unused;
 	gameControllerManager controllerP2(.mmioBoardOutput(gameControllerOutputP2),
 												  .mmioBoardInput(gameControllerInputP2),
-												  .halfgpio(gpio[31:16]), .halfoverflowgpio(gpio[35:34]), .ledMotorOut(gpioOutput[1]), .fastClock(clock), .slowClock(unused));
+												  .halfgpio(gpio[31:16]), .halfoverflowgpio(gpio[35:34]), .ledMotorOut(gpioOutput[1]), 
+												  .fastClock(clock), .slowClock(unused), .startDir(1'b0), .reset(reset));
 	
+	
+	
+	/******** Attack Coprocessors ********/
+	reg[31:0] pos1_attack, pos2_attack, size1_attack, size2_attack;
+
 	// Attack Coprocessor Player 1
+	reg[31:0] p1controls_attack;
 	wire[31:0] attack_out1, move_out1, knock_out1; 
-	attack_coprocessor attackP1(.clock(clock), .reset(reset), .char1pos(pos1), .char1size(player_size_p1),
-																				.char2pos(pos2), .char2size(player_size_p2),
-																				.controls(gameControllerInputP1),
-																				.attack(attack_out1),
-																				.movement(move_out1),
-																				.knockback(knock_out1));
+	attack_coprocessor attackP1(.clock(clock), .reset(reset), 
+			.char1pos(pos1_attack), .char1size(size1_attack),
+			.char2pos(pos2_attack), .char2size(size2_attack),
+			.controls(p1controls_attack),
+			.attack(attack_out1),
+			.movement(move_out1),
+			.knockback(knock_out1));
 																									
-	
 	// Attack Coprocessor Player 2
+	reg[31:0] p2controls_attack;
 	wire[31:0] attack_out2, move_out2, knock_out2; 
-	attack_coprocessor attackP2(.clock(clock), .reset(reset), .char1pos(pos1), .char1size(player_size_p1),
-																			.char2pos(pos2), .char2size(player_size_p2),
-																			.controls(gameControllerInputP2),
-																			.attack(attack_out2),
-																			.movement(move_out2),
-																			.knockback(knock_out2));
+	attack_coprocessor attackP2(.clock(clock), .reset(reset), 
+			.char1pos(pos2_attack), .char1size(size2_attack),
+			.char2pos(pos1_attack), .char2size(size1_attack),
+			.controls(p2controls_attack),
+			.attack(attack_out2),
+			.movement(move_out2),
+			.knockback(knock_out2));
+					
+
+					
+	/******** VGA Coprocessors ********/
 	
 	// VGA Coprocessor Player 1
-	reg[31:0] posP1InVGA, whP1InVGA;
-	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .poswhOut(p1VGA), .controller(gameControllerInputP1), .controller_out(p1Controller));
+	reg[31:0] posP1InVGA, whP1InVGA, controlP1VGA, attackP1VGA, collision_p1vga_in;
+	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .controller(controlP1VGA), .attack(attackP1VGA), .collision(collision_p1vga_in), .vga_output(p1VGA));
 
 	// VGA Coprocessor Player 2
-	reg[31:0] posP2InVGA, whP2InVGA;
-	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(whP2InVGA), .poswhOut(p2VGA), .controller(gameControllerInputP2), .controller_out(p2Controller));
-
-	// VGA Coprocessor Stage
-	reg[31:0] posStageInVGA, whStageInVGA;
-	vga_coprocessor vgaStage(.posIn(posStageInVGA), .whIn(whStageInVGA), .poswhOut(stageVGA));
-
+	reg[31:0] posP2InVGA, whP2InVGA, controlP2VGA, attackP2VGA, collision_p2vga_in;
+	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(whP2InVGA), .controller(controlP2VGA), .attack(attackP2VGA), .collision(collision_p2vga_in), .vga_output(p2VGA));
 
 	// DMEM
    wire [11:0] address_dmem;
@@ -159,15 +185,17 @@ module mmio(
 	always @(negedge clock) begin
 
 		// Variable constant assigning from registers/processor
+		/*
 		mass1 <= reg24;
 		player_size_p1 <= reg25;
 		knock1 <= reg26;
 		mass2 <= reg27;
 		player_size_p2 <= reg28;
 		knock2 <= reg29;
+		*/
 		
 		// Permanent constant assigning
-		
+/*
 		// Physics Constants
 		//mass1 <= 32'h00000010; 
 		grav1 <= 32'h00010000; 
@@ -186,14 +214,34 @@ module mmio(
 		
 		//player_size_p2 <= 32'h0085007d;
 		//No need for stage_pos and stage_size again
+		*/
 
+		// Testing, Remove Later - Now updated for P2
+
+		// Physics Constants
+		gravity <= 32'h00010000;
+		wind <= 32'h00000010;
+		mass1 <= 32'h00000010;
+		startPos1 <= 32'h016000fa;
+		mass2 <= 32'h00000010;
+		startPos2 <= 32'h02a900fa;
+
+		// Collision Constants
+		stage_pos <= 32'h01430014;
+		stage_size <= 32'h01fa00c8;
+		player_size_p1 <= 32'h0085007d;
+		player_size_p2 <= 32'h00590055;
+		
+		// Attack Constants
+		size1_attack <= player_size_p1;
+		size2_attack <= player_size_p2;
+		
 		// VGA Constants
 		whP1InVGA <= player_size_p1;
 		whP2InVGA <= player_size_p2;
-		posStageInVGA <= 32'h01430014;
-		whStageInVGA <= 32'h01fa00c8;
 
 		// Physics Inputs
+		/*
 		ctrl1 <= gameControllerInputP1;
 		//knock1 <= 32'h00000000;
 		attack1 <= 32'h00000000;
@@ -202,71 +250,38 @@ module mmio(
 		//knock2 <= 32'h00000000;
 		attack2 <= 32'h00000000;
 		collis2 <= collision_out_p2;
+		*/
+
+		ctrl1_inP <= gameControllerInputP1;
+		knock1_inP <= knock_out2;
+		attack1_inP <= attack_out2;
+		collis1_inP <= collision_out_p1;
+		ctrl2_inP <= gameControllerInputP2;
+		knock2_inP <= knock_out1;
+		attack2_inP <= attack_out1;
+		collis2_inP <= collision_out_p2;
 		
 		// Collision Inputs
 		player_pos_p1 <= pos1;
 		player_pos_p2 <= pos2;
+		
+		// Attack Inputs
+		pos1_attack <= pos1;
+		pos2_attack <= pos2;
+		p1controls_attack <= gameControllerInputP1;
+		p2controls_attack <= gameControllerInputP2;
 
 		// VGA Inputs
 		posP1InVGA <= pos1;
+		controlP1VGA <= gameControllerInputP1;
+		attackP1VGA <= attack_out1;
 		posP2InVGA <= pos2;
-		
-		/*
-		if (wren & co_sel[0]) begin // physics player 1
-			if (co_spec[0]) mass1 <= data_in;
-			if (co_spec[1]) grav1 <= data_in;
-			if (co_spec[2]) wind1 <= data_in;
-			if (co_spec[3]) startPos1 <= data_in;
-			if (co_spec[4]) ctrl1 <= data_in;
-			if (co_spec[5]) knock1 <= data_in;
-			if (co_spec[6]) attack1 <= data_in;
-			if (co_spec[7]) collis1 <= data_in;
-		end
-		if (wren & co_sel[1]) begin // physics player 2
-			if (co_spec[0]) mass2 <= data_in;
-			if (co_spec[1]) grav2 <= data_in;
-			if (co_spec[2]) wind2 <= data_in;
-			if (co_spec[3]) startPos2 <= data_in;
-			if (co_spec[4]) ctrl2 <= data_in;
-			if (co_spec[5]) knock2 <= data_in;
-			if (co_spec[6]) attack2 <= data_in;
-			if (co_spec[7]) collis2 <= data_in;
-		end
-		if (wren & co_sel[4]) begin // Game Controller Manager for player 1
-			if (co_spec[0]) gameControllerOutputP1 <= data_in;
-		end
-		if (wren & co_sel[5]) begin // Game Controller Manager for player 2
-			if (co_spec[0]) gameControllerOutputP2 <= data_in;
-		end
-		if (wren & co_sel[8]) begin // VGA Coprocessor P1
-			if (co_spec[0])  posP1InVGA <= data_in;
-			if (co_spec[1])  whP1InVGA <= data_in;
-		end
-		if (wren & co_sel[9]) begin // VGA Coprocessor P2
-			if (co_spec[0])  posP2InVGA <= data_in;
-			if (co_spec[1])  whP2InVGA <= data_in;
-		end
-		if (wren & co_sel[10]) begin // VGA Coprocessor Stage
-			if (co_spec[0])  posStageInVGA <= data_in;
-			if (co_spec[1])  whStageInVGA <= data_in;
-		end
-		if (wren & co_sel[12]) begin  // Collision P1
-			if (co_spec[0]) player_pos_p1 <= data_in;
-			if (co_spec[1]) stage_pos <= data_in;
-			if (co_spec[2]) player_size_p1 <= data_in;
-			if (co_spec[3]) stage_size <= data_in;
-		end
-		if (wren & co_sel[13]) begin // Collision P2
-			if (co_spec[0]) player_pos_p2 <= data_in;
-			if (co_spec[1]) stage_pos <= data_in;
-			if (co_spec[2]) player_size_p2 <= data_in;
-			if (co_spec[3]) stage_size <= data_in;
-		end
-		*/
+		controlP2VGA <= gameControllerInputP2;
+		attackP2VGA <= attack_out2;
+		collision_p1vga_in <= collision_out_p1;
+		collision_p2vga_in <= collision_out_p2;
 	end
 	
-
-
 	// Module Outputs
 	wire [31:0] coprocessor_out;
 	tristate_32 outmux(.sel(co_sel),

@@ -12,6 +12,8 @@ module physics_coprocessor(
 	wall, 					// Hitting walls
 
 	freeze_in,				// Holds player still
+	
+	ctrl_num,				// Indicates which joystick is used
 
 	position 				// Output position [x, y]
 );
@@ -24,6 +26,7 @@ module physics_coprocessor(
 	input [31:0] wall;
 	input attack_in;
 	input freeze_in;
+	input ctrl_num;
 
 	// Output Position
 	output [31:0] position;
@@ -36,7 +39,7 @@ module physics_coprocessor(
 	assign joystick_y[8] = 1'b0;
 	wire jump_pushed;
 	wire platform_Thru;
-	assign jump_pushed = joystick_y[7] & joystick_y[6] & joystick_y[5] & joystick_y[4]; // Joystick Y 240 to 255 (up)
+	assign jump_pushed = controller_in[24] | (joystick_y[7] & joystick_y[6] & joystick_y[5] & joystick_y[4]); // Joystick Y 240 to 255 (up)
 	assign platform_Thru = ~joystick_y[7] & ~joystick_y[6] & ~joystick_y[5] & ~joystick_y[4]; // Joystick Y 0 to 15 (down)
 	
 	// Input from Collisions
@@ -57,7 +60,7 @@ module physics_coprocessor(
 	assign gravity[47:32] = 16'b0;
 	assign wind[31:0] = wind_in;
 	assign wind[47:32] = 16'b0;
-	assign sjoy_x = joystick_x - 9'sb001110000; // Map joystick values to -128 to 127
+	assign sjoy_x = joystick_x - (ctrl_num ? 9'sb001110000 : 9'sb010000000); // Map joystick values to -128 to 127
 	assign sjoy_y = joystick_y - 9'sb001110000; // Map joystick values to -128 to 127
 	assign move_x[18:10] = sjoy_x;
 	assign move_x[9:0] = 10'b0;
@@ -164,7 +167,7 @@ module physics_coprocessor(
     		if(vel_x < vel_x_t) vel_x <= vel_x + 48'd1;
    		else vel_x <= vel_x - 48'd1;
     		if(vel_y < vel_y_t) vel_y <= jump ? (48'h000000040000 / mass) : (vel_y + 48'd1);
-    		else vel_y <= jump ? (move_y / mass) : (vel_y - 48'd1);
+    		else vel_y <= jump ? (48'h000000040000 / mass) : (vel_y - 48'd1);
     	end
 		
 		// Acceleration, velocity update for on grounde
