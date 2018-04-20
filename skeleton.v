@@ -56,7 +56,6 @@ module skeleton(
 	output[31:0] TEST_gameControllerOutputP1;
 	output[31:0] TEST_posP1InVGA;	
 	
-	
 	// VGA Outputs
 	output			VGA_CLK;   				//	VGA Clock
 	output			VGA_HS;					//	VGA H_SYNC
@@ -138,7 +137,7 @@ module skeleton(
 	     regtest4,
 		  regtest5,
 	     regtest6,
-		  regtest7 
+		  regtest7
     );
 
 	//Double the period of the clock JUST FOR PROCESSOR

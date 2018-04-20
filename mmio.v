@@ -1,7 +1,6 @@
 module mmio(
 	clock, processorClock, reset,
 	address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA, stageVGA, p1Controller, p2Controller,
-	
 	TEST_startPos1,
 	TEST_collis1,
 	TEST_player_pos_p1,

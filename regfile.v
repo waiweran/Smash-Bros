@@ -16,7 +16,7 @@ module regfile (
 	     regtest4,
 		  regtest5,
 	     regtest6,
-		  regtest7 
+		  regtest7
  
 );
 	//TESTING
