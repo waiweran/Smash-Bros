@@ -56,13 +56,18 @@ begin
 	else if (cBLANK_n==1'b1)
 		ADDR<=ADDR+19'd1;
 	
+	
+end
+
+//always@(negedge iVGA_CLK)
+//begin
 //	if (ADDR % 19'd640 == 19'b0) // increase the count for each line that passes
 //		count<=count+9'd1;
 //	if (ADDR % 2 == 19'b0) //increment stage addr every other pixel
 //		stage_addr<=stage_addr+9'd1;
 //	if (count % 2 == 9'd1)
 //		stage_addr<=stage_addr-9'd320;
-end
+//end
 
 assign VGA_CLK_n = ~iVGA_CLK;
 
@@ -70,16 +75,16 @@ assign VGA_CLK_n = ~iVGA_CLK;
 /************** OUR CODE STARTS HERE ************/
 
  //Load background
-//stage_data	stage_data_inst (
-//	.address ( ADDR/19'd2 ),
-//	.clock ( VGA_CLK_n ),
-//	.q ( index )
-//);
-//stage_index stage_index_inst (
-//	.address ( index ),
-//	.clock ( iVGA_CLK ),
-//	.q ( bgr_data_raw_background )
-//);	
+stage_data	stage_data_inst (
+	.address ( ADDR/19'd2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( index )
+);
+stage_index stage_index_inst (
+	.address ( index ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_background )
+);	
 //img_data	img_data_inst (
 //	.address ( ADDR ),
 //	.clock ( VGA_CLK_n ),
@@ -122,12 +127,12 @@ bowser_index character1_index_inst (
 	.q ( bgr_data_raw_p1_normal )
 );	
 // Load P1 attack
-bowser_regattack_data	character1_attack_data_inst (
+bowser_a_data	character1_attack_data_inst (
 	.address ( indexP1 ),
 	.clock ( VGA_CLK_n ),
 	.q ( indexc1_a )
 );
-bowser_regattack_index character1_attack_index_inst (
+bowser_a_index character1_attack_index_inst (
 	.address ( indexc1_a ),
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_p1_a )
@@ -343,7 +348,7 @@ always@(posedge VGA_CLK_n) begin
 	end
 end
 
-assign bgr_data_raw_background = 24'b010101010101010101010101;
+//assign bgr_data_raw_background = 24'b010101010101010101010101;
 
 assign w1 = isInsideP1 & (bgr_data_raw_p1 !== 24'b0) ? bgr_data_raw_p1 : bgr_data_raw_background;
 
