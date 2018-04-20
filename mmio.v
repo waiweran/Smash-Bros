@@ -1,6 +1,7 @@
 module mmio(
 	clock, reset,
-	address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA, stageVGA, p1Controller, p2Controller
+	address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA, stageVGA, p1Controller, p2Controller,
+	reg24, reg25, reg26, reg27, reg28, reg29
 );
 	
 	input clock, reset;
@@ -13,6 +14,8 @@ module mmio(
 	output[2:0] gpioOutput;
 	output [63:0] p1VGA, p2VGA, stageVGA;
 	output [31:0] p1Controller, p2Controller;
+	
+	input[31:0] reg24, reg25, reg26, reg27, reg28, reg29;
 
 	// Player 1 Physics Coprocessor
 	reg [31:0] mass1, grav1, wind1, startPos1;
@@ -155,26 +158,33 @@ module mmio(
 
 	always @(negedge clock) begin
 
+		// Variable constant assigning from registers/processor
+		mass1 <= reg24;
+		player_size_p1 <= reg25;
+		knock1 <= reg26;
+		mass2 <= reg27;
+		player_size_p2 <= reg28;
+		knock2 <= reg29;
 		
-		// Testing, Remove Later - Now updated for P2
-
+		// Permanent constant assigning
+		
 		// Physics Constants
-		mass1 <= 32'h00000010;
-		grav1 <= 32'h00010000;
-		wind1 <= 32'h00000010;
+		//mass1 <= 32'h00000010; 
+		grav1 <= 32'h00010000; 
+		wind1 <= 32'h00000010; 
 		startPos1 <= 32'h016000fa;  //x = 352, y = 250
 		
-		mass2 <= 32'h00000010;
+		//mass2 <= 32'h00000010;
 		grav2 <= 32'h00010000;
 		wind2 <= 32'h00000010;
 		startPos2 <= 32'h01a900fa;   //x = 425 y = 250
 
 		// Collision Constants
-		player_size_p1 <= 32'h0085007d;
+		//player_size_p1 <= 32'h0085007d;
 		stage_pos <= 32'h01430014;
 		stage_size <= 32'h01fa00c8;
 		
-		player_size_p2 <= 32'h0085007d;
+		//player_size_p2 <= 32'h0085007d;
 		//No need for stage_pos and stage_size again
 
 		// VGA Constants
@@ -185,11 +195,11 @@ module mmio(
 
 		// Physics Inputs
 		ctrl1 <= gameControllerInputP1;
-		knock1 <= 32'h00000000;
+		//knock1 <= 32'h00000000;
 		attack1 <= 32'h00000000;
 		collis1 <= collision_out_p1;
 		ctrl2 <= gameControllerInputP2;
-		knock2 <= 32'h00000000;
+		//knock2 <= 32'h00000000;
 		attack2 <= 32'h00000000;
 		collis2 <= collision_out_p2;
 		

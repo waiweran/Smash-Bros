@@ -13,6 +13,7 @@ module multiplier_wrap(inA, inB, start, clock, reset, done, overflow, product);
 
 	wire [63:0] out;
 	multiplier mult(.inA(positive_inA), .inB(positive_inB), .out(out));
+	//assign out = 64'b0;
 
 	wire timing;
 	

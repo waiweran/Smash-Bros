@@ -109,7 +109,7 @@ module processor(
         .multdiv_start(multdiv_start), .multdiv_ready(multdiv_ready), .ctrl_ew(ctrl_ew), .ctrl_er(ctrl_er),
 		  .ctrl_load(ctrl_load), .ctrl_store(ctrl_store), .ctrl_mult(ctrl_mult), .ctrl_div(ctrl_div), .ctrl_link(ctrl_link),		  
 		  .by_aluinA(bypass_aluinA), .by_aluinB(bypass_aluinB), .by_regB(bypass_readRegB),
-		  .clock(clock), .reset(reset), .stall(stall), .multdiv_stall(multdiv_stall));
+		  .clock(clock), .reset(reset), .stall(stall), .multdiv_stall(div_stall));
 
 	 // Branch Predictor
     wire branch_actual, branch_prediction, branch_in, mispredict, ctrl_branch_e;

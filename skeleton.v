@@ -22,8 +22,39 @@ module skeleton(
 	gpio,
 	gpioOutput,
 	LEDs,
-	test_atk
+	test_atk,
+	instruction,
+	/*
+	test_reg1,
+	test_reg24,
+	test_reg25,
+	test_reg26,
+	test_reg27,
+	test_reg28,
+	test_reg29
+	*/
 );
+
+	//TEST OUTPUTS
+	output[31:0] instruction;
+	assign instruction = q_imem;
+	/*
+	output[31:0] test_reg1,
+	test_reg24,
+	test_reg25,
+	test_reg26,
+	test_reg27,
+	test_reg28,
+	test_reg29;
+	*/
+	
+	assign test_reg1 = reg1;
+	assign test_reg24 = reg24;
+	assign test_reg25 = reg25;
+	assign test_reg26 = reg26;
+	assign test_reg27 = reg27;
+	assign test_reg28 = reg28;
+	assign test_reg29 = reg29;	
 		
 	// VGA Outputs
 	output			VGA_CLK;   				//	VGA Clock
@@ -76,7 +107,8 @@ module skeleton(
 		  .p2VGA		  (p2VGA),
 		  .stageVGA   (stageVGA),
 		  .p1Controller(p1Controller),
-		  .p2Controller(p2Controller)
+		  .p2Controller(p2Controller),
+		  .reg24(reg24), .reg25(reg25), .reg26(reg26), .reg27(reg27), .reg28(reg28), .reg29(reg29)
     );
 
     /** REGFILE **/
@@ -84,6 +116,8 @@ module skeleton(
     wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     wire [31:0] data_writeReg;
     wire [31:0] data_readRegA, data_readRegB;
+	 wire[31:0] reg1, reg24, reg25, reg26, reg27, reg28, reg29;
+	 
     regfile my_regfile(
         ~clock,
         ctrl_writeEnable,
@@ -93,10 +127,11 @@ module skeleton(
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB
+        data_readRegB, reg1,
+		  reg24, reg25, reg26, reg27, reg28, reg29
     );
 
-    /** Processor **/ /*
+    /** Processor **/
     processor my_processor(
         // Control signals
         clock,                          // I: The master clock
