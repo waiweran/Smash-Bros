@@ -235,10 +235,10 @@ always@(posedge VGA_CLK_n) begin
 	else if(p1VGA[106]) begin
 		bgr_data_raw_p1 <= bgr_data_raw_p1_b;
 	end
-	else if(p1VGA[71:69] == 3'b000) begin
+	else if((p1VGA[71:69] == 3'b000) & p1VGA[113]) begin
 		bgr_data_raw_p1 <= bgr_data_raw_p1_down;
 	end	
-	else if((p1VGA[79:78] != 2'b10) & (p1VGA[79:78] != 2'b01)) begin
+	else if((p1VGA[79:78] != 2'b10) & (p1VGA[79:78] != 2'b01) & p1VGA[113]) begin
 		bgr_data_raw_p1 <= bgr_data_raw_p1_walk;
 	end
 	else begin

@@ -152,12 +152,12 @@ module mmio(
 	/******** VGA Coprocessors ********/
 	
 	// VGA Coprocessor Player 1
-	reg[31:0] posP1InVGA, whP1InVGA, controlP1VGA, attackP1VGA;
-	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .controller(controlP1VGA), .attack(attackP1VGA), .vga_output(p1VGA));
+	reg[31:0] posP1InVGA, whP1InVGA, controlP1VGA, attackP1VGA, collision_p1vga_in;
+	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .controller(controlP1VGA), .attack(attackP1VGA), .collision(collision_p1vga_in), .vga_output(p1VGA));
 
 	// VGA Coprocessor Player 2
-	reg[31:0] posP2InVGA, whP2InVGA, controlP2VGA, attackP2VGA;
-	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(whP2InVGA), .controller(controlP2VGA), .attack(attackP2VGA), .vga_output(p2VGA));
+	reg[31:0] posP2InVGA, whP2InVGA, controlP2VGA, attackP2VGA, collision_p2vga_in;
+	vga_coprocessor vgaP2(.posIn(posP2InVGA), .whIn(whP2InVGA), .controller(controlP2VGA), .attack(attackP2VGA), .collision(collision_p2vga_in), .vga_output(p2VGA));
 
 	// DMEM
    wire [11:0] address_dmem;
@@ -236,7 +236,8 @@ module mmio(
 		posP2InVGA <= pos2;
 		controlP2VGA <= gameControllerInputP2;
 		attackP2VGA <= attack_out2;
-		
+		collision_p1vga_in <= collision_out_p1;
+		collision_p2vga_in <= collision_out_p2;
 	end
 	
 
