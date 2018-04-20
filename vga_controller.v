@@ -7,11 +7,8 @@ module vga_controller(iRST_n,
                       g_data,
                       r_data,
 							 p1VGA,
-							 p2VGA,
-							 stageVGA,
-							 test_atk,
-							 p1Controller,
-							 p2Controller);
+							 p2VGA
+);
 
 	
 input iRST_n;
@@ -23,9 +20,7 @@ output [7:0] b_data;
 output [7:0] g_data;  
 output [7:0] r_data;
 
-input [63:0] p1VGA, p2VGA, stageVGA;
-input test_atk;
-input [31:0] p1Controller, p2Controller;
+input [127:0] p1VGA, p2VGA;
                         
 ///////// ////                     
 reg [18:0] ADDR;
@@ -101,8 +96,8 @@ assign myY = ADDR / 19'd640;
 // Test if inside any sprite
 wire isInsideP1, isInsideP2;
 wire [18:0] indexP1, indexP2;
-isInsideSprite insideP1(p1VGA, myX, myY, isInsideP1, indexP1, p1Controller);
-isInsideSprite insideP2(p2VGA, myX, myY, isInsideP2, indexP2, p2Controller);
+isInsideSprite insideP1(p1VGA, myX, myY, isInsideP1, indexP1);
+isInsideSprite insideP2(p2VGA, myX, myY, isInsideP2, indexP2);
 
 wire[23:0] bgr_data_raw_background;
 wire[23:0] bgr_data_raw_p1;
@@ -133,16 +128,16 @@ bowser_regattack_index character1_attack_index_inst (
 	.q ( bgr_data_raw_p1_attack )
 );	
 // Load P2 image
-//character2_data	character2_data_inst (
-//	.address ( ADDR ),
-//	.clock ( VGA_CLK_n ),
-//	.q ( indexc2 )
-//);
-//character2_index	character2_index_inst (
-//	.address ( indexc2 ),
-//	.clock ( iVGA_CLK ),
-//	.q ( bgr_data_raw_p2)
-//);	
+kirby_data	character2_data_inst (
+	.address ( indexP2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexc2 )
+);
+kirby_index	character2_index_inst (
+	.address ( indexc2 ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_p2)
+);	
 
 
 //Choose the color of the frontmost object (can change layering via order of muxes here)
@@ -150,8 +145,10 @@ wire[23:0] w1;
 //assign w1 = isInsideP2 ? bgr_data_raw_p2 : bgr_data_raw_background;
 //assign bgr_data_raw = isInsideP1 ? bgr_data_raw_p1 : w1;
 	
-assign bgr_data_raw_p1 = ~test_atk ? bgr_data_raw_p1_attack : bgr_data_raw_p1_normal;
-assign bgr_data_raw = isInsideP1 & (bgr_data_raw_p1 !== 24'b0) ? bgr_data_raw_p1 : bgr_data_raw_background;
+assign bgr_data_raw_p1 = ~p1VGA[96] ? bgr_data_raw_p1_attack : bgr_data_raw_p1_normal;
+assign w1 = isInsideP1 & (bgr_data_raw_p1 !== 24'b0) ? bgr_data_raw_p1 : bgr_data_raw_background;
+
+assign bgr_data_raw = isInsideP2 & (bgr_data_raw_p2 !== 24'b0) ? bgr_data_raw_p2 : w1;
 	
 /************** OUR CODE ENDS HERE **************/
 

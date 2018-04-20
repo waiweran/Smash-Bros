@@ -1,6 +1,6 @@
 //For a single player
 //See google doc for documentation on bits of in and out
-module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfoverflowgpio, ledMotorOut, fastClock, slowClock);
+module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfoverflowgpio, ledMotorOut, fastClock, slowClock, startDir, reset);
 	
 	input[15:0] halfgpio;
 	input[1:0] halfoverflowgpio;
@@ -9,6 +9,7 @@ module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfover
 	output ledMotorOut;
 	input fastClock;
 	output slowClock;
+	input startDir, reset;
 	
 	assign mmioBoardInput[3:0] = 4'b0;
 	assign mmioBoardInput[7:4] = halfgpio[7:4]; //x
@@ -98,10 +99,8 @@ module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfover
 	wire tiltL, tiltR;
 	assign tiltL = ~mmioBoardInput[15] & ~mmioBoardInput[14];
 	assign tiltR = mmioBoardInput[15] & mmioBoardInput[14];
-	initial begin
-		lastDirection <= 1'b1;
-	end
 	always@(posedge slowClock) begin
+		if(reset) lastDirection <= startDir;
 		if(tiltL) lastDirection <= 1'b0;
 		if(tiltR) lastDirection <= 1'b1;
 	end

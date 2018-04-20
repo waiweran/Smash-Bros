@@ -22,7 +22,6 @@ module skeleton(
 	gpio,
 	gpioOutput,
 	LEDs,
-	test_atk
 );
 		
 	// VGA Outputs
@@ -36,7 +35,7 @@ module skeleton(
 	output	[7:0]	VGA_B;   				//	VGA Blue[9:0]
 	
 	// Clock and Reset Inputs
-	input clock, reset_btn, test_atk;
+	input clock, reset_btn;
 	wire reset;
 	assign reset = ~reset_btn;
 	
@@ -61,8 +60,7 @@ module skeleton(
     wire [31:0] data;
     wire wren;
     wire [31:0] q_dmem;
-	 wire [63:0] p1VGA, p2VGA, stageVGA;
-	 wire [31:0] p1Controller, p2Controller;
+	 wire [127:0] p1VGA, p2VGA;
     mmio my_mem(
 		  .clock		  (clock),
 		  .reset		  (reset),
@@ -73,10 +71,7 @@ module skeleton(
 		  .gpio		  (gpio),				// For controller IO
 		  .gpioOutput (gpioOutput),
 		  .p1VGA		  (p1VGA),
-		  .p2VGA		  (p2VGA),
-		  .stageVGA   (stageVGA),
-		  .p1Controller(p1Controller),
-		  .p2Controller(p2Controller)
+		  .p2VGA		  (p2VGA)
     );
 
     /** REGFILE **/
@@ -135,18 +130,14 @@ module skeleton(
 								 .g_data(VGA_G),
 								 .r_data(VGA_R),
 								 .p1VGA(p1VGA),
-								 .p2VGA(p2VGA),
-								 .stageVGA(stageVGA),
-								 .test_atk(test_atk),
-								 .p1Controller(p1Controller),
-								 .p2Controller(p2Controller)
+								 .p2VGA(p2VGA)
 	);
 	
 	/** LEDs **/
 	//assign LEDs[12:0] = address_dmem;
-	assign LEDs[0] = p1Controller[26];
-	assign LEDs[4:3] = p1Controller[15:14];
-	assign LEDs[2:1] = 2'b0;
-	assign LEDs[17:5] = 13'b0;
+	assign LEDs[0] = p1VGA[88];
+	assign LEDs[4:1] = p1VGA[79:76];
+	assign LEDs[8:5] = p1VGA[71:68];
+	assign LEDs[17:9] = 9'b0;
 
 endmodule
