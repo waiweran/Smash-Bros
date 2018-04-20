@@ -22,8 +22,17 @@ module skeleton(
 	gpio,
 	gpioOutput,
 	LEDs,
-	test_atk
+	test_atk,
+	TEST_instruction,
+	TEST_regfile1,
+	TEST_regfile2,
+	TEST_regfile3
 );
+		
+	//REGFILE TESTS
+	output[31:0] TEST_instruction;
+	assign TEST_instruction = q_imem;
+	output[31:0] TEST_regfile1, TEST_regfile2, TEST_regfile3;
 		
 	// VGA Outputs
 	output			VGA_CLK;   				//	VGA Clock
@@ -93,10 +102,11 @@ module skeleton(
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB
+        data_readRegB,
+		  TEST_regfile1, TEST_regfile2, TEST_regfile3
     );
 
-    /** Processor **/ /*
+    /** Processor **/
     processor my_processor(
         // Control signals
         clock,                          // I: The master clock

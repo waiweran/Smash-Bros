@@ -5,7 +5,8 @@ module branch_predictor(pc_read, pc_write, branch_result, branch_address, reset,
 	input branch_result, reset, write, clock;
 	output branch_prediction, mispredict;
 	output[31:0] branch_target;
-
+	
+	/*
 	// Global State
 	wire [2:0] gs;
 	wire global_in;
@@ -44,5 +45,9 @@ module branch_predictor(pc_read, pc_write, branch_result, branch_address, reset,
 	xnor pred_corr(pred_correct, predict_overwrite, branch_result);
 	or mispred_or(mispred_inter, ~same1, ~same2, ~same3, ~pred_correct);
 	and mispred_and(mispredict, mispred_inter, write);
-
+	*/
+	assign mispredict = write;
+	assign branch_prediction = 1'b0;
+	assign branch_target = 32'b0;
+	
 endmodule

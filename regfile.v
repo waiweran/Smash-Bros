@@ -3,9 +3,15 @@ module regfile (
     ctrl_writeEnable,
     ctrl_reset, ctrl_writeReg,
     ctrl_readRegA, ctrl_readRegB, data_writeReg,
-    data_readRegA, data_readRegB
+    data_readRegA, data_readRegB,
+	 TEST_regfile1, TEST_regfile2, TEST_regfile3
 );
-
+	//TEST
+	output[31:0] TEST_regfile1, TEST_regfile2, TEST_regfile3;
+	assign TEST_regfile1 = read1;
+	assign TEST_regfile2 = read2;
+	assign TEST_regfile3 = read3;
+	
    input clock, ctrl_writeEnable, ctrl_reset;
    input [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
    input [31:0] data_writeReg;

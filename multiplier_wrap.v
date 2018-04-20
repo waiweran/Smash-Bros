@@ -12,8 +12,9 @@ module multiplier_wrap(inA, inB, start, clock, reset, done, overflow, product);
 	sign_inverter outsign(.invert(final_sign), .in(positive_product), .out(product));
 
 	wire [63:0] out;
-	multiplier mult(.inA(positive_inA), .inB(positive_inB), .out(out));
-
+	//multiplier mult(.inA(positive_inA), .inB(positive_inB), .out(out));
+	assign out = 64'b0;
+	
 	wire timing;
 	
 	assign positive_product[31:0] = out[31:0];
