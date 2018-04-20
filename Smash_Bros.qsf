@@ -147,8 +147,10 @@ set_location_assignment PIN_F21 -to LEDs[3]
 set_location_assignment PIN_E19 -to LEDs[2]
 set_location_assignment PIN_F19 -to LEDs[1]
 set_location_assignment PIN_G19 -to LEDs[0]
-set_global_assignment -name VERILOG_FILE character2_data.v
-set_global_assignment -name VERILOG_FILE character1_data.v
+set_location_assignment PIN_J10 -to gpioOutput[0]
+set_location_assignment PIN_J14 -to gpioOutput[1]
+set_location_assignment PIN_H13 -to gpioOutput[2]
+set_location_assignment PIN_M21 -to test_atk
 set_global_assignment -name VERILOG_FILE tristate_32.v
 set_global_assignment -name VERILOG_FILE mux_16.v
 set_global_assignment -name VERILOG_FILE mmio.v
@@ -231,12 +233,8 @@ set_global_assignment -name MIF_FILE kirby1_data.mif
 set_global_assignment -name MIF_FILE kirby1_index.mif
 set_global_assignment -name QIP_FILE bowser_data.qip
 set_global_assignment -name QIP_FILE bowser_index.qip
-set_location_assignment PIN_J10 -to gpioOutput[0]
-set_location_assignment PIN_J14 -to gpioOutput[1]
-set_location_assignment PIN_H13 -to gpioOutput[2]
 set_global_assignment -name QIP_FILE bowser_regattack_data.qip
 set_global_assignment -name QIP_FILE bowser_regattack_index.qip
-set_location_assignment PIN_M21 -to test_atk
 set_global_assignment -name MIF_FILE bowser_attack_data.mif
 set_global_assignment -name MIF_FILE bowser_attack_index.mif
 set_global_assignment -name MIF_FILE bowser_data.mif
