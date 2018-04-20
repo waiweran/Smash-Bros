@@ -132,6 +132,7 @@ bowser_regattack_index character1_attack_index_inst (
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_p1_a )
 );	
+/*
 //Load P1 down
 bowser_down_data	character1_down_data_inst (
 	.address ( indexP1 ),
@@ -198,7 +199,7 @@ bowser_walk_index character1_walk_index_inst (
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_p1_walk )
 );	
-
+*/
 
 // Load P2 image
 kirby_data	character2_data_inst (
@@ -212,6 +213,12 @@ kirby_index	character2_index_inst (
 	.q ( bgr_data_raw_p2_normal)
 );	
 
+assign bgr_data_raw_p1_down = 24'b1;
+assign bgr_data_raw_p1_downb = 24'b1;
+assign bgr_data_raw_p1_sideb = 24'b1;
+assign bgr_data_raw_p1_upb = 24'b1;
+assign bgr_data_raw_p1_b = 24'b1;
+assign bgr_data_raw_p1_walk = 24'b1;
 
 //Choose the color of the frontmost object (can change layering via order of muxes here)
 wire[23:0] w1;

@@ -1,5 +1,5 @@
 module mmio(
-	clock, reset,address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA,
+	clock, reset, address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA,
 	reg24, reg25, reg26, reg27, reg28, reg29);
 	
 	input clock, reset;
@@ -221,16 +221,16 @@ module mmio(
 		// Physics Constants
 		gravity <= 32'h00010000;
 		wind <= 32'h00000010;
-		mass1 <= 32'h00000010;
+		//mass1 <= 32'h00000010;
 		startPos1 <= 32'h016000fa;
-		mass2 <= 32'h00000010;
+		//mass2 <= 32'h00000010;
 		startPos2 <= 32'h02a900fa;
 
 		// Collision Constants
 		stage_pos <= 32'h01430014;
 		stage_size <= 32'h01fa00c8;
-		player_size_p1 <= 32'h0085007d;
-		player_size_p2 <= 32'h00590055;
+		//player_size_p1 <= 32'h0085007d;
+		//player_size_p2 <= 32'h00590055;
 		
 		// Attack Constants
 		size1_attack <= player_size_p1;

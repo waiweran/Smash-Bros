@@ -24,14 +24,9 @@ module skeleton(
 	gpio,
 	gpioOutput,
 	LEDs,
-	test_atk,
 	instruction,
 	test_reg1,
 	test_reg24,
-	test_reg25
-	test_reg26,
-	test_reg27,
-	test_reg28,
 	test_reg29
 );
 
@@ -41,13 +36,13 @@ module skeleton(
 	
 	output[31:0] test_reg1,
 	test_reg24,
-	test_reg25;
 	/*
+	test_reg25,
 	test_reg26,
 	test_reg27,
 	test_reg28,
-	test_reg29;
 	*/
+	test_reg29;
 	
 	assign test_reg1 = reg1;
 	assign test_reg24 = reg24;
@@ -105,9 +100,6 @@ module skeleton(
 		  .gpioOutput (gpioOutput),
 		  .p1VGA		  (p1VGA),
 		  .p2VGA		  (p2VGA),
-		  .stageVGA   (stageVGA),
-		  .p1Controller(p1Controller),
-		  .p2Controller(p2Controller),
 		  .reg24(reg24), .reg25(reg25), .reg26(reg26), .reg27(reg27), .reg28(reg28), .reg29(reg29));
 
     /** REGFILE **/
