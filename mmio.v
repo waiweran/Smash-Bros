@@ -147,7 +147,13 @@ module mmio(
 			.movement(move_out2),
 			.knockback(knock_out2));
 					
+	// Damage Coproccesor Player 1
+	wire [31:0] damage_out1;
+	damage_coprocessor damageP1(.clock(clock), .reset(reset), .attack(attack_out2), .damage(damage_out1));
 
+	// Damage Coproccesor Player 2
+	wire [31:0] damage_out2;
+	damage_coprocessor damageP1(.clock(clock), .reset(reset), .attack(attack_out1), .damage(damage_out2));
 					
 	/******** VGA Coprocessors ********/
 	
