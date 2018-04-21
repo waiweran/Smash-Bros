@@ -9,6 +9,8 @@
  * inspect which signals the processor tries to assert when.
  */
 
+ 
+ 
 module skeleton(
 	clock, reset_btn, 
 	VGA_CLK,   														//	VGA Clock
@@ -21,7 +23,7 @@ module skeleton(
 	VGA_B,															//	VGA Blue[9:0]
 	gpio,
 	gpioOutput,
-	LEDs,
+	LEDs//, reg28, reg29
 );
 		
 	// VGA Outputs
@@ -33,6 +35,7 @@ module skeleton(
 	output	[7:0]	VGA_R;   				//	VGA Red[9:0]
 	output	[7:0]	VGA_G;	 				//	VGA Green[9:0]
 	output	[7:0]	VGA_B;   				//	VGA Blue[9:0]
+//	output [31:0]  reg28, reg29;
 	
 	// Clock and Reset Inputs
 	input clock, reset_btn;
@@ -71,14 +74,16 @@ module skeleton(
 		  .gpio		  (gpio),				// For controller IO
 		  .gpioOutput (gpioOutput),
 		  .p1VGA		  (p1VGA),
-		  .p2VGA		  (p2VGA)
-    );
+		  .p2VGA		  (p2VGA),
+		  .reg24(reg24), .reg25(reg25), .reg26(reg26), .reg27(reg27), .reg28(reg28), .reg29(reg29));
 
     /** REGFILE **/
     wire ctrl_writeEnable;
     wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     wire [31:0] data_writeReg;
     wire [31:0] data_readRegA, data_readRegB;
+	 wire[31:0] reg1, reg2, reg3, reg24, reg25, reg26, reg27, reg28, reg29;
+	 
     regfile my_regfile(
         ~clock,
         ctrl_writeEnable,
@@ -88,10 +93,10 @@ module skeleton(
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB
+        data_readRegB, reg24, reg25, reg26, reg27, reg28, reg29
     );
 
-    /** Processor **/ /*
+    /** Processor **/
     processor my_processor(
         // Control signals
         clock,                          // I: The master clock
@@ -135,7 +140,7 @@ module skeleton(
 	
 	/** LEDs **/
 	//assign LEDs[12:0] = address_dmem;
-	assign LEDs[10:0] = p1VGA[90:80];
-	assign LEDs[17:11] = 7'b0;
+	assign LEDs[3:0] = gpio[7:4];
+	assign LEDs[17:4] = 14'b0;
 
 endmodule

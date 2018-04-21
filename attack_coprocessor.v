@@ -65,12 +65,11 @@ module attack_coprocessor(
 	collision rightCol(rhbpos, hbsize, char2pos, char2size, hitOutR);
 	collision upCol(uhbpos, hbsize, char2pos, char2size, hitOutU);
 	collision downCol(dhbpos, hbsize, char2pos, char2size, hitOutD);
-	wire leftHit, rightHit, upHit, downHit, anyHit;
+	wire leftHit, rightHit, upHit, downHit;
 	assign leftHit = hitOutL[0] | hitOutL[1] | hitOutL[2] | hitOutL[3];
 	assign rightHit = hitOutR[0] | hitOutR[1] | hitOutR[2] | hitOutR[3];
 	assign upHit = hitOutU[0] | hitOutU[1] | hitOutU[2] | hitOutU[3];
 	assign downHit = hitOutD[0] | hitOutD[1] | hitOutD[2] | hitOutD[3];
-	assign anyHit = leftHit | rightHit | upHit | downHit;
 
 	// Attack Duration
 	reg [24:0] longTimer;
@@ -189,6 +188,9 @@ module attack_coprocessor(
 
 
 	// Attack output
+	assign attack[0] = smashU_out & upHit | smashD_out & downHit | smashL_out & leftHit | smashR_out & rightHit | jabNL_out & leftHit
+						 | jabNR_out & rightHit | specialU_out & upHit | specialD_out & downHit | specialL_out & leftHit
+						 | specialR_out & rightHit | specialNL_out & leftHit | specialNR_out & rightHit;
 	assign attack[1] = smashU_out;
 	assign attack[2] = smashD_out;
 	assign attack[3] = smashL_out;
@@ -202,10 +204,7 @@ module attack_coprocessor(
 	assign attack[11] = smashU_out | smashD_out | smashL_out | smashR_out | jabNL_out
 						 | jabNR_out | specialU_out | specialD_out | specialL_out 
 						 | specialR_out | specialNL_out | specialNR_out;
-	assign attack[0] = attack[11] & anyHit;
-	
-	assign attack[31:12] = 20'b0;
-	
+		
 	// Giving Knockback
 	reg knockback;
 	always@(posedge clock) begin

@@ -42,7 +42,7 @@ module stage_data (
 	clock,
 	q);
 
-	input	[16:0]  address;
+	input	[17:0]  address;
 	input	  clock;
 	output	[5:0]  q;
 `ifndef ALTERA_RESERVED_QIS
@@ -88,11 +88,11 @@ module stage_data (
 		altsyncram_component.intended_device_family = "Cyclone V",
 		altsyncram_component.lpm_hint = "ENABLE_RUNTIME_MOD=NO",
 		altsyncram_component.lpm_type = "altsyncram",
-		altsyncram_component.numwords_a = 131072,
+		altsyncram_component.numwords_a = 153600,
 		altsyncram_component.operation_mode = "ROM",
 		altsyncram_component.outdata_aclr_a = "NONE",
 		altsyncram_component.outdata_reg_a = "UNREGISTERED",
-		altsyncram_component.widthad_a = 17,
+		altsyncram_component.widthad_a = 18,
 		altsyncram_component.width_a = 6,
 		altsyncram_component.width_byteena_a = 1;
 
