@@ -21,21 +21,7 @@ module skeleton(
 	VGA_B,															//	VGA Blue[9:0]
 	gpio,
 	gpioOutput,
-	LEDs,
-	test_atk,
-	instruction,
-	regtest1,
-	regtest2,
-	regtest4,
-	regtest5,
-	regtest6,
-	regtest7,
-	TEST_startPos1,
-	TEST_collis1,
-	TEST_player_pos_p1,
-	TEST_gameControllerOutputP1,
-	TEST_posP1InVGA
-);
+	LEDs);
 	//REG TEST OUTPUTS
 	//output[31:0] regtest0;
 	output[31:0] regtest1;
@@ -67,7 +53,7 @@ module skeleton(
 	output	[7:0]	VGA_B;   				//	VGA Blue[9:0]
 	
 	// Clock and Reset Inputs
-	input clock, reset_btn, test_atk;
+	input clock, reset_btn;
 	wire reset;
 	assign reset = ~reset_btn;
 	
@@ -93,8 +79,7 @@ module skeleton(
     wire [31:0] data;
     wire wren;
     wire [31:0] q_dmem;
-	 wire [63:0] p1VGA, p2VGA, stageVGA;
-	 wire [31:0] p1Controller, p2Controller;
+	 wire [127:0] p1VGA, p2VGA;
     mmio my_mem(
 		  .clock		  (clock),
 		  .processorClock (processorClock),
@@ -106,15 +91,7 @@ module skeleton(
 		  .gpio		  (gpio),				// For controller IO
 		  .gpioOutput (gpioOutput),
 		  .p1VGA		  (p1VGA),
-		  .p2VGA		  (p2VGA),
-		  .stageVGA   (stageVGA),
-		  .p1Controller(p1Controller),
-		  .p2Controller(p2Controller),
-		  	.TEST_startPos1(TEST_startPos1),
-	.TEST_collis1(TEST_collis1),
-	.TEST_player_pos_p1(TEST_player_pos_p1),
-	.TEST_gameControllerOutputP1(TEST_gameControllerOutputP1),
-	.TEST_posP1InVGA(TEST_posP1InVGA)
+		  .p2VGA		  (p2VGA)
     );
 
     /** REGFILE **/
@@ -194,16 +171,10 @@ module skeleton(
 								 .g_data(VGA_G),
 								 .r_data(VGA_R),
 								 .p1VGA(p1VGA),
-								 .p2VGA(p2VGA),
-								 .stageVGA(stageVGA),
-								 .test_atk(test_atk),
-								 .p1Controller(p1Controller),
-								 .p2Controller(p2Controller)
+								 .p2VGA(p2VGA)
 	);
 	
 	/** LEDs **/
-	//assign LEDs[12:0] = address_dmem;
-	assign LEDs[15:0] = p1VGA[63:48];
-	assign LEDs[17:16] = 2'b0;
-	
+	assign LEDs[10:0] = p1VGA[90:80];
+	assign LEDs[17:11] = 7'b0;
 endmodule

@@ -12,6 +12,8 @@ module physics_coprocessor(
 	wall, 					// Hitting walls
 
 	freeze_in,				// Holds player still
+	
+	ctrl_num,				// Indicates which joystick is used
 
 	position 				// Output position [x, y]
 );
@@ -24,6 +26,7 @@ module physics_coprocessor(
 	input [31:0] wall;
 	input attack_in;
 	input freeze_in;
+	input ctrl_num;
 
 	// Output Position
 	output [31:0] position;
@@ -34,9 +37,9 @@ module physics_coprocessor(
 	assign joystick_x[8] = 1'b0;
 	assign joystick_y[7:0] = controller_in[7:0];
 	assign joystick_y[8] = 1'b0;
-	wire jump;
+	wire jump_pushed;
 	wire platform_Thru;
-	assign jump = joystick_y[7] & joystick_y[6] & joystick_y[5] & joystick_y[4]; // Joystick Y 240 to 255 (up)
+	assign jump_pushed = controller_in[24] | (joystick_y[7] & joystick_y[6] & joystick_y[5] & joystick_y[4]); // Joystick Y 240 to 255 (up)
 	assign platform_Thru = ~joystick_y[7] & ~joystick_y[6] & ~joystick_y[5] & ~joystick_y[4]; // Joystick Y 0 to 15 (down)
 	
 	// Input from Collisions
@@ -57,12 +60,12 @@ module physics_coprocessor(
 	assign gravity[47:32] = 16'b0;
 	assign wind[31:0] = wind_in;
 	assign wind[47:32] = 16'b0;
-	assign sjoy_x = joystick_x - 9'sb001110000; // Map joystick values to -128 to 127
+	assign sjoy_x = joystick_x - (ctrl_num ? 9'sb001110000 : 9'sb010000000); // Map joystick values to -128 to 127
 	assign sjoy_y = joystick_y - 9'sb001110000; // Map joystick values to -128 to 127
 	assign move_x[18:10] = sjoy_x;
-	assign move_x[9:0] = 8'b0;
+	assign move_x[9:0] = 10'b0;
 	assign move_y[18:10] = sjoy_y;
-	assign move_y[9:0] = 8'b0;
+	assign move_y[9:0] = 10'b0;
 	assign knockback_x[15:0] = knockback_in[31:16]; // Split knockback into x, y
 	assign knockback_y[15:0] = knockback_in[15:0];
 	genvar i;
@@ -82,7 +85,31 @@ module physics_coprocessor(
 
     // Stored Values
     reg signed [47:0] vel_x, vel_y;
-    reg signed [47:0] accel_x, accel_y;
+    reg signed [47:0] vel_x_t, vel_y_t;
+	 
+	 // Slowed clock for acceleration
+	 reg [15:0] slowClock;
+	 wire slowClockBit;
+	 assign slowClockBit = slowClock[11];
+	 always@(negedge clock) begin
+		if(reset) slowClock <= 16'b0;
+		else slowClock <= slowClock + 16'd1;
+	 end
+	 
+	 // Jump Control
+	 reg jump, jump_prev, jump_count;
+	 always@(posedge slowClock[15]) begin
+	 		if(jump_prev) jump <= 1'b0;
+			else if(jump_pushed & ~jump_count) begin
+				jump <= 1'b1;
+				jump_prev <= 1'b1;
+				jump_count <= jump_count + 1'b1;
+			end
+			if(~jump_pushed) begin
+				jump_prev <= 1'b0;
+			end
+			if(wall_Down | platform_Down) jump_count <= 1'b0;
+	 end
 
     // Vibration Values
     reg [47:0] vibr_pos_y;
@@ -101,10 +128,8 @@ module physics_coprocessor(
 	 
 		// Reset
 		if(reset) begin
-		    accel_x <= 48'b0;
-			accel_y <= 48'b0;
-			vel_x <= 48'b0;
-			vel_y <= 48'b0;
+		   vel_x_t <= 48'b0;
+			vel_y_t <= 48'b0;
 			pos_x [47:32] <= start_Position[31:16];
 			pos_x [31:0] <= 32'b0;
 			pos_y [47:32] <= start_Position[15:0];
@@ -113,46 +138,44 @@ module physics_coprocessor(
 
     	// Acceleration, velocity update for in air
     	else if(~freeze_in & ~attack_in & ~wall_Down & ~platform_Down) begin
-    		accel_x <= move_x / mass;// - vel_x * vel_x * vel_x / wind;
-    		accel_y <= move_y / mass - gravity;// - vel_y * vel_y * vel_y / wind;
-    		vel_x <= move_x / mass; // TODO Fix for Collisions L, R
-    		vel_y <= jump ? (move_y / mass) : (move_y / mass - gravity); // TODO Fix for collisions U, jumps
+    		vel_x_t <= move_x / mass;// - vel_x * vel_x * vel_x / wind;
+    		vel_y_t <= move_y / mass - gravity;// - vel_y * vel_y * vel_y / wind;
     		pos_x <= pos_x + vel_x;
     		pos_y <= pos_y + vel_y;
     	end
 
     	// Acceleration, velocity update for on ground
     	else if(~freeze_in & ~attack_in) begin
-    		accel_x <= 48'b0;
-    		accel_y <= 48'b0;
-    		vel_x <= move_x / mass; // TODO Fix for Collisions L, R
-    		vel_y <= jump ? (move_y / mass) : 48'b0; // TODO Fix for platform thru, jumps
-    		pos_x <= pos_x + vel_x;
-            pos_y <= pos_y + vel_y;
-    	end
-
-    	// Start of attack
-    	if(~reset & attack_in & ~attack_prev) begin
-    		attack_prev <= attack_in;
-	    	vibr_pos_y <= pos_y + 48'h000100000000; // Start up 1 pixel to be off the ground
-	    	pos_y <= pos_y + 48'h000100000000;
-	    end
-
-    	// During Attack
-    	if(~reset & attack_prev) begin
-    		accel_x <= 48'b0;
-	    	accel_y <= 48'b0;
-	    	attack_prev <= attack_in;
-    		// Knockback velocity
-    		vel_x <= knockback_x / mass;
-	    	vel_y <= knockback_y / mass;
-     		// Attack vibration
-    		if(vibr_dir)
-    			pos_y <= pos_y + 48'd2;
-    		else
-    			pos_y <= pos_y - 48'd2; 
+    		vel_x_t <= move_x / mass; // TODO Fix for Collisions L, R
+    		vel_y_t <= jump ? (48'h000000040000 / mass) : 48'b0; // TODO Fix for platform thru, jumps
+    		pos_x <= pos_x + vel_x_t;
+            pos_y <= pos_y + vel_y_t;
     	end
 
     end
+	 	 
+	 always@(posedge slowClockBit) begin
+				
+		// Reset
+		if(reset) begin
+			vel_x <= 48'b0;
+			vel_y <= 48'b0;
+		end
+
+    	// Acceleration, velocity update for in air
+    	else if(~freeze_in & ~attack_in & ~wall_Down & ~platform_Down) begin
+    		if(vel_x < vel_x_t) vel_x <= vel_x + 48'd1;
+   		else vel_x <= vel_x - 48'd1;
+    		if(vel_y < vel_y_t) vel_y <= jump ? (48'h000000040000 / mass) : (vel_y + 48'd1);
+    		else vel_y <= jump ? (48'h000000040000 / mass) : (vel_y - 48'd1);
+    	end
+		
+		// Acceleration, velocity update for on grounde
+    	else if(~freeze_in & ~attack_in) begin
+    		vel_x <= vel_x_t;
+			vel_y <= vel_y_t;
+    	end
+
+	 end
 
 endmodule
