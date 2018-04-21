@@ -26,15 +26,22 @@ module skeleton(
 	LEDs,
 	instruction,
 	test_reg1,
+	test_reg2,
+	test_reg3,
 	test_reg24,
-	test_reg29
+	test_reg29,
+	TEST_ctrl_writeReg
 );
 
 	//TEST OUTPUTS
+	output[31:0] TEST_ctrl_writeReg;
 	output[31:0] instruction;
 	assign instruction = q_imem;
+	assign TEST_ctrl_writeReg = ctrl_writeReg;
 	
 	output[31:0] test_reg1,
+	test_reg2,
+	test_reg3,
 	test_reg24,
 	/*
 	test_reg25,
@@ -45,6 +52,8 @@ module skeleton(
 	test_reg29;
 	
 	assign test_reg1 = reg1;
+	assign test_reg2 = reg2;
+	assign test_reg3 = reg3;
 	assign test_reg24 = reg24;
 	assign test_reg25 = reg25;
 	assign test_reg26 = reg26;
@@ -107,7 +116,7 @@ module skeleton(
     wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     wire [31:0] data_writeReg;
     wire [31:0] data_readRegA, data_readRegB;
-	 wire[31:0] reg1, reg24, reg25, reg26, reg27, reg28, reg29;
+	 wire[31:0] reg1, reg2, reg3, reg24, reg25, reg26, reg27, reg28, reg29;
 	 
     regfile my_regfile(
         ~clock,
@@ -118,7 +127,7 @@ module skeleton(
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB, reg1, reg24, reg25, reg26, reg27, reg28, reg29
+        data_readRegB, reg1, reg2, reg3//, reg24, reg25, reg26, reg27, reg28, reg29
     );
 
     /** Processor **/
