@@ -52,7 +52,7 @@ module physics_coprocessor(
 
 	// Input Physics Parameters
 	wire signed [47:0] mass, gravity, wind;
-    wire signed [9:0] sjoy_x, sjoy_y;
+   wire signed [9:0] sjoy_x, sjoy_y;
 	wire signed [47:0] move_x, move_y, knockback_x, knockback_y;
 	assign mass[31:0] = mass_in;
 	assign mass[47:32] = 16'b0;
@@ -111,12 +111,7 @@ module physics_coprocessor(
 			if(wall_Down | platform_Down) jump_count <= 1'b0;
 	 end
 
-    // Vibration Values
-    reg [47:0] vibr_pos_y;
-    wire vibr_dir;
-    assign vibr_dir = (pos_y < vibr_pos_y + 48'd10000000)? 1'b1 : 1'b0;
-
-    // Attack start, end value
+    // Attack start, end
     reg attack_prev;
 
     // Separate input, output components
@@ -135,9 +130,22 @@ module physics_coprocessor(
 			pos_y [47:32] <= start_Position[15:0];
 			pos_y [31:0] <= 32'b0;
 		end
+		
+		// Knockback application when attacked
+		else if(attack_in & ~attack_prev) begin
+			attack_prev <= 1'b1;
+			pos_y <= pos_y + 48'h000800000000;
+		end
+		else if(attack_in & attack_prev) begin
+			vel_x_t <= knockback_x;
+			vel_y_t <= knockback_y;
+		end
+		else if(attack_prev) begin
+			attack_prev <= 1'b0;
+		end			
 
     	// Acceleration, velocity update for in air
-    	else if(~freeze_in & ~attack_in & ~wall_Down & ~platform_Down) begin
+    	else if(~freeze_in & ~wall_Down & ~platform_Down) begin
     		vel_x_t <= move_x / mass;// - vel_x * vel_x * vel_x / wind;
     		vel_y_t <= move_y / mass - gravity;// - vel_y * vel_y * vel_y / wind;
     		pos_x <= pos_x + vel_x;
@@ -145,11 +153,11 @@ module physics_coprocessor(
     	end
 
     	// Acceleration, velocity update for on ground
-    	else if(~freeze_in & ~attack_in) begin
-    		vel_x_t <= move_x / mass; // TODO Fix for Collisions L, R
+    	else if(~freeze_in) begin
+    		vel_x_t <= move_x / mass;
     		vel_y_t <= jump ? (48'h000000040000 / mass) : 48'b0; // TODO Fix for platform thru, jumps
     		pos_x <= pos_x + vel_x_t;
-            pos_y <= pos_y + vel_y_t;
+         pos_y <= pos_y + vel_y_t;
     	end
 
     end
@@ -161,17 +169,23 @@ module physics_coprocessor(
 			vel_x <= 48'b0;
 			vel_y <= 48'b0;
 		end
+		
+		// Attack velocity update
+		else if(attack_in) begin
+			vel_x <= knockback_x;
+			vel_y <= knockback_y;
+		end
 
     	// Acceleration, velocity update for in air
-    	else if(~freeze_in & ~attack_in & ~wall_Down & ~platform_Down) begin
-    		if(vel_x < vel_x_t) vel_x <= vel_x + 48'd1;
+    	else if(~freeze_in & ~wall_Down & ~platform_Down) begin
+    		if(vel_x < vel_x_t) vel_x <= vel_x + 48'd1; // TODO fix for L/R collisions
    		else vel_x <= vel_x - 48'd1;
-    		if(vel_y < vel_y_t) vel_y <= jump ? (48'h000000040000 / mass) : (vel_y + 48'd1);
+    		if(vel_y < vel_y_t) vel_y <= jump ? (48'h000000040000 / mass) : (vel_y + 48'd1); // TODO fix for up collisions
     		else vel_y <= jump ? (48'h000000040000 / mass) : (vel_y - 48'd1);
     	end
 		
-		// Acceleration, velocity update for on grounde
-    	else if(~freeze_in & ~attack_in) begin
+		// Acceleration, velocity update for on ground
+    	else if(~freeze_in) begin
     		vel_x <= vel_x_t;
 			vel_y <= vel_y_t;
     	end

@@ -29,7 +29,7 @@ reg [8:0] count;
 reg [23:0] bgr_data;
 wire VGA_CLK_n;
 wire [7:0] index, indexc1, indexc1_a, indexc1_down, indexc1_downb, indexc1_sideb, indexc1_upb, indexc1_walk, indexc1_b;
-wire [7:0] indexc2;
+wire [7:0] indexc2, indexc2_a, indexc2_down, indexc2_downb, indexc2_sideb, indexc2_upb, indexc2_walk, indexc2_b;
 wire [23:0] bgr_data_raw;
 wire cBLANK_n,cHS,cVS,rst;
 ////
@@ -43,30 +43,36 @@ video_sync_generator LTM_ins (.vga_clk(iVGA_CLK),
 ////Address generator
 always@(posedge iVGA_CLK,negedge iRST_n)
 begin
-	if (!iRST_n) begin
+	if (!iRST_n) 
 		ADDR<=19'd0;
-//		count<=9'd0;
-//		stage_addr<=17'd0;
-	end
-	else if (cHS==1'b0 && cVS==1'b0) begin
+	else if (cHS==1'b0 && cVS==1'b0)
 		ADDR<=19'd0;
-//		count<=9'd0;
-//		stage_addr<=17'd0;
-	end
 	else if (cBLANK_n==1'b1)
 		ADDR<=ADDR+19'd1;
 	
-	
+
 end
 
-//always@(negedge iVGA_CLK)
+//always@(posedge iVGA_CLK, negedge iRST_n)
 //begin
+//	if (count % 2 == 9'd1)
+//		stage_addr<=stage_addr-9'd320;
+//end
+//
+//always@(negedge iVGA_CLK, negedge iRST_n)
+//begin
+//	if (!iRST_n) begin
+//		count<=9'd0;
+//		stage_addr<=17'd0;
+//	end
+//	else if (cHS==1'b0 && cVS==1'b0) begin
+//		count<=9'd0;
+//		stage_addr<=17'd0;
+//	end
 //	if (ADDR % 19'd640 == 19'b0) // increase the count for each line that passes
 //		count<=count+9'd1;
 //	if (ADDR % 2 == 19'b0) //increment stage addr every other pixel
 //		stage_addr<=stage_addr+9'd1;
-//	if (count % 2 == 9'd1)
-//		stage_addr<=stage_addr-9'd320;
 //end
 
 assign VGA_CLK_n = ~iVGA_CLK;
@@ -75,16 +81,16 @@ assign VGA_CLK_n = ~iVGA_CLK;
 /************** OUR CODE STARTS HERE ************/
 
  //Load background
-stage_data	stage_data_inst (
-	.address ( ADDR/19'd2 ),
-	.clock ( VGA_CLK_n ),
-	.q ( index )
-);
-stage_index stage_index_inst (
-	.address ( index ),
-	.clock ( iVGA_CLK ),
-	.q ( bgr_data_raw_background )
-);	
+//stage_data	stage_data_inst (
+//	.address ( ADDR/2 ),
+//	.clock ( VGA_CLK_n ),
+//	.q ( index )
+//);
+//stage_index stage_index_inst (
+//	.address ( index ),
+//	.clock ( iVGA_CLK ),
+//	.q ( bgr_data_raw_background )
+//);	
 //img_data	img_data_inst (
 //	.address ( ADDR ),
 //	.clock ( VGA_CLK_n ),
@@ -149,16 +155,16 @@ bowser_down_index character1_down_index_inst (
 	.q ( bgr_data_raw_p1_down )
 );	
 //Load P1 downb
-bowser_downb_data	character1_downb_data_inst (
-	.address ( indexP1 ),
-	.clock ( VGA_CLK_n ),
-	.q ( indexc1_downb )
-);
-bowser_downb_index character1_downb_index_inst (
-	.address ( indexc1_downb ),
-	.clock ( iVGA_CLK ),
-	.q ( bgr_data_raw_p1_downb )
-);	
+//bowser_downb_data	character1_downb_data_inst (
+//	.address ( indexP1 ),
+//	.clock ( VGA_CLK_n ),
+//	.q ( indexc1_downb )
+//);
+//bowser_downb_index character1_downb_index_inst (
+//	.address ( indexc1_downb ),
+//	.clock ( iVGA_CLK ),
+//	.q ( bgr_data_raw_p1_downb )
+//);	
 //Load P1 sideb
 bowser_sideb_data	character1_sideb_data_inst (
 	.address ( indexP1 ),
@@ -238,16 +244,17 @@ kirby_down_index character2_down_index_inst (
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_p2_down )
 );	// Load P2 downb
-kirby_downb_data	character2_adownb_data_inst (
-	.address ( indexP2 ),
-	.clock ( VGA_CLK_n ),
-	.q ( indexc2_downb )
-);
-kirby_downb_index character2_downb_index_inst (
-	.address ( indexc2_a ),
-	.clock ( iVGA_CLK ),
-	.q ( bgr_data_raw_p2_downb )
-);	// Load P2 sideb
+//kirby_downb_data	character2_adownb_data_inst (
+//	.address ( indexP2 ),
+//	.clock ( VGA_CLK_n ),
+//	.q ( indexc2_downb )
+//);
+//kirby_downb_index character2_downb_index_inst (
+//	.address ( indexc2_a ),
+//	.clock ( iVGA_CLK ),
+//	.q ( bgr_data_raw_p2_downb )
+//);	
+// Load P2 sideb
 kirby_sideb_data	character2_sideb_data_inst (
 	.address ( indexP2 ),
 	.clock ( VGA_CLK_n ),
@@ -298,9 +305,9 @@ always@(posedge VGA_CLK_n) begin
 	if(p1VGA[101]) begin
 		bgr_data_raw_p1 <= bgr_data_raw_p1_a;
 	end
-	else if(p1VGA[103]) begin
-		bgr_data_raw_p1 <= bgr_data_raw_p1_downb;
-	end
+//	else if(p1VGA[103]) begin
+//		bgr_data_raw_p1 <= bgr_data_raw_p1_downb;
+//	end
 	else if(p1VGA[102]) begin
 		bgr_data_raw_p1 <= bgr_data_raw_p1_upb;
 	end
@@ -325,9 +332,9 @@ always@(posedge VGA_CLK_n) begin
 	if(p2VGA[101]) begin
 		bgr_data_raw_p2 <= bgr_data_raw_p2_a;
 	end
-	else if(p2VGA[103]) begin
-		bgr_data_raw_p2 <= bgr_data_raw_p2_downb;
-	end
+//	else if(p2VGA[103]) begin
+//		bgr_data_raw_p2 <= bgr_data_raw_p2_downb;
+//	end
 	else if(p2VGA[102]) begin
 		bgr_data_raw_p2 <= bgr_data_raw_p2_upb;
 	end
@@ -348,7 +355,7 @@ always@(posedge VGA_CLK_n) begin
 	end
 end
 
-//assign bgr_data_raw_background = 24'b010101010101010101010101;
+assign bgr_data_raw_background = 24'b010101010101010101010101;
 
 assign w1 = isInsideP1 & (bgr_data_raw_p1 !== 24'b0) ? bgr_data_raw_p1 : bgr_data_raw_background;
 

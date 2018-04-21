@@ -1,7 +1,6 @@
 module mmio(
-	clock, reset,
-	address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA
-);
+	clock, reset, address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA,
+	reg24, reg25, reg26, reg27, reg28, reg29);
 	
 	input clock, reset;
 	input [12:0] address;
@@ -11,6 +10,8 @@ module mmio(
 
 	input [35:0] gpio;
 	output[2:0] gpioOutput;
+	
+	input[31:0] reg24, reg25, reg26, reg27, reg28, reg29;
 	output [127:0] p1VGA, p2VGA;
 	
 	
@@ -31,12 +32,12 @@ module mmio(
 
 		.controller_in(ctrl1_inP),
 		.knockback_in(knock1_inP),
-		.attack_in(attack1_inP[0]),
+		.attack_in(attack2_inP[0]),
 
 
 		.wall(collis1_inP),
 
-		.freeze_in(1'b0),
+		.freeze_in(attack1_inP[11]),
 		
 		.ctrl_num(1'b0),
 
@@ -55,12 +56,12 @@ module mmio(
 
 		.controller_in(ctrl2_inP),
 		.knockback_in(knock2_inP),
-		.attack_in(attack2_inP[0]),
+		.attack_in(attack1_inP[0]),
 
 
 		.wall(collis2_inP),
 
-		.freeze_in(1'b0),
+		.freeze_in(attack2_inP[11]),
 		
 		.ctrl_num(1'b1),
 
@@ -146,14 +147,15 @@ module mmio(
 			.attack(attack_out2),
 			.movement(move_out2),
 			.knockback(knock_out2));
-					
+	
 	// Damage Coproccesor Player 1
 	wire [31:0] damage_out1;
 	damage_coprocessor damageP1(.clock(clock), .reset(reset), .attack(attack_out2), .damage(damage_out1));
 
 	// Damage Coproccesor Player 2
 	wire [31:0] damage_out2;
-	damage_coprocessor damageP1(.clock(clock), .reset(reset), .attack(attack_out1), .damage(damage_out2));
+	damage_coprocessor damageP1(.clock(clock), .reset(reset), .attack(attack_out1), .damage(damage_out2));				
+
 					
 	/******** VGA Coprocessors ********/
 	
@@ -189,7 +191,13 @@ module mmio(
 
 	always @(negedge clock) begin
 
+		// Variable constant assigning from registers/processor
+		//mass1 <= reg24;
+		//mass2 <= reg25;
+		player_size_p1 <= reg26;
+		player_size_p2 <= reg27;
 		
+		// Permanent constant assigning
 		// Testing, Remove Later - Now updated for P2
 
 		// Physics Constants
@@ -197,15 +205,21 @@ module mmio(
 		wind <= 32'h00000010;
 		mass1 <= 32'h00000010;
 		startPos1 <= 32'h016000fa;
-		mass2 <= 32'h00000010;
+		mass2 <= 32'h0000000E;
 		startPos2 <= 32'h02a900fa;
 
 		// Collision Constants
-		stage_pos <= 32'h01430014;
-		stage_size <= 32'h01fa00c8;
-		player_size_p1 <= 32'h0085007d;
-		player_size_p2 <= 32'h00590055;
+//		stage_pos <= 32'h01430014;
+		// x: 88 y: 0
+		stage_pos <= 32'h01580014;
+//		stage_size <= 32'h01fa00c8;
+		// x: 460 y: 130
+		stage_size <= 32'h01CC006E;
+
+//		player_size_p1 <= 32'h0085007d;
+//		player_size_p2 <= 32'h00590055;
 		
+
 		// Attack Constants
 		size1_attack <= player_size_p1;
 		size2_attack <= player_size_p2;
@@ -214,15 +228,15 @@ module mmio(
 		whP1InVGA <= player_size_p1;
 		whP2InVGA <= player_size_p2;
 
-		
 		// Physics Inputs
+
 		ctrl1_inP <= gameControllerInputP1;
 		knock1_inP <= knock_out2;
-		attack1_inP <= attack_out2;
+		attack1_inP <= attack_out1;
 		collis1_inP <= collision_out_p1;
 		ctrl2_inP <= gameControllerInputP2;
 		knock2_inP <= knock_out1;
-		attack2_inP <= attack_out1;
+		attack2_inP <= attack_out2;
 		collis2_inP <= collision_out_p2;
 		
 		// Collision Inputs
@@ -244,10 +258,9 @@ module mmio(
 		attackP2VGA <= attack_out2;
 		collision_p1vga_in <= collision_out_p1;
 		collision_p2vga_in <= collision_out_p2;
+		
 	end
 	
-
-
 	// Module Outputs
 	wire [31:0] coprocessor_out;
 	tristate_32 outmux(.sel(co_sel),
