@@ -136,7 +136,7 @@ bowser_a_index character1_attack_index_inst (
 	.address ( indexc1_a ),
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_p1_a )
-);	
+);	/*
 //Load P1 down
 bowser_down_data	character1_down_data_inst (
 	.address ( indexP1 ),
@@ -191,7 +191,7 @@ bowser_b_index character1_b_index_inst (
 	.address ( indexc1_b ),
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_p1_b )
-);	
+);
 //Load P1 walk
 bowser_walk_data	character1_walk_data_inst (
 	.address ( indexP1 ),
@@ -204,7 +204,7 @@ bowser_walk_index character1_walk_index_inst (
 	.q ( bgr_data_raw_p1_walk )
 );	
 
-
+*/
 // Load P2 image
 kirby_data	character2_data_inst (
 	.address ( indexP2 ),
@@ -226,7 +226,7 @@ kirby_a_index character2_attack_index_inst (
 	.address ( indexc2_a ),
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_p2_a )
-);	
+);	/*
 // Load P2 down
 kirby_down_data	character2_down_data_inst (
 	.address ( indexP2 ),
@@ -287,7 +287,7 @@ kirby_walk_index character2_walk_index_inst (
 	.address ( indexc2_walk ),
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_p2_walk )
-);	
+);	*/
 //Choose the color of the frontmost object (can change layering via order of muxes here)
 wire[23:0] w1;
 //assign w1 = isInsideP2 ? bgr_data_raw_p2 : bgr_data_raw_background;

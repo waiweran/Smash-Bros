@@ -1,7 +1,6 @@
 module mmio(
-	clock, reset,
-	address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA
-);
+	clock, reset, address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA,
+	reg24, reg25, reg26, reg27, reg28, reg29);
 	
 	input clock, reset;
 	input [12:0] address;
@@ -11,6 +10,8 @@ module mmio(
 
 	input [35:0] gpio;
 	output[2:0] gpioOutput;
+	
+	input[31:0] reg24, reg25, reg26, reg27, reg28, reg29;
 	output [127:0] p1VGA, p2VGA;
 	
 	
@@ -183,22 +184,30 @@ module mmio(
 
 	always @(negedge clock) begin
 
+		// Variable constant assigning from registers/processor
+		mass1 <= reg24;
+		mass2 <= reg25;
+		player_size_p1 <= reg26;
+		player_size_p2 <= reg27;
+		startPos1 <= reg28;
+		startPos2 <= reg29;
 		
+		// Permanent constant assigning
 		// Testing, Remove Later - Now updated for P2
 
 		// Physics Constants
 		gravity <= 32'h00010000;
 		wind <= 32'h00000010;
-		mass1 <= 32'h00000010;
-		startPos1 <= 32'h016000fa;
-		mass2 <= 32'h00000010;
-		startPos2 <= 32'h02a900fa;
+		//mass1 <= 32'h00000010;
+		//startPos1 <= 32'h016000fa;
+		//mass2 <= 32'h00000010;
+		//startPos2 <= 32'h02a900fa;
 
 		// Collision Constants
 		stage_pos <= 32'h01430014;
 		stage_size <= 32'h01fa00c8;
-		player_size_p1 <= 32'h0085007d;
-		player_size_p2 <= 32'h00590055;
+		//player_size_p1 <= 32'h0085007d;
+		//player_size_p2 <= 32'h00590055;
 		
 		// Attack Constants
 		size1_attack <= player_size_p1;
@@ -208,8 +217,8 @@ module mmio(
 		whP1InVGA <= player_size_p1;
 		whP2InVGA <= player_size_p2;
 
-		
 		// Physics Inputs
+
 		ctrl1_inP <= gameControllerInputP1;
 		knock1_inP <= knock_out2;
 		attack1_inP <= attack_out2;
@@ -240,8 +249,6 @@ module mmio(
 		collision_p2vga_in <= collision_out_p2;
 	end
 	
-
-
 	// Module Outputs
 	wire [31:0] coprocessor_out;
 	tristate_32 outmux(.sel(co_sel),

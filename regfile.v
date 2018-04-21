@@ -11,32 +11,18 @@ module regfile (
     ctrl_reset, ctrl_writeReg,
     ctrl_readRegA, ctrl_readRegB, data_writeReg,
     data_readRegA, data_readRegB,
-		  regtest1,
-	     regtest2,
-	     regtest4,
-		  regtest5,
-	     regtest6,
-		  regtest7
+	 reg24, reg25, reg26, reg27, reg28, reg29
  
 );
 	//TESTING
-	//output[31:0] regtest0;
-	output[31:0] regtest1;
-	output[31:0] regtest2;
-	//output[31:0] regtest3;
-	output[31:0] regtest4;
-	output[31:0] regtest5;
-	output[31:0] regtest6;	
-	output[31:0] regtest7;
+	output[31:0] reg24, reg25, reg26, reg27, reg28, reg29;
 	
-	//assign regtest0 = dataOutputWires[0];
-	assign regtest1 = dataOutputWires[1];
-	assign regtest2 = dataOutputWires[2];
-	//assign regtest3 = dataOutputWires[3];
-	assign regtest4 = dataOutputWires[4];
-	assign regtest5 = dataOutputWires[5];
-	assign regtest6 = dataOutputWires[6];	
-	assign regtest7 = dataOutputWires[7];
+	assign reg24 = dataOutputWires[24];
+	assign reg25 = dataOutputWires[25];
+	assign reg26 = dataOutputWires[26];
+	assign reg27 = dataOutputWires[27];
+	assign reg28 = dataOutputWires[28];
+	assign reg29 = dataOutputWires[29];
 	
    input clock, ctrl_writeEnable, ctrl_reset;
    input [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;

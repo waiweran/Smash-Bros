@@ -9,6 +9,8 @@
  * inspect which signals the processor tries to assert when.
  */
 
+ 
+ 
 module skeleton(
 	clock, reset_btn, 
 	VGA_CLK,   														//	VGA Clock
@@ -21,27 +23,29 @@ module skeleton(
 	VGA_B,															//	VGA Blue[9:0]
 	gpio,
 	gpioOutput,
-	LEDs);
-	//REG TEST OUTPUTS
-	//output[31:0] regtest0;
-	output[31:0] regtest1;
-	output[31:0] regtest2;
-	//output[31:0] regtest3;
-	output[31:0] regtest4;
-	output[31:0] regtest5;
-	output[31:0] regtest6;	
-	output[31:0] regtest7;
-	
-	//MORE TEST OUTPUTS
+	LEDs,
+	instruction,
+	test_reg24,
+	test_reg29
+);
+
+	//TEST OUTPUTS
 	output[31:0] instruction;
 	assign instruction = q_imem;
 	
-	output[31:0] TEST_startPos1;
-	output[31:0] TEST_collis1;
-	output[31:0] TEST_player_pos_p1;
-	output[31:0] TEST_gameControllerOutputP1;
-	output[31:0] TEST_posP1InVGA;	
+	output[31:0]
+	test_reg24,
+	/*
+	test_reg25,
+	test_reg26,
+	test_reg27,
+	test_reg28,
+	*/
+	test_reg29;
 	
+	assign test_reg24 = reg24;
+	assign test_reg29 = reg29;	
+		
 	// VGA Outputs
 	output			VGA_CLK;   				//	VGA Clock
 	output			VGA_HS;					//	VGA H_SYNC
@@ -63,14 +67,13 @@ module skeleton(
 	
 	// LEDs for Testing
 	output[17:0] LEDs;
-
 	
     /** IMEM **/
     wire [11:0] address_imem;
     wire [31:0] q_imem;
     imem my_imem(
         .address    (address_imem),            // address of data
-        .clock      (~processorClock),                  // you may need to invert the clock
+        .clock      (~clock),                  // you may need to invert the clock
         .q          (q_imem)                   // the raw instruction
     );
 
@@ -82,7 +85,6 @@ module skeleton(
 	 wire [127:0] p1VGA, p2VGA;
     mmio my_mem(
 		  .clock		  (clock),
-		  .processorClock (processorClock),
 		  .reset		  (reset),
         .address    (address_dmem),  	// address of data
         .data_in    (data),    			// data you want to write
@@ -91,16 +93,18 @@ module skeleton(
 		  .gpio		  (gpio),				// For controller IO
 		  .gpioOutput (gpioOutput),
 		  .p1VGA		  (p1VGA),
-		  .p2VGA		  (p2VGA)
-    );
+		  .p2VGA		  (p2VGA),
+		  .reg24(reg24), .reg25(reg25), .reg26(reg26), .reg27(reg27), .reg28(reg28), .reg29(reg29));
 
     /** REGFILE **/
     wire ctrl_writeEnable;
     wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     wire [31:0] data_writeReg;
     wire [31:0] data_readRegA, data_readRegB;
+	 wire[31:0] reg1, reg2, reg3, reg24, reg25, reg26, reg27, reg28, reg29;
+	 
     regfile my_regfile(
-        ~processorClock,
+        ~clock,
         ctrl_writeEnable,
         reset,
         ctrl_writeReg,
@@ -108,33 +112,13 @@ module skeleton(
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB,
-		  regtest1,
-	     regtest2,
-	     regtest4,
-		  regtest5,
-	     regtest6,
-		  regtest7
+        data_readRegB, reg24, reg25, reg26, reg27, reg28, reg29
     );
 
-	//Double the period of the clock JUST FOR PROCESSOR
-	reg[1:0] counter;
-	wire processorClock;
-	
-	initial
-	begin
-		counter = 0;
-	end
-	always @(posedge clock) begin
-		counter = counter + 1;
-	end
-	
-	assign processorClock = counter[1];
-	 
     /** Processor **/
     processor my_processor(
         // Control signals
-        processorClock,                          // I: The master clock
+        clock,                          // I: The master clock
         reset,                          // I: A reset signal
 
         // Imem
@@ -155,7 +139,6 @@ module skeleton(
         data_writeReg,                  // O: Data to write to for regfile
         data_readRegA,                  // I: Data from port A of regfile
         data_readRegB                   // I: Data from port B of regfile
-		  
     );
 	 
 	 
@@ -175,6 +158,8 @@ module skeleton(
 	);
 	
 	/** LEDs **/
+	//assign LEDs[12:0] = address_dmem;
 	assign LEDs[10:0] = p1VGA[90:80];
 	assign LEDs[17:11] = 7'b0;
+
 endmodule
