@@ -11,7 +11,7 @@ module isInsideSprite(spriteData, myX, myY, isInside, index);
 	
 	//Extract data from spriteData
 	wire[18:0] bottomLeftX, bottomLeftY, topRightX, topRightY;
-	assign bottomLeftX[15:0] = spriteData[63:48] - (16'd256 - spriteData[31:16])/2;
+	assign bottomLeftX[15:0] = spriteData[63:48] - (16'd256 - spriteData[31:16])/16'd2;
 	assign bottomLeftX[18:16] = 3'b0;
 	assign bottomLeftY[15:0] = spriteData[47:32];
 	assign bottomLeftY[18:16] = 3'b0;

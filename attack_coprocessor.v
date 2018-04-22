@@ -59,7 +59,7 @@ module attack_coprocessor(
 	assign uhbpos[31:16] = char1posX + hbsize[31:16] / 16'd2;
 	assign uhbpos[15:0] = char1posY + char1size[15:0];
 	assign dhbpos[31:16] = char1posX + hbsize[31:16] / 16'd2;
-	assign dhbpos[15:0] = char1posY - hbsize[31:16] / 16'd2;
+	assign dhbpos[15:0] = char1posY - hbsize[15:0] / 16'd2;
 	wire [3:0] hitOutL, hitOutR, hitOutU, hitOutD;
 	collision leftCol(lhbpos, hbsize, char2pos, char2size, hitOutL);
 	collision rightCol(rhbpos, hbsize, char2pos, char2size, hitOutR);
@@ -204,18 +204,21 @@ module attack_coprocessor(
 	assign attack[11] = smashU_out | smashD_out | smashL_out | smashR_out | jabNL_out
 						 | jabNR_out | specialU_out | specialD_out | specialL_out 
 						 | specialR_out | specialNL_out | specialNR_out;
+	assign attack[31:12] = 20'b0;
 		
 	// Giving Knockback
-	reg knockback;
+	reg [31:0] knockback;
 	always@(posedge clock) begin
 		if(smashU_out) knockback <= 32'h00000800;
 		if(smashD_out) knockback <= 32'h0000F7FE;
 		if(smashL_out) knockback <= 32'hF7FE00E0;
 		if(smashR_out) knockback <= 32'h080000E0;
+		if(jabNL_out) knockback <= 32'hFBFE0080;
+		if(jabNR_out) knockback <= 32'h04000080;
 	end
 
 	// Moving the Characters
-	reg movement;
+	reg [31:0] movement;
 	always@(posedge clock) begin
 		if(specialU_out) movement <= 32'h00000010;
 	end

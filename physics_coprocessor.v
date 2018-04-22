@@ -52,7 +52,7 @@ module physics_coprocessor(
 
 	// Input Physics Parameters
 	wire signed [47:0] mass, gravity, wind;
-   wire signed [9:0] sjoy_x, sjoy_y;
+   wire signed [8:0] sjoy_x, sjoy_y;
 	wire signed [47:0] move_x, move_y, knockback_x, knockback_y;
 	assign mass[31:0] = mass_in;
 	assign mass[47:32] = 16'b0;
@@ -66,15 +66,17 @@ module physics_coprocessor(
 	assign move_x[9:0] = 10'b0;
 	assign move_y[18:10] = sjoy_y;
 	assign move_y[9:0] = 10'b0;
-	assign knockback_x[15:0] = knockback_in[31:16]; // Split knockback into x, y
-	assign knockback_y[15:0] = knockback_in[15:0];
+	assign knockback_x[19:4] = knockback_in[31:16]; // Split knockback into x, y
+	assign knockback_y[19:4] = knockback_in[15:0];
+	assign knockback_x[3:0] = 4'b0;
+	assign knockback_y[3:0] = 4'b0;
 	genvar i;
 	generate // Extend joystick, knockback values to 32 bit signed values
 		for(i = 19; i < 48; i = i + 1) begin: signextend1
 			assign move_x[i] = move_x[18];
 			assign move_y[i] = move_y[18];
 		end
-		for(i = 16; i < 48; i = i + 1) begin: signextend2
+		for(i = 20; i < 48; i = i + 1) begin: signextend2
 			assign knockback_x[i] = knockback_in[31];
 			assign knockback_y[i] = knockback_in[15];
 		end
@@ -123,6 +125,7 @@ module physics_coprocessor(
 	 
 		// Reset
 		if(reset) begin
+			attack_prev <= 1'b0;
 		   vel_x_t <= 48'b0;
 			vel_y_t <= 48'b0;
 			pos_x [47:32] <= start_Position[31:16];
@@ -134,13 +137,9 @@ module physics_coprocessor(
 		// Knockback application when attacked
 		else if(attack_in & ~attack_prev) begin
 			attack_prev <= 1'b1;
-			pos_y <= pos_y + 48'h000800000000;
+			if(wall_Down) pos_y <= pos_y + 48'h000800000000;
 		end
-		else if(attack_in & attack_prev) begin
-			vel_x_t <= knockback_x;
-			vel_y_t <= knockback_y;
-		end
-		else if(attack_prev) begin
+		else if(~attack_in & attack_prev) begin
 			attack_prev <= 1'b0;
 		end			
 

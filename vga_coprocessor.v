@@ -5,8 +5,8 @@ module vga_coprocessor(posIn, whIn, controller, attack, collision, vga_output);
 	input[31:0] posIn, whIn, controller, attack, collision;
 	output[127:0] vga_output;
 	
-	assign vga_output[127:112] = collision[16:0];
-	assign vga_output[111:96] = attack[16:0];
+	assign vga_output[127:112] = collision[15:0];
+	assign vga_output[111:96] = attack[15:0];
 	assign vga_output[95:64] = controller;
 	assign vga_output[63:32] = posIn;
 	assign vga_output[31:0] = whIn;

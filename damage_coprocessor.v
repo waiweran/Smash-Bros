@@ -1,6 +1,6 @@
 module damage_coprocessor(
     // Inputs
-    clock, reset
+    clock, reset,
     attack,
 
     // Outputs
@@ -28,7 +28,7 @@ module damage_coprocessor(
         damage <= 32'd15;
       end
       // side b
-      else if(attack[0] & (attack[8] | attack[9]) begin
+      else if(attack[0] & (attack[8] | attack[9])) begin
         damage <= 32'd30;
       end
       // b
