@@ -1,5 +1,5 @@
 module isInsideSprite(spriteData, myX, myY, isInside, index);
-	input[127:0] spriteData;
+	input[159:0] spriteData;
 	input[18:0] myX, myY;
 	output isInside;
 	output[18:0] index;

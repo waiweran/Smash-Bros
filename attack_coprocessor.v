@@ -61,10 +61,10 @@ module attack_coprocessor(
 	assign dhbpos[31:16] = char1posX + hbsize[31:16] / 16'd2;
 	assign dhbpos[15:0] = char1posY - hbsize[15:0] / 16'd2;
 	wire [3:0] hitOutL, hitOutR, hitOutU, hitOutD;
-	collision leftCol(lhbpos, hbsize, char2pos, char2size, hitOutL);
-	collision rightCol(rhbpos, hbsize, char2pos, char2size, hitOutR);
-	collision upCol(uhbpos, hbsize, char2pos, char2size, hitOutU);
-	collision downCol(dhbpos, hbsize, char2pos, char2size, hitOutD);
+	collision leftCol(lhbpos, char2pos, hbsize, char2size, hitOutL);
+	collision rightCol(rhbpos, char2pos, hbsize, char2size, hitOutR);
+	collision upCol(uhbpos, char2pos, hbsize, char2size, hitOutU);
+	collision downCol(dhbpos, char2pos, hbsize, char2size, hitOutD);
 	wire leftHit, rightHit, upHit, downHit;
 	assign leftHit = hitOutL[0] | hitOutL[1] | hitOutL[2] | hitOutL[3];
 	assign rightHit = hitOutR[0] | hitOutR[1] | hitOutR[2] | hitOutR[3];

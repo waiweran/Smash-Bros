@@ -35,7 +35,7 @@ module damage_coprocessor(
       else if(attack[0] & attack[10]) begin
         damage <= 32'd10;
       end
-      else 
+      else begin
         damage <= 32'b0;
       end
     end
