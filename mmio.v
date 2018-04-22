@@ -288,8 +288,8 @@ module mmio(
 			.in21(32'b0), 							// Unused
 			.in22(32'b0), 							// Unused
 			.in23(32'b0), 							// Unused
-			.in24(32'b0), 							// Unused
-			.in25(32'b0), 							// Unused
+			.in24(damage_out1), 							// Damage done to Player 1
+			.in25(damage_out2), 							// Damage done to Player 2
 			.in26(32'b0), 							// Unused
 			.in27(32'b0), 							// Unused
 			.in28(32'b0), 							// Unused
