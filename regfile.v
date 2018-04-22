@@ -11,12 +11,13 @@ module regfile (
     ctrl_reset, ctrl_writeReg,
     ctrl_readRegA, ctrl_readRegB, data_writeReg,
     data_readRegA, data_readRegB,
-	 reg24, reg25, reg26, reg27, reg28, reg29
+	 reg23, reg24, reg25, reg26, reg27, reg28, reg29
  
 );
 	//TESTING
-	output[31:0] reg24, reg25, reg26, reg27, reg28, reg29;
+	output[31:0] reg23, reg24, reg25, reg26, reg27, reg28, reg29;
 	
+	assign reg23 = dataOutputWires[23];
 	assign reg24 = dataOutputWires[24];
 	assign reg25 = dataOutputWires[25];
 	assign reg26 = dataOutputWires[26];

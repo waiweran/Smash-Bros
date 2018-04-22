@@ -25,6 +25,7 @@ module skeleton(
 	gpioOutput,
 	LEDs,
 	instruction,
+	test_reg23,
 	test_reg24,
 	test_reg29
 );
@@ -34,6 +35,7 @@ module skeleton(
 	assign instruction = q_imem;
 	
 	output[31:0]
+	test_reg23,
 	test_reg24,
 	/*
 	test_reg25,
@@ -43,6 +45,7 @@ module skeleton(
 	*/
 	test_reg29;
 	
+	assign test_reg23 = reg23;
 	assign test_reg24 = reg24;
 	assign test_reg29 = reg29;	
 		
@@ -112,7 +115,7 @@ module skeleton(
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB, reg24, reg25, reg26, reg27, reg28, reg29
+        data_readRegB, reg23, reg24, reg25, reg26, reg27, reg28, reg29
     );
 
     /** Processor **/
