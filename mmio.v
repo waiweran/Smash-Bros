@@ -183,13 +183,9 @@ module mmio(
 
 
 	// Module Inputs
-	wire [31:0] co_sel, co_spec;
-	assign wren_dmem = wren & ~address[12];
-	assign address_dmem = address[11:0];
-	decoder_32 coprocessor_select(.in(address[11:7]), .out(co_sel));
-	decoder_32 coprocessor_inspec(.in(address[6:2]), .out(co_spec));
-	reg [31:0] damage1, damage2, lives1, lives2;
-
+	wire [31:0] lives1, lives2;
+	assign lives1 = reg28;
+	assign lives2 = reg29;
 	
 	always @(negedge clock) begin
 
@@ -198,8 +194,8 @@ module mmio(
 		damage2_inP <= reg25;
 		player_size_p1 <= reg26;
 		player_size_p2 <= reg27;
-		lives1 <= reg28;
-		lives2 <= reg29;
+		//lives1 <= reg28;
+		//lives2 <= reg29;
 		
 		damage_livesP1VGA[31:16] <= damage1_inP[15:0];
 		damage_livesP1VGA[15:0] <= lives1[15:0];
@@ -272,6 +268,10 @@ module mmio(
 	end
 	
 	// Module Outputs
+	wire [31:0] co_sel;
+	assign wren_dmem = wren & ~address[12];
+	assign address_dmem = address[11:0];
+	decoder_32 coprocessor_select(.in(address[11:7]), .out(co_sel));
 	wire [31:0] coprocessor_out;
 	tristate_32 outmux(.sel(co_sel),
 			.in0(pos1),								// Player 1 Physics Coprocessor

@@ -141,7 +141,7 @@ module skeleton(
 	
 	/** LEDs **/
 	//assign LEDs[12:0] = address_dmem;
-	assign LEDs[15:0] = p1VGA[143:128];
+	assign LEDs[15:0] = reg28[15:0];
 	assign LEDs[17:16] = 2'b0;
 
 endmodule
