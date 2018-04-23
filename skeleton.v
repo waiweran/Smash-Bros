@@ -78,6 +78,10 @@ module skeleton(
 		  .reg23(reg23), .reg24(reg24), .reg25(reg25), .reg26(reg26), .reg27(reg27), .reg28(reg28), .reg29(reg29),
 		  .debug(derp)
 	 );
+	 
+	 // Slowed Clock
+	 reg [3:0] clockDivide;
+	 always @(posedge clock) clockDivide <= clockDivide + 4'b0001;
 
     /** REGFILE **/
     wire ctrl_writeEnable;
@@ -87,22 +91,22 @@ module skeleton(
 	 wire [31:0] reg23, reg24, reg25, reg26, reg27, reg28, reg29;
 	 
     regfile my_regfile(
-        ~clock,
-        ctrl_writeEnable,
-        reset,
-        ctrl_writeReg,
-        ctrl_readRegA,
-        ctrl_readRegB,
-        data_writeReg,
-        data_readRegA,
-        data_readRegB, 
-		  reg23, reg24, reg25, reg26, reg27, reg28, reg29
+        .clock(~clockDivide[3]),
+        .ctrl_writeEnable(ctrl_writeEnable),
+        .ctrl_reset(reset),
+        .ctrl_writeReg(ctrl_writeReg),
+        .ctrl_readRegA(ctrl_readRegA),
+        .ctrl_readRegB(ctrl_readRegB),
+        .data_writeReg(data_writeReg),
+        .data_readRegA(data_readRegA),
+        .data_readRegB(data_readRegB), 
+		  .regi23(reg23), .regi24(reg24), .regi25(reg25), .regi26(reg26), .regi27(reg27), .regi28(reg28), .regi29(reg29)
     );
 
     /** Processor **/
     processor my_processor(
         // Control signals
-        clock,                          // I: The master clock
+        clockDivide[3],                          // I: The master clock
         reset,                          // I: A reset signal
 
         // Imem

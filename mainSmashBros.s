@@ -87,11 +87,19 @@ nop
 
 # damage to P1
 lw $1 7168($0)
+bne $1 $15 1
+j afterAddOne
 add $24 $24 $1
+afterAddOne:
+add $15 $1 $0
 
 # damage to P2
 lw $1 7296($0)
+bne $1 $16 1
+j afterAddTwo
 add $25 $25 $1
+afterAddTwo:
+add $16 $1 $0
 
 j loop
 
