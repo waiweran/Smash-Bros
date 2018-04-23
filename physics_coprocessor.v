@@ -7,6 +7,7 @@ module physics_coprocessor(
 	controller_in, 			// Input from controller joystick
 	knockback_in,			// Input from attack coprocessor
 	attack_in,				// Input from attack coprocessor
+	movement_in,			// Input from attack coprocessor
 	damage_in,				// Input from register
 
 
@@ -23,7 +24,7 @@ module physics_coprocessor(
 	input clock, reset;
 	input [31:0] mass_in, gravity_in, wind_in;
 	input [31:0] start_Position;
-	input [31:0] controller_in, knockback_in, damage_in;
+	input [31:0] controller_in, knockback_in, movement_in, damage_in;
 	input [31:0] wall;
 	input attack_in;
 	input freeze_in;
@@ -54,8 +55,8 @@ module physics_coprocessor(
 	// Input Physics Parameters
 	wire signed [47:0] mass, gravity, wind;
    wire signed [8:0] sjoy_x, sjoy_y;
-	wire signed [47:0] move_x, move_y, knockback_x, knockback_y;
-	wire [31:0] damage_multiplier;
+	wire signed [47:0] move_x, move_y, knockback_x, knockback_y, movement_x, movement_y;
+	wire signed [15:0] damage_multiplier, kbx_signed, kby_signed;
 	assign mass[31:0] = mass_in;
 	assign mass[47:32] = 16'b0;
 	assign gravity[31:0] = gravity_in;
@@ -68,11 +69,17 @@ module physics_coprocessor(
 	assign move_x[9:0] = 10'b0;
 	assign move_y[18:10] = sjoy_y;
 	assign move_y[9:0] = 10'b0;
-	assign damage_multiplier = damage_in + 32'd100;
-	assign knockback_x[19:4] = (knockback_in[31:16]*damage_multiplier[15:0]) / 16'd100; // Split knockback into x, y
-	assign knockback_y[19:4] = (knockback_in[15:0]*damage_multiplier[15:0]) / 16'd100;
+	assign damage_multiplier = damage_in[15:0] + 16'sd100;
+	assign kbx_signed = knockback_in[31:16];
+	assign kby_signed = knockback_in[15:0];
+	assign knockback_x[19:4] = (kbx_signed*damage_multiplier) / 16'sd100; // Split knockback into x, y
+	assign knockback_y[19:4] = (kby_signed*damage_multiplier) / 16'sd100;
 	assign knockback_x[3:0] = 4'b0;
 	assign knockback_y[3:0] = 4'b0;
+	assign movement_x[19:4] = movement_in[31:16]; // Split attack movement into x, y
+	assign movement_y[19:4] = movement_in[15:0];
+	assign movement_x[3:0] = 4'b0;
+	assign movement_y[3:0] = 4'b0;
 	genvar i;
 	generate // Extend joystick, knockback values to 32 bit signed values
 		for(i = 19; i < 48; i = i + 1) begin: signextend1
@@ -82,6 +89,10 @@ module physics_coprocessor(
 		for(i = 20; i < 48; i = i + 1) begin: signextend2
 			assign knockback_x[i] = knockback_in[31];
 			assign knockback_y[i] = knockback_in[15];
+		end
+		for(i = 20; i < 48; i = i + 1) begin: signextend3
+			assign movement_x[i] = movement_in[31];
+			assign movement_y[i] = movement_in[15];
 		end
 	endgenerate
 
@@ -95,10 +106,9 @@ module physics_coprocessor(
 	 // Slowed clock for acceleration
 	 reg [15:0] slowClock;
 	 wire slowClockBit;
-	 assign slowClockBit = slowClock[11];
+	 assign slowClockBit = slowClock[10];
 	 always@(negedge clock) begin
-		if(reset) slowClock <= 16'b0;
-		else slowClock <= slowClock + 16'd1;
+		slowClock <= slowClock + 16'd1;
 	 end
 	 
 	 // Jump Control
@@ -141,6 +151,10 @@ module physics_coprocessor(
 		else if(attack_in & ~attack_prev) begin
 			attack_prev <= 1'b1;
 			if(wall_Down) pos_y <= pos_y + 48'h000800000000;
+		end
+		else if(attack_in & attack_prev) begin
+			pos_x <= pos_x + movement_x;
+			pos_y <= pos_y + movement_y;
 		end
 		else if(~attack_in & attack_prev) begin
 			attack_prev <= 1'b0;

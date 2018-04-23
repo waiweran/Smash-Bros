@@ -75,7 +75,8 @@ module skeleton(
 		  .gpioOutput (gpioOutput),
 		  .p1VGA		  (p1VGA),
 		  .p2VGA		  (p2VGA),
-		  .reg24(reg24), .reg25(reg25), .reg26(reg26), .reg27(reg27), .reg28(reg28), .reg29(reg29)
+		  .reg23(reg23), .reg24(reg24), .reg25(reg25), .reg26(reg26), .reg27(reg27), .reg28(reg28), .reg29(reg29),
+		  .debug(derp)
 	 );
 
     /** REGFILE **/
@@ -83,7 +84,7 @@ module skeleton(
     wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     wire [31:0] data_writeReg;
     wire [31:0] data_readRegA, data_readRegB;
-	 wire[31:0] reg1, reg2, reg3, reg24, reg25, reg26, reg27, reg28, reg29;
+	 wire [31:0] reg23, reg24, reg25, reg26, reg27, reg28, reg29;
 	 
     regfile my_regfile(
         ~clock,
@@ -94,7 +95,8 @@ module skeleton(
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB, reg24, reg25, reg26, reg27, reg28, reg29
+        data_readRegB, 
+		  reg23, reg24, reg25, reg26, reg27, reg28, reg29
     );
 
     /** Processor **/
@@ -140,8 +142,9 @@ module skeleton(
 	);
 	
 	/** LEDs **/
-	//assign LEDs[12:0] = address_dmem;
-	assign LEDs[15:0] = p1VGA[143:128];
-	assign LEDs[17:16] = 2'b0;
+	wire [31:0] derp;
+	assign LEDs[7:0] = derp[7:0];
+	assign LEDs[15:8] = reg28[7:0];
+	assign LEDs[17:16] = gpioOutput;
 
 endmodule

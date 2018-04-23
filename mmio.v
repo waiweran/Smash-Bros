@@ -1,6 +1,6 @@
 module mmio(
 	clock, reset, address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA,
-	reg24, reg25, reg26, reg27, reg28, reg29);
+	reg23, reg24, reg25, reg26, reg27, reg28, reg29, debug);
 	
 	input clock, reset;
 	input [12:0] address;
@@ -12,9 +12,10 @@ module mmio(
 	output[2:0] gpioOutput;
 	
 	//24,25: damage 26,27: mass, 28,29: lives
-	input[31:0] reg24, reg25, reg26, reg27, reg28, reg29;
-	output [127:0] p1VGA, p2VGA;
-	
+	input[31:0] reg23, reg24, reg25, reg26, reg27, reg28, reg29;
+	output [159:0] p1VGA, p2VGA;
+	output[31:0] debug;
+	assign debug = p1VGA[159:128];
 	
 	
 	/******** Physics Coprocessors ********/
@@ -23,7 +24,7 @@ module mmio(
 
 	// Player 1 Physics Coprocessor
 	reg [31:0] mass1, startPos1;
-	reg [31:0] ctrl1_inP, knock1_inP, attack1_inP, collis1_inP, damage1_inP;
+	reg [31:0] ctrl1_inP, knock1_inP, attack1_inP, collis1_inP, move1_inP, damage1_inP;
 	wire [31:0] pos1;
 	physics_coprocessor physP1(
 		.clock(clock), .reset(reset),
@@ -34,6 +35,7 @@ module mmio(
 		.controller_in(ctrl1_inP),
 		.knockback_in(knock1_inP),
 		.attack_in(attack2_inP[0]),
+		.movement_in(move1_inP),
 		.damage_in(damage1_inP),
 
 		.wall(collis1_inP),
@@ -47,7 +49,7 @@ module mmio(
 
 	// Player 2 Physics Coprocessor
 	reg [31:0] mass2, startPos2;
-	reg [31:0] ctrl2_inP, knock2_inP, attack2_inP, collis2_inP, damage2_inP;
+	reg [31:0] ctrl2_inP, knock2_inP, attack2_inP, collis2_inP, move2_inP, damage2_inP;
 	wire [31:0] pos2;
 	physics_coprocessor physP2(
 		.clock(clock), .reset(reset),
@@ -58,6 +60,7 @@ module mmio(
 		.controller_in(ctrl2_inP),
 		.knockback_in(knock2_inP),
 		.attack_in(attack1_inP[0]),
+		.movement_in(move2_inP),
 		.damage_in(damage2_inP),
 
 		.wall(collis2_inP),
@@ -111,7 +114,7 @@ module mmio(
 	gameControllerManager controllerP1(.mmioBoardOutput(gameControllerOutputP1),
 												  .mmioBoardInput(gameControllerInputP1),
 												  .halfgpio(gpio[15:0]), .halfoverflowgpio(gpio[33:32]), .ledMotorOut(gpioOutput[0]), 
-												  .fastClock(clock), .slowClock(gpioOutput[2]), .startDir(1'b1), .reset(reset));
+												  .fastClock(clock), .slowClock(gpioOutput[2]), .startDir(1'b1), .reset(reset), .ledSignal(reg23[0]));
 
 	// Player 2 Game Controller Manager
 	reg[31:0] gameControllerOutputP2;
@@ -120,7 +123,7 @@ module mmio(
 	gameControllerManager controllerP2(.mmioBoardOutput(gameControllerOutputP2),
 												  .mmioBoardInput(gameControllerInputP2),
 												  .halfgpio(gpio[31:16]), .halfoverflowgpio(gpio[35:34]), .ledMotorOut(gpioOutput[1]), 
-												  .fastClock(clock), .slowClock(unused), .startDir(1'b0), .reset(reset));
+												  .fastClock(clock), .slowClock(unused), .startDir(1'b0), .reset(reset), .ledSignal(reg23[0]));
 	
 	
 	
@@ -162,7 +165,7 @@ module mmio(
 	
 	// VGA Coprocessor Player 1
 	reg[31:0] posP1InVGA, whP1InVGA, controlP1VGA, attackP1VGA, collision_p1vga_in, damage_livesP1VGA;
-	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .controller(controlP1VGA), .attack(attackP1VGA), .collision(collision_p1vga_in), .damage_lives(damage_livesP1VGA), .vga_output(p1VGA));
+	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .controller(controlP1VGA), .attack(attackP1VGA), .collision(collision_p1vga_in), .damage_lives(reg28), .vga_output(p1VGA));
 
 	// VGA Coprocessor Player 2
 	reg[31:0] posP2InVGA, whP2InVGA, controlP2VGA, attackP2VGA, collision_p2vga_in, damage_livesP2VGA;
@@ -182,33 +185,20 @@ module mmio(
 
 
 
-	// Module Inputs
-	wire [31:0] co_sel, co_spec;
-	assign wren_dmem = wren & ~address[12];
-	assign address_dmem = address[11:0];
-	decoder_32 coprocessor_select(.in(address[11:7]), .out(co_sel));
-	decoder_32 coprocessor_inspec(.in(address[6:2]), .out(co_spec));
-	reg [31:0] damage1, damage2, lives1, lives2;
-
-	
-	always @(negedge clock) begin
-
-		// Variable constant assigning from registers/processor
+	// Module Inputs from Registers
+	always @(posedge clock) begin
 		damage1_inP <= reg24;
 		damage2_inP <= reg25;
 		player_size_p1 <= reg26;
 		player_size_p2 <= reg27;
-		lives1 <= reg28;
-		lives2 <= reg29;
-		
-		damage_livesP1VGA[31:16] <= damage1_inP[15:0];
-		damage_livesP1VGA[15:0] <= lives1[15:0];
-		
-		damage_livesP2VGA[31:16] <= damage2_inP[15:0];
-		damage_livesP2VGA[15:0] <= lives2[15:0];
-		
-		// Permanent constant assigning
-		// Testing, Remove Later - Now updated for P2
+		damage_livesP1VGA[31:16] <= reg24[15:0];
+		damage_livesP1VGA[15:0] <= reg28[15:0];
+		damage_livesP2VGA[31:16] <= reg25[15:0];
+		damage_livesP2VGA[15:0] <= reg29[15:0];
+	end
+	
+	// Module Interconnects
+	always @(negedge clock) begin
 
 		// Physics Constants
 		gravity <= 32'h00010000;
@@ -219,16 +209,10 @@ module mmio(
 		startPos2 <= 32'h02a900fa;
 
 		// Collision Constants
-//		stage_pos <= 32'h01430014;
-		// x: 88 y: 0
 		stage_pos <= 32'h01580014;
-//		stage_size <= 32'h01fa00c8;
-		// x: 460 y: 130
 		stage_size <= 32'h01CC006E;
-
-//		player_size_p1 <= 32'h0085007d;
-//		player_size_p2 <= 32'h00590055;
-		
+		// player_size_p1 <= 32'h0085007d;
+		// player_size_p2 <= 32'h00590055;
 
 		// Attack Constants
 		size1_attack <= player_size_p1;
@@ -238,15 +222,17 @@ module mmio(
 		whP1InVGA <= player_size_p1;
 		whP2InVGA <= player_size_p2;
 
+		
 		// Physics Inputs
-
 		ctrl1_inP <= gameControllerInputP1;
 		knock1_inP <= knock_out2;
 		attack1_inP <= attack_out1;
+		move1_inP <= move_out1;
 		collis1_inP <= collision_out_p1;
 		ctrl2_inP <= gameControllerInputP2;
 		knock2_inP <= knock_out1;
 		attack2_inP <= attack_out2;
+		move2_inP <= move_out2;
 		collis2_inP <= collision_out_p2;
 		
 		// Collision Inputs
@@ -272,6 +258,10 @@ module mmio(
 	end
 	
 	// Module Outputs
+	wire [31:0] co_sel;
+	assign wren_dmem = wren & ~address[12];
+	assign address_dmem = address[11:0];
+	decoder_32 coprocessor_select(.in(address[11:7]), .out(co_sel));
 	wire [31:0] coprocessor_out;
 	tristate_32 outmux(.sel(co_sel),
 			.in0(pos1),								// Player 1 Physics Coprocessor

@@ -4,7 +4,7 @@ module regfile (
     ctrl_reset, ctrl_writeReg,
     ctrl_readRegA, ctrl_readRegB, data_writeReg,
     data_readRegA, data_readRegB,
-	 regi24, regi25, regi26, regi27, regi28, regi29
+	 regi23, regi24, regi25, regi26, regi27, regi28, regi29
 );
 
    input clock, ctrl_writeEnable, ctrl_reset;
@@ -13,7 +13,8 @@ module regfile (
 
    output [31:0] data_readRegA, data_readRegB;
 	//24: mass1, 25: mass2, 
-	output[31:0] regi24, regi25, regi26, regi27, regi28, regi29;
+	output[31:0] regi23, regi24, regi25, regi26, regi27, regi28, regi29;
+	assign regi23 = read23;
 	assign regi24 = read24;
 	assign regi25 = read25;
 	assign regi26 = read26;
