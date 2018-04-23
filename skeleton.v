@@ -150,7 +150,7 @@ module skeleton(
 	
 	/** LEDs **/
 	wire [31:0] derp;
-	assign LEDs[15:0] = q_dmem[15:0];
+	assign LEDs[15:0] = derp[15:0];
 	assign LEDs[17:16] = gpioOutput;
 
 endmodule

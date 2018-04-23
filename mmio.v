@@ -188,7 +188,19 @@ module mmio(
 
 
 	// Module Inputs from Registers
-	always @(posedge clock) begin
+//	always @(posedge clock) begin
+//		damage1_inP <= reg24;
+//		damage2_inP <= reg25;
+//		player_size_p1 <= reg26;
+//		player_size_p2 <= reg27;
+//		damage_livesP1VGA[31:16] <= reg24[15:0];
+//		damage_livesP1VGA[15:0] <= reg28[15:0];
+//		damage_livesP2VGA[31:16] <= reg25[15:0];
+//		damage_livesP2VGA[15:0] <= reg29[15:0];
+//	end
+	
+	// Module Interconnects
+	always @(negedge clock) begin
 		damage1_inP <= reg24;
 		damage2_inP <= reg25;
 		player_size_p1 <= reg26;
@@ -197,11 +209,7 @@ module mmio(
 		damage_livesP1VGA[15:0] <= reg28[15:0];
 		damage_livesP2VGA[31:16] <= reg25[15:0];
 		damage_livesP2VGA[15:0] <= reg29[15:0];
-	end
-	
-	// Module Interconnects
-	always @(negedge clock) begin
-
+		
 		// Physics Constants
 		gravity <= 32'h00010000;
 		wind <= 32'h00000010;
