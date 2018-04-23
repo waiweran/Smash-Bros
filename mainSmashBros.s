@@ -150,12 +150,12 @@ jr $31
 
 # decrease lives P1
 dieOne:
-sub $28 $28 $1
+sra $28 $28 1
 j doneOne
 
 # decrease lives P2
 dieTwo:
-sub $29 $29 $1
+sra $29 $29 1
 j doneTwo
 
 
