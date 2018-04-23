@@ -142,7 +142,7 @@ module attack_coprocessor(
 		end
 
 		// Attack Endings
-		if(longTimer === 25'b0100000000000000000000001) begin
+		if(longTimer === 25'b0011111111111111111111111) begin
 			lastSL <= 1'b0;
 			lastSR <= 1'b0;
 			lastSU <= 1'b0;
@@ -154,8 +154,8 @@ module attack_coprocessor(
 			lastBL <= 1'b0;
 			lastBU <= 1'b0;
 			lastBD <= 1'b0;
-		end 
-		if(shortTimer === 24'b010000000000000000000001) begin
+		end //                                       
+		if(shortTimer === 24'b001111111111111111111111) begin
 			lastJNL <= 1'b0;
 			lastJNR <= 1'b0;
 		end
@@ -211,10 +211,16 @@ module attack_coprocessor(
 	always@(posedge clock) begin
 		if(smashU_out) knockback <= 32'h00000800;
 		if(smashD_out) knockback <= 32'h0000F7FE;
-		if(smashL_out) knockback <= 32'hF7FE00E0;
-		if(smashR_out) knockback <= 32'h080000E0;
-		if(jabNL_out) knockback <= 32'hFBFE0080;
-		if(jabNR_out) knockback <= 32'h04000080;
+		if(smashL_out) knockback <= 32'hF7FE00A0;
+		if(smashR_out) knockback <= 32'h080000A0;
+		if(jabNL_out) knockback <= 32'hFFBE0010;
+		if(jabNR_out) knockback <= 32'h00400010;
+		if(specialU_out) knockback <= 32'h00000800;
+		if(specialD_out) knockback <= 32'h0000F7FE;
+		if(specialL_out) knockback <= 32'hF7FE00A0;
+		if(specialR_out) knockback <= 32'h080000A0;
+		if(specialNL_out) knockback <= 32'hFBFE0080;
+		if(specialNR_out) knockback <= 32'h04000080;
 	end
 
 	// Moving the Characters

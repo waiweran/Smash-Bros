@@ -102,7 +102,7 @@ set_location_assignment PIN_AD21 -to gpio[6]
 set_location_assignment PIN_AE16 -to gpio[7]
 set_location_assignment PIN_AD15 -to gpio[8]
 set_location_assignment PIN_AE15 -to gpio[9]
-set_location_assignment PIN_AC19 -to gpio[10]
+set_location_assignment PIN_H14 -to gpio[10]
 set_location_assignment PIN_AF16 -to gpio[11]
 set_location_assignment PIN_AD19 -to gpio[12]
 set_location_assignment PIN_AF15 -to gpio[13]
@@ -276,4 +276,5 @@ set_global_assignment -name CDF_FILE output_files/Chain3.cdf
 set_global_assignment -name CDF_FILE output_files/Chain4.cdf
 set_global_assignment -name SYSTEMVERILOG_FILE isInside7Segsv.sv
 set_global_assignment -name SYSTEMVERILOG_FILE vga_controller.sv
+set_global_assignment -name MIF_FILE mainSmashBros.mif
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

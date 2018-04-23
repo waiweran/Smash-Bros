@@ -28,6 +28,6 @@ module isInsideSprite(spriteData, myX, myY, isInside, index);
 	//Flipped Index
 	assign flipped_index = topRightX - myX + (myY - (19'd480 - topRightY))*18'd256;
 	
-	assign index = spriteData[90] ? normal_index : flipped_index;
+	assign index = (spriteData[90] | spriteData[100]) & ~spriteData[99] ? normal_index : flipped_index;
 
 endmodule

@@ -1,7 +1,7 @@
 //For a single player
 //See google doc for documentation on bits of in and out
-module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfoverflowgpio, ledMotorOut, fastClock, slowClock, startDir, reset);
-	
+module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfoverflowgpio, ledMotorOut, fastClock, slowClock, startDir, reset, ledSignal);
+
 	input[15:0] halfgpio;
 	input[1:0] halfoverflowgpio;
 	input[31:0] mmioBoardOutput; //Only LSB is used! Everything else is padding just because assembly is 32 bits.
@@ -10,16 +10,36 @@ module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfover
 	input fastClock;
 	output slowClock;
 	input startDir, reset;
+	input ledSignal;
 	
 	assign mmioBoardInput[3:0] = 4'b0;
 	assign mmioBoardInput[7:4] = halfgpio[7:4]; //x
 	assign mmioBoardInput[11:8] = 4'b0;
 	assign mmioBoardInput[15:12] = halfgpio[15:12]; //y
-	assign mmioBoardInput[19:16] = halfgpio[3:0]; //a, b, grab, shield
-	assign mmioBoardInput[23:20] = 4'b0;//halfgpio[11:8]; //D pad
-	assign mmioBoardInput[25:24] = halfoverflowgpio; //Reset, Jump
+	assign mmioBoardInput[25:16] = mmioBoardButtons[25:16];
+	reg[31:0] mmioBoardButtons, mmioBoardPrev;  
+	reg[7:0] deTripCounter;
+	always @(posedge fastClock) begin
+		deTripCounter <= deTripCounter + 8'b1;
+	end
+	always @(posedge deTripCounter[7]) begin
+		if(reset) begin
+			mmioBoardButtons[25:16] = 10'b0;
+			mmioBoardPrev[25:16] = 10'b0;
+		end
+		else begin
+			mmioBoardButtons[19:16] = mmioBoardPrev[19:16] & halfgpio[3:0]; //a, b, grab, shield
+			mmioBoardButtons[23:20] = mmioBoardPrev[23:20] & halfgpio[11:8]; //D pad
+			mmioBoardButtons[25:24] = mmioBoardPrev[25:24] & halfoverflowgpio; //Reset, Jump
+			mmioBoardPrev[19:16] = halfgpio[3:0]; //a, b, grab, shield
+			mmioBoardPrev[23:20] = halfgpio[11:8]; //D pad
+			mmioBoardPrev[25:24] = halfoverflowgpio; //Reset, Jump
+		end
+	end
+
 	
 	//Pattern for ledMotorOut
+	/*
 	reg[31:0] ledCount;
 	reg ledMotorOutReg;
 	initial
@@ -70,10 +90,15 @@ module gameControllerManager(mmioBoardOutput, mmioBoardInput, halfgpio, halfover
 				ledCount = 0;
 			end
 			*/
+			/*
 		end
 	end
 	
 	assign ledMotorOut = ledMotorOutReg;
+	*/
+	//Code for LED Pattern
+	assign ledMotorOut = ledSignal;
+	
 	
 	//Slow clock for ADCs
 	reg[4:0] counter;
