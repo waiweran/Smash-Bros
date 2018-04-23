@@ -65,10 +65,10 @@ module physics_coprocessor(
 	assign wind[47:32] = 16'b0;
 	assign sjoy_x = joystick_x - (ctrl_num ? 9'sb001110000 : 9'sb010000000); // Map joystick values to -128 to 127
 	assign sjoy_y = joystick_y - 9'sb001110000; // Map joystick values to -128 to 127
-	assign move_x[18:10] = sjoy_x;
-	assign move_x[9:0] = 10'b0;
-	assign move_y[18:10] = sjoy_y;
-	assign move_y[9:0] = 10'b0;
+	assign move_x[19:11] = sjoy_x;
+	assign move_x[10:0] = 11'b0;
+	assign move_y[19:11] = sjoy_y;
+	assign move_y[10:0] = 11'b0;
 	assign damage_multiplier = damage_in[15:0] + 16'sd100;
 	assign kbx_signed = knockback_in[31:16];
 	assign kby_signed = knockback_in[15:0];
@@ -82,9 +82,9 @@ module physics_coprocessor(
 	assign movement_y[3:0] = 4'b0;
 	genvar i;
 	generate // Extend joystick, knockback values to 32 bit signed values
-		for(i = 19; i < 48; i = i + 1) begin: signextend1
-			assign move_x[i] = move_x[18];
-			assign move_y[i] = move_y[18];
+		for(i = 20; i < 48; i = i + 1) begin: signextend1
+			assign move_x[i] = move_x[19];
+			assign move_y[i] = move_y[19];
 		end
 		for(i = 20; i < 48; i = i + 1) begin: signextend2
 			assign knockback_x[i] = knockback_in[31];

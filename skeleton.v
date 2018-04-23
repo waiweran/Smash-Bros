@@ -144,7 +144,7 @@ module skeleton(
 	/** LEDs **/
 	wire [31:0] derp;
 	assign LEDs[7:0] = derp[7:0];
-	assign LEDs[15:8] = reg28[7:0];
+	assign LEDs[15:8] = reg25[7:0];
 	assign LEDs[17:16] = gpioOutput;
 
 endmodule

@@ -15,7 +15,7 @@ module mmio(
 	input[31:0] reg23, reg24, reg25, reg26, reg27, reg28, reg29;
 	output [159:0] p1VGA, p2VGA;
 	output[31:0] debug;
-	assign debug = p1VGA[159:128];
+	assign debug = 32'b0;
 	
 	
 	/******** Physics Coprocessors ********/
@@ -165,7 +165,7 @@ module mmio(
 	
 	// VGA Coprocessor Player 1
 	reg[31:0] posP1InVGA, whP1InVGA, controlP1VGA, attackP1VGA, collision_p1vga_in, damage_livesP1VGA;
-	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .controller(controlP1VGA), .attack(attackP1VGA), .collision(collision_p1vga_in), .damage_lives(reg28), .vga_output(p1VGA));
+	vga_coprocessor vgaP1(.posIn(posP1InVGA), .whIn(whP1InVGA), .controller(controlP1VGA), .attack(attackP1VGA), .collision(collision_p1vga_in), .damage_lives(damage_livesP1VGA), .vga_output(p1VGA));
 
 	// VGA Coprocessor Player 2
 	reg[31:0] posP2InVGA, whP2InVGA, controlP2VGA, attackP2VGA, collision_p2vga_in, damage_livesP2VGA;
