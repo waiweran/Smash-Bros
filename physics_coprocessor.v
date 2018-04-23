@@ -56,8 +56,7 @@ module physics_coprocessor(
 	wire signed [47:0] mass, gravity, wind;
    wire signed [8:0] sjoy_x, sjoy_y;
 	wire signed [47:0] move_x, move_y, knockback_x, knockback_y, movement_x, movement_y;
-	wire signed [31:0] damage_multiplier;
-	wire signed [15:0] kbx_signed, kby_signed;
+	wire signed [15:0] damage_multiplier, kbx_signed, kby_signed;
 	assign mass[31:0] = mass_in;
 	assign mass[47:32] = 16'b0;
 	assign gravity[31:0] = gravity_in;
@@ -70,11 +69,11 @@ module physics_coprocessor(
 	assign move_x[9:0] = 10'b0;
 	assign move_y[18:10] = sjoy_y;
 	assign move_y[9:0] = 10'b0;
-	assign damage_multiplier = damage_in + 32'd100;
+	assign damage_multiplier = damage_in[15:0] + 16'sd100;
 	assign kbx_signed = knockback_in[31:16];
 	assign kby_signed = knockback_in[15:0];
-	assign knockback_x[19:4] = (kbx_signed*damage_multiplier[15:0]) / 16'sd100; // Split knockback into x, y
-	assign knockback_y[19:4] = (kby_signed*damage_multiplier[15:0]) / 16'sd100;
+	assign knockback_x[19:4] = (kbx_signed*damage_multiplier) / 16'sd100; // Split knockback into x, y
+	assign knockback_y[19:4] = (kby_signed*damage_multiplier) / 16'sd100;
 	assign knockback_x[3:0] = 4'b0;
 	assign knockback_y[3:0] = 4'b0;
 	assign movement_x[19:4] = movement_in[31:16]; // Split attack movement into x, y
@@ -107,7 +106,7 @@ module physics_coprocessor(
 	 // Slowed clock for acceleration
 	 reg [15:0] slowClock;
 	 wire slowClockBit;
-	 assign slowClockBit = slowClock[11];
+	 assign slowClockBit = slowClock[10];
 	 always@(negedge clock) begin
 		slowClock <= slowClock + 16'd1;
 	 end

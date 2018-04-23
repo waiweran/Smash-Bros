@@ -1,6 +1,6 @@
 module mmio(
 	clock, reset, address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA,
-	reg23, reg24, reg25, reg26, reg27, reg28, reg29);
+	reg23, reg24, reg25, reg26, reg27, reg28, reg29, debug);
 	
 	input clock, reset;
 	input [12:0] address;
@@ -13,8 +13,9 @@ module mmio(
 	
 	//24,25: damage 26,27: mass, 28,29: lives
 	input[31:0] reg23, reg24, reg25, reg26, reg27, reg28, reg29;
-	output [127:0] p1VGA, p2VGA;
-	
+	output [159:0] p1VGA, p2VGA;
+	output[31:0] debug;
+	assign debug = p1VGA[159:128];
 	
 	
 	/******** Physics Coprocessors ********/
