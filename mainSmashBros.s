@@ -11,9 +11,7 @@ jal initializeConstants
 j loop
 
 # Loads constants from dmem and puts them in the special registers
-# Mass P1
 initializeConstants:
-
 #Damage to P1
 addi $24 $0 0
 
@@ -74,20 +72,21 @@ sll $7 $5 16
 sra $7 $7 16
 
 # if out of left bound
-blt $6 $2 54
+blt $6 $2 16
 # if out of right bound
-blt $4 $6 54
+blt $4 $6 15
 # if out of bottom bound
-blt $7 $0 54
+blt $7 $0 14
 # if out of top bound
-blt $3 $7 54
+blt $3 $7 13
 
 doneOne:
 jr $31
 
+ # Pos P1
 checkpTwo:
-# Pos P1
 lw $8 4224($0)
+
 # xpos
 sra $9 $8 16
 # ypos
@@ -95,23 +94,23 @@ sll $10 $8 16
 sra $10 $10 16
 
 # if out of left bound
-blt $9 $2 57
+blt $9 $2 8
 # if out of right bound
-blt $4 $9 57
+blt $4 $9 7
 # if out of bottom bound
-blt $10 $0 57
+blt $10 $0 6
 # if out of top bound
-blt $3 $10 57
+blt $3 $10 5
 
 doneTwo:
 jr $31
 
-dieOne:
 # decrease lives P1
+dieOne:
 sub $28 $28 $1
 j doneOne
 
-dieTwo:
 # decrease lives P2
+dieTwo:
 sub $29 $29 $1
 j doneTwo
