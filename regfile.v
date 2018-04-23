@@ -4,6 +4,7 @@ module regfile (
     ctrl_reset, ctrl_writeReg,
     ctrl_readRegA, ctrl_readRegB, data_writeReg,
     data_readRegA, data_readRegB,
+	 rego19, rego20, rego21, rego22,
 	 regi23, regi24, regi25, regi26, regi27, regi28, regi29
 );
 
@@ -13,6 +14,7 @@ module regfile (
 
    output [31:0] data_readRegA, data_readRegB;
 	//24: mass1, 25: mass2, 
+	input[31:0] rego19, rego20, rego21, rego22;
 	output[31:0] regi23, regi24, regi25, regi26, regi27, regi28, regi29;
 	assign regi23 = read23;
 	assign regi24 = read24;
@@ -57,10 +59,10 @@ module regfile (
 	register reg16(.write(data_writeReg), .we(writemask[16]), .clr(ctrl_reset), .clk(clock), .read(read16));
 	register reg17(.write(data_writeReg), .we(writemask[17]), .clr(ctrl_reset), .clk(clock), .read(read17));
 	register reg18(.write(data_writeReg), .we(writemask[18]), .clr(ctrl_reset), .clk(clock), .read(read18));
-	register reg19(.write(data_writeReg), .we(writemask[19]), .clr(ctrl_reset), .clk(clock), .read(read19));
-	register reg20(.write(data_writeReg), .we(writemask[20]), .clr(ctrl_reset), .clk(clock), .read(read20));
-	register reg21(.write(data_writeReg), .we(writemask[21]), .clr(ctrl_reset), .clk(clock), .read(read21));
-	register reg22(.write(data_writeReg), .we(writemask[22]), .clr(ctrl_reset), .clk(clock), .read(read22));
+//	register reg19(.write(data_writeReg), .we(writemask[19]), .clr(ctrl_reset), .clk(clock), .read(read19));
+//	register reg20(.write(data_writeReg), .we(writemask[20]), .clr(ctrl_reset), .clk(clock), .read(read20));
+//	register reg21(.write(data_writeReg), .we(writemask[21]), .clr(ctrl_reset), .clk(clock), .read(read21));
+//	register reg22(.write(data_writeReg), .we(writemask[22]), .clr(ctrl_reset), .clk(clock), .read(read22));
 	register reg23(.write(data_writeReg), .we(writemask[23]), .clr(ctrl_reset), .clk(clock), .read(read23));
 	register reg24(.write(data_writeReg), .we(writemask[24]), .clr(ctrl_reset), .clk(clock), .read(read24));
 	register reg25(.write(data_writeReg), .we(writemask[25]), .clr(ctrl_reset), .clk(clock), .read(read25));
@@ -74,12 +76,12 @@ module regfile (
 	tristate_32 readoutA(.sel(ctrl_readRegA), .out(data_readRegA), .in0(32'b0), .in1(read1), .in2(read2), .in3(read3), 
 	.in4(read4), .in5(read5), .in6(read6), .in7(read7), .in8(read8), .in9(read9), .in10(read10), .in11(read11), 
 	.in12(read12), .in13(read13), .in14(read14), .in15(read15), .in16(read16), .in17(read17), .in18(read18), 
-	.in19(read19), .in20(read20), .in21(read21), .in22(read22), .in23(read23), .in24(read24), .in25(read25),
+	.in19(rego19), .in20(rego20), .in21(rego21), .in22(rego22), .in23(read23), .in24(read24), .in25(read25),
 	.in26(read26), .in27(read27), .in28(read28), .in29(read29), .in30(read30), .in31(read31));
 	tristate_32 readoutB(.sel(ctrl_readRegB), .out(data_readRegB), .in0(32'b0), .in1(read1), .in2(read2), .in3(read3), 
 	.in4(read4), .in5(read5), .in6(read6), .in7(read7), .in8(read8), .in9(read9), .in10(read10), .in11(read11), 
 	.in12(read12), .in13(read13), .in14(read14), .in15(read15), .in16(read16), .in17(read17), .in18(read18), 
-	.in19(read19), .in20(read20), .in21(read21), .in22(read22), .in23(read23), .in24(read24), .in25(read25),
+	.in19(rego19), .in20(rego20), .in21(rego21), .in22(rego22), .in23(read23), .in24(read24), .in25(read25),
 	.in26(read26), .in27(read27), .in28(read28), .in29(read29), .in30(read30), .in31(read31));
 
 endmodule

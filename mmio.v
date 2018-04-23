@@ -1,5 +1,6 @@
 module mmio(
 	clock, reset, address, data_in, wren, data_out, gpio, gpioOutput, p1VGA, p2VGA,
+	reg19, reg20, reg21, reg22,
 	reg23, reg24, reg25, reg26, reg27, reg28, reg29, debug);
 	
 	input clock, reset;
@@ -11,11 +12,12 @@ module mmio(
 	input [35:0] gpio;
 	output[2:0] gpioOutput;
 	
+	output[31:0] reg19, reg20, reg21, reg22;
 	//24,25: damage 26,27: mass, 28,29: lives
 	input[31:0] reg23, reg24, reg25, reg26, reg27, reg28, reg29;
 	output [159:0] p1VGA, p2VGA;
 	output[31:0] debug;
-	assign debug = 32'b0;
+	
 	
 	
 	/******** Physics Coprocessors ********/
@@ -159,7 +161,7 @@ module mmio(
 	// Damage Coproccesor Player 2
 	wire [31:0] damage_out2;
 	damage_coprocessor damageP2(.clock(clock), .reset(reset), .attack(attack_out1), .damage(damage_out2));				
-
+	assign debug = damage_out1;
 					
 	/******** VGA Coprocessors ********/
 	
@@ -257,46 +259,51 @@ module mmio(
 		
 	end
 	
-	// Module Outputs
-	wire [31:0] co_sel;
-	assign wren_dmem = wren & ~address[12];
-	assign address_dmem = address[11:0];
-	decoder_32 coprocessor_select(.in(address[11:7]), .out(co_sel));
-	wire [31:0] coprocessor_out;
-	tristate_32 outmux(.sel(co_sel),
-			.in0(pos1),								// Player 1 Physics Coprocessor
-			.in1(pos2),								// Player 2 Physics Coprocessor
-			.in2(32'b0),							// Player 3 Physics Coprocessor (Unused)
-			.in3(32'b0),							// Player 4 Physics Coprocessor (Unused)
-			.in4(gameControllerInputP1), 		// Player 1 Game Controller Manager
-			.in5(gameControllerInputP2), 		// Player 2 Game Controller Manager
-			.in6(32'b0),  							// Player 3 Game Controller Manager (Unused)
-			.in7(32'b0),  							// Player 4 Game Controller Manager (Unused)
-			.in8(32'b0),  							// Player 1 VGA Coprocessor (Unused)
-			.in9(32'b0), 							// Player 2 VGA Coprocessor (Unused)
-			.in10(32'b0),  						// Player 3 VGA Coprocessor (Unused)
-			.in11(32'b0),  						// Player 4 VGA Coprocessor (Unused)
-			.in12(collision_out_p1), 			// Player 1 Collision Coprocessor
-			.in13(collision_out_p2), 			// Player 2 Collision Coprocessor
-			.in14(32'b0), 							// Unused
-			.in15(32'b0), 							// Unused
-			.in16(attack1),						// Player 1 Attack Coprocessor
-			.in17(attack2), 						// Player 2 Attack Coprocessor
-			.in18(32'b0), 							// Unused
-			.in19(32'b0), 							// Unused
-			.in20(32'b0), 							// Unused
-			.in21(32'b0), 							// Unused
-			.in22(32'b0), 							// Unused
-			.in23(32'b0), 							// Unused
-			.in24(damage_out1), 							// Damage done to Player 1
-			.in25(damage_out2), 							// Damage done to Player 2
-			.in26(32'b0), 							// Unused
-			.in27(32'b0), 							// Unused
-			.in28(32'b0), 							// Unused
-			.in29(32'b0), 							// Unused
-			.in30(32'b0), 							// Unused
-			.in31(32'b0), 							// Unused
-			.out(coprocessor_out));
-	assign data_out = address[12]? coprocessor_out : q_dmem;
+	assign reg19 = pos1;
+	assign reg20 = pos2;
+	assign reg21 = damage_out1;
+	assign reg22 = damage_out2;
+	
+//	// Module Outputs
+//	wire [31:0] co_sel;
+//	assign wren_dmem = wren & ~address[12];
+//	assign address_dmem = address[11:0];
+//	decoder_32 coprocessor_select(.in(address[11:7]), .out(co_sel));
+//	wire [31:0] coprocessor_out;
+//	tristate_32 outmux(.sel(co_sel),
+//			.in0(pos1),								// Player 1 Physics Coprocessor
+//			.in1(pos2),								// Player 2 Physics Coprocessor
+//			.in2(32'b0),							// Player 3 Physics Coprocessor (Unused)
+//			.in3(32'b0),							// Player 4 Physics Coprocessor (Unused)
+//			.in4(32'b0), 		// Player 1 Game Controller Manager
+//			.in5(32'b0), 		// Player 2 Game Controller Manager
+//			.in6(32'b0),  							// Player 3 Game Controller Manager (Unused)
+//			.in7(32'b0),  							// Player 4 Game Controller Manager (Unused)
+//			.in8(32'b0),  							// Player 1 VGA Coprocessor (Unused)
+//			.in9(32'b0), 							// Player 2 VGA Coprocessor (Unused)
+//			.in10(32'b0),  						// Player 3 VGA Coprocessor (Unused)
+//			.in11(32'b0),  						// Player 4 VGA Coprocessor (Unused)
+//			.in12(32'b0), 			// Player 1 Collision Coprocessor
+//			.in13(32'b0), 			// Player 2 Collision Coprocessor
+//			.in14(32'b0), 							// Unused
+//			.in15(32'b0), 							// Unused
+//			.in16(32'b0),						// Player 1 Attack Coprocessor
+//			.in17(32'b0), 						// Player 2 Attack Coprocessor
+//			.in18(32'b0), 							// Unused
+//			.in19(32'b0), 							// Unused
+//			.in20(32'b0), 							// Unused
+//			.in21(32'b0), 							// Unused
+//			.in22(32'b0), 							// Unused
+//			.in23(32'b0), 							// Unused
+//			.in24(damage_out1), 							// Damage done to Player 1
+//			.in25(damage_out2), 							// Damage done to Player 2
+//			.in26(32'b0), 							// Unused
+//			.in27(32'b0), 							// Unused
+//			.in28(32'b0), 							// Unused
+//			.in29(32'b0), 							// Unused
+//			.in30(32'b0), 							// Unused
+//			.in31(32'b0), 							// Unused
+//			.out(coprocessor_out));
+	assign data_out =  q_dmem;
 
 endmodule

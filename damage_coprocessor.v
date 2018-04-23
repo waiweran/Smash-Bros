@@ -11,7 +11,7 @@ module damage_coprocessor(
     output [31:0] damage;
 
     reg [31:0] damage;
-    always@(posedge clock) begin
+    always@(negedge clock) begin
       if(reset) begin
         damage <= 32'b0;
       end

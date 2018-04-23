@@ -72,30 +72,27 @@ nop
 nop
 
 # damage to P1
-lw $1 7168($0)
-bne $1 $15 1
+bne $21 $15 1
 j afterAddOne
-add $24 $24 $1
+add $24 $24 $21
 afterAddOne:
-add $15 $1 $0
+add $15 $21 $0
 
 # damage to P2
-lw $1 7296($0)
-bne $1 $16 1
+bne $22 $16 1
 j afterAddTwo
-add $25 $25 $1
+add $25 $25 $22
 afterAddTwo:
-add $16 $1 $0
+add $16 $22 $0
 
 j loop
 
 checkpOne:
 # Pos P1
-lw $11 4096($0)
 # xpos
-sra $6 $11 16
+sra $6 $19 16
 # ypos
-sll $7 $11 16
+sll $7 $19 16
 sra $7 $7 16
 
 # if out of left bound
@@ -113,12 +110,10 @@ jr $31
 
  # Pos P1
 checkpTwo:
-lw $8 4224($0)
-
 # xpos
-sra $9 $8 16
+sra $9 $20 16
 # ypos
-sll $10 $8 16
+sll $10 $20 16
 sra $10 $10 16
 
 # if out of left bound
