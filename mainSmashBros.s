@@ -3,21 +3,22 @@
 # - PC immediate works for jal/functions, but not for branching - must do it manually for branching.
 # - If you write "functionName:" then on a newline write the next instruction, a nop will be inserted.
 # - Comments cannot be on the same line as an instruction.
-#
+# - Do not write the dollar sign or equals sign in a comment and do not write it in code unless actually calling a register.
+# For some reason the rest of this comment causes assembulator to crash, remove it when using.
 # Special Registers
-# - $23 = LED/Rumble Output
-# - $24 = Damage P1
-# - $25 = Damage P2
-# - $26 = Size P1
-# - $27 = Size P2
-# - $28 = Lives P1
-# - $29 = Lives P2
-# - $30 = Exceptions that we shouldn't use
-# - $31 = Return Address
+# - 23 - LED/Rumble Output
+# - 24 - Damage P1
+# - 25 - Damage P2
+# - 26 - Size P1
+# - 27 - Size P2
+# - 28 - Lives P1
+# - 29 - Lives P2
+# - 30 - Exceptions that we shouldnt use
+# - 31 - Return Address
 #
 # Other Registers
-# - $2. $3, $4 = Stage Boundaries for Death
-# - $5 is the counter for LEDs
+# - 2, 3, 4 - Stage Boundaries for Death
+# - 5 is the counter for LEDs
 
 main:
 nop
@@ -28,7 +29,7 @@ nop
 j loop
 
 # Loads constants from dmem and puts them in the special registers
-# Registers: 
+# Registers:
 initializeConstants:
 #Damage to P1
 addi $24 $0 0
@@ -152,7 +153,7 @@ j doneTwo
 
 
 
-blinkLEDs: 
+blinkLEDs:
 #First counter variable to turn high
 # Upper bits
 addi $8 $0 3051
@@ -161,10 +162,10 @@ sll $8 $8 12
 addi $6 $8 3104
 #Second counter variable to turn low
 # Upper bits
-addi $8 $0 3051
-sll $8 $8 12
+addi $8 $0 381
+sll $8 $8 16
 # Lower bits
-addi $7 $8 6208
+addi $7 $8 30784
 bne $5 $6 1
 addi $23 $0 1
 
