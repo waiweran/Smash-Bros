@@ -29,7 +29,7 @@ module mmio(
 	reg [31:0] ctrl1_inP, knock1_inP, attack1_inP, collis1_inP, move1_inP, damage1_inP;
 	wire [31:0] pos1;
 	physics_coprocessor physP1(
-		.clock(clock), .reset(reset),
+		.clock(clock), .reset(reset | reg23[2]),
 
 		.mass_in(mass1), .gravity_in(gravity), .wind_in(wind),
 		.start_Position(startPos1),
@@ -54,7 +54,7 @@ module mmio(
 	reg [31:0] ctrl2_inP, knock2_inP, attack2_inP, collis2_inP, move2_inP, damage2_inP;
 	wire [31:0] pos2;
 	physics_coprocessor physP2(
-		.clock(clock), .reset(reset),
+		.clock(clock), .reset(reset | reg23[3]),
 
 		.mass_in(mass2), .gravity_in(gravity), .wind_in(wind),
 		.start_Position(startPos2),
@@ -274,8 +274,8 @@ module mmio(
 	
 //	// Module Outputs
 //	wire [31:0] co_sel;
-//	assign wren_dmem = wren & ~address[12];
-//	assign address_dmem = address[11:0];
+	assign wren_dmem = wren & ~address[12];
+	assign address_dmem = address[11:0];
 //	decoder_32 coprocessor_select(.in(address[11:7]), .out(co_sel));
 //	wire [31:0] coprocessor_out;
 //	tristate_32 outmux(.sel(co_sel),

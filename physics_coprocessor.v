@@ -108,7 +108,8 @@ module physics_coprocessor(
 	 wire slowClockBit;
 	 assign slowClockBit = slowClock[10];
 	 always@(negedge clock) begin
-		slowClock <= slowClock + 16'd1;
+		if(reset) slowClock <= 16'b0000010000000000;
+		else slowClock <= slowClock + 16'd1;
 	 end
 	 
 	 // Jump Control

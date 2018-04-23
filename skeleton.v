@@ -89,7 +89,7 @@ module skeleton(
     wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     wire [31:0] data_writeReg;
     wire [31:0] data_readRegA, data_readRegB;
-	 wire [31:0] reg19, reg20, reg21, reg22;
+	 wire [31:0] reg18, reg19, reg20, reg21, reg22;
 	 wire [31:0] reg23, reg24, reg25, reg26, reg27, reg28, reg29;
 	 
     regfile my_regfile(
@@ -102,7 +102,7 @@ module skeleton(
         .data_writeReg(data_writeReg),
         .data_readRegA(data_readRegA),
         .data_readRegB(data_readRegB), 
-		  .rego19(reg19), .rego20(reg20), .rego21(reg21), .rego22(reg22),
+		  .rego18(reg18), .rego19(reg19), .rego20(reg20), .rego21(reg21), .rego22(reg22),
 		  .regi23(reg23), .regi24(reg24), .regi25(reg25), .regi26(reg26), .regi27(reg27), .regi28(reg28), .regi29(reg29)
     );
 
@@ -145,7 +145,8 @@ module skeleton(
 								 .g_data(VGA_G),
 								 .r_data(VGA_R),
 								 .p1VGA(p1VGA),
-								 .p2VGA(p2VGA)
+								 .p2VGA(p2VGA),
+								 .reg18(reg18)
 	);
 	
 	/** LEDs **/

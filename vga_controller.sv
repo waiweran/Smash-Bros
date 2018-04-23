@@ -7,7 +7,8 @@ module vga_controller(iRST_n,
                       g_data,
                       r_data,
 							 p1VGA,
-							 p2VGA
+							 p2VGA,
+							 reg18
 );
 
 	
@@ -19,10 +20,12 @@ output reg oVS;
 output [7:0] b_data;
 output [7:0] g_data;  
 output [7:0] r_data;
+output [31:0] reg18; //register for lives
 
 input [159:0] p1VGA, p2VGA;
                         
-///////// ////                     
+///////// //// 
+reg [31:0] reg18;                    
 reg [18:0] ADDR;
 reg [16:0] stage_addr;
 reg [8:0] count;
@@ -30,7 +33,7 @@ reg [23:0] bgr_data;
 wire VGA_CLK_n;
 wire [7:0] index, indexc1, indexc1_a, indexc1_down, indexc1_downb, indexc1_sideb, indexc1_upb, indexc1_walk, indexc1_b;
 wire [7:0] indexc2, indexc2_a, indexc2_down, indexc2_downb, indexc2_sideb, indexc2_upb, indexc2_walk, indexc2_b;
-wire[23:0] bgr_data_raw;
+reg[23:0] bgr_data_raw;
 wire cBLANK_n,cHS,cVS,rst;
 ////
 assign rst = ~iRST_n;
@@ -43,37 +46,16 @@ video_sync_generator LTM_ins (.vga_clk(iVGA_CLK),
 ////Address generator
 always@(posedge iVGA_CLK,negedge iRST_n)
 begin
-	if (!iRST_n) 
+	if (!iRST_n) begin
 		ADDR<=19'd0;
+		reg18 <= (setlives1 << 16'd16) + setlives2;
+	end
 	else if (cHS==1'b0 && cVS==1'b0)
 		ADDR<=19'd0;
 	else if (cBLANK_n==1'b1)
 		ADDR<=ADDR+19'd1;
 	
-
 end
-
-//always@(posedge iVGA_CLK, negedge iRST_n)
-//begin
-//	if (count % 2 == 9'd1)
-//		stage_addr<=stage_addr-9'd320;
-//end
-//
-//always@(negedge iVGA_CLK, negedge iRST_n)
-//begin
-//	if (!iRST_n) begin
-//		count<=9'd0;
-//		stage_addr<=17'd0;
-//	end
-//	else if (cHS==1'b0 && cVS==1'b0) begin
-//		count<=9'd0;
-//		stage_addr<=17'd0;
-//	end
-//	if (ADDR % 19'd640 == 19'b0) // increase the count for each line that passes
-//		count<=count+9'd1;
-//	if (ADDR % 2 == 19'b0) //increment stage addr every other pixel
-//		stage_addr<=stage_addr+9'd1;
-//end
 
 assign VGA_CLK_n = ~iVGA_CLK;
 
@@ -91,16 +73,6 @@ stage_index stage_index_inst (
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw_background )
 );	
-//img_data	img_data_inst (
-//	.address ( ADDR ),
-//	.clock ( VGA_CLK_n ),
-//	.q ( index )
-//);
-//img_index	img_index_inst (
-//	.address ( index ),
-//	.clock ( iVGA_CLK ),
-//	.q ( bgr_data_raw_background)
-//);	
 
 // Convert ADDR to pixel (x, y)
 wire[18:0] myX, myY;
@@ -314,7 +286,7 @@ always@(posedge VGA_CLK_n) begin
 	else if(p1VGA[104] | p1VGA[105] | p1VGA[99] | p1VGA[100]) begin
 		bgr_data_raw_p1 <= bgr_data_raw_p1_sideb;
 	end
-	else if(p1VGA[106] | p1VGA[98]) begin
+	else if(p1VGA[106]) begin
 		bgr_data_raw_p1 <= bgr_data_raw_p1_b;
 	end
 	else if((p1VGA[71:69] == 3'b000) & p1VGA[113]) begin
@@ -335,13 +307,13 @@ always@(posedge VGA_CLK_n) begin
 	else if(p2VGA[98]) begin
 		bgr_data_raw_p2 <= bgr_data_raw_p2_downb;
 	end
-	else if(p2VGA[102]) begin
+	else if(p2VGA[102] | p2VGA[97]) begin
 		bgr_data_raw_p2 <= bgr_data_raw_p2_upb;
 	end
 	else if(p2VGA[104] | p2VGA[105] | p2VGA[99] | p2VGA[100]) begin
 		bgr_data_raw_p2 <= bgr_data_raw_p2_sideb;
 	end
-	else if(p2VGA[106] | p2VGA[98]) begin
+	else if(p2VGA[106]) begin
 		bgr_data_raw_p2 <= bgr_data_raw_p2_b;
 	end
 	else if((p2VGA[71:69] == 3'b000) & p2VGA[113]) begin
@@ -354,21 +326,6 @@ always@(posedge VGA_CLK_n) begin
 		bgr_data_raw_p2 <= bgr_data_raw_p2_normal;
 	end
 end
-
-wire [23:0] bgr_data_raw_endscreen;
-assign bgr_data_raw_endscreen = 24'b000000001111111111111111;
-//assign bgr_data_raw_background = 24'b010101010101010101010101;
-
-//always@(negedge VGA_CLK_n) begin
-//	if((p1VGA[143:128] == 16'b0) | (p2VGA[143:128] == 16'b0)) begin
-//		bgr_data_raw <= bgr_data_raw_endscreen;
-//	end
-//	else begin
-////		assign w1 = isInsideP1 & (bgr_data_raw_p1 !== 24'b0) ? bgr_data_raw_p1 : bgr_data_raw_background;
-//
-//		bgr_data_raw <= isInsideP2 & (bgr_data_raw_p2 !== 24'b0) ? bgr_data_raw_p2 : (isInsideP1 & (bgr_data_raw_p1 !== 24'b0)) ? bgr_data_raw_p1 : bgr_data_raw_background;
-//	end
-//end
 
 wire[23:0] bgr_data_raw_sevseg;
 assign bgr_data_raw_sevseg = 24'b111111111111111111111111;
@@ -483,7 +440,7 @@ endgenerate
 wire [6:0] isInside7seg1 [2:0];
 wire [6:0] isInside7seg2 [2:0];
 //isInside7Segsv inside7Seg1(seg100_1, seg10_1, seg1_1, myX, myY, p1VGA[159:144], isInside7seg1);
-isInside7Segsv inside7Seg1(seg100_1, seg10_1, seg1_1, myX, myY, p2VGA[159:144], isInside7seg1);
+isInside7Segsv inside7Seg1(seg100_1, seg10_1, seg1_1, myX, myY, p1VGA[159:144], isInside7seg1);
 isInside7Segsv inside7Seg2(seg100_2, seg10_2, seg1_2, myX, myY, p2VGA[159:144], isInside7seg2);
 
 wire [23:0] bgr_data_raw_wow;
@@ -491,7 +448,7 @@ assign bgr_data_raw_wow = (isInside7seg1[0][0]|isInside7seg1[0][1]|isInside7seg1
 								  |isInside7seg2[0][0]|isInside7seg2[0][1]|isInside7seg2[0][2]|isInside7seg2[0][3]|isInside7seg2[0][4]|isInside7seg2[0][5]|isInside7seg2[0][6]|isInside7seg2[1][0]|isInside7seg2[1][1]|isInside7seg2[1][2]|isInside7seg2[1][3]|isInside7seg2[1][4]|isInside7seg2[1][5]|isInside7seg2[1][6]|isInside7seg2[2][0]|isInside7seg2[2][1]|isInside7seg2[2][2]|isInside7seg2[2][3]|isInside7seg2[2][4]|isInside7seg2[2][5]|isInside7seg2[2][6]) ? bgr_data_raw_sevseg : bgr_data_raw_background;
 
 
-wire [23:0] bgr_data_raw_lives1, bgr_data_raw_lives2 , bgr_data_raw_wow2, bgr_data_raw_wow3;
+wire [23:0] bgr_data_raw_lives1, bgr_data_raw_lives2 , bgr_data_raw_wow2, bgr_data_raw_wow3, bgr_data_raw_wow4;
 assign bgr_data_raw_lives1 = 24'b000000000000000001111100;
 assign bgr_data_raw_lives2 = 24'b101010101010101010101010;
 
@@ -521,8 +478,67 @@ isInsideLives insidelives2(lives2, myX, myY, p2VGA[143:128], isInsideLives2);
 assign bgr_data_raw_wow2 = isInsideP2 & (bgr_data_raw_p2 !== 24'b0) ? bgr_data_raw_p2 : (isInsideP1 & (bgr_data_raw_p1 !== 24'b0)) ? bgr_data_raw_p1 : bgr_data_raw_wow;
 
 assign bgr_data_raw_wow3 = (isInsideLives1[0]|isInsideLives1[1]|isInsideLives1[2]|isInsideLives1[3]|isInsideLives1[4]) ? bgr_data_raw_lives1 : bgr_data_raw_wow2;	
-assign bgr_data_raw = (isInsideLives2[0]|isInsideLives2[1]|isInsideLives2[2]|isInsideLives2[3]|isInsideLives2[4]) ? bgr_data_raw_lives2 : bgr_data_raw_wow3;	
+assign bgr_data_raw_wow4 = (isInsideLives2[0]|isInsideLives2[1]|isInsideLives2[2]|isInsideLives2[3]|isInsideLives2[4]) ? bgr_data_raw_lives2 : bgr_data_raw_wow3;	
 	  
+
+wire [23:0] bgr_data_raw_endscreen1, bgr_data_raw_endscreen2;
+assign bgr_data_raw_endscreen1 = 24'b000000001111111111111111;
+assign bgr_data_raw_endscreen2 = 24'b111111110000000000000000;
+
+wire [4:0] isInsideLives3, isInsideLives4;
+reg [4:0] setlives1, setlives2;
+isInsideLives insidesetlives1(lives1, myX, myY, setlives1, isInsideLives3);
+isInsideLives insidesetLives2(lives2, myX, myY, setlives2, isInsideLives4);
+reg uplastpressed, downlastpressed;
+
+//Check ending
+always@(negedge VGA_CLK_n) begin
+	if((p1VGA[143:128] == 16'b0) | (p2VGA[143:128] == 16'b0)) begin
+		//dpad down, decrease lives
+		if(p1VGA[84] & ~uplastpressed) begin
+			setlives1 <= setlives1 >> 1'b1;
+			uplastpressed <= 1'b1;
+		end
+		else if(~p1VGA[84] & uplastpressed)begin
+			uplastpressed <= 1'b0;
+		end
+		//dpad up, increase lives
+		else if(p1VGA[85] & ~downlastpressed) begin
+			setlives1 <= (setlives1 << 1'b1) + 1'b1;
+			downlastpressed <= 1'b1;
+		end
+		else if(~p1VGA[85] & downlastpressed) begin
+			downlastpressed <= 1'b0;
+		end
+			
+		//dpad down, decrease lives
+		if(p2VGA[84] & ~uplastpressed) begin
+			setlives2 <= setlives2 >> 1'b1;
+			uplastpressed <= 1'b1;
+		end
+		else if(~p2VGA[84] & uplastpressed)begin
+			uplastpressed <= 1'b0;
+		end
+		//dpad up, increase lives
+		else if(p2VGA[85] & ~downlastpressed) begin
+			setlives2 <= (setlives2 << 1'b1) + 1'b1;
+			downlastpressed <= 1'b1;
+		end
+		else if(~p2VGA[85] & downlastpressed) begin
+			downlastpressed <= 1'b0;
+		end
+	end
+	
+	if((p1VGA[143:128] == 16'b0)) begin		
+		bgr_data_raw <= (isInsideLives3[0]|isInsideLives3[1]|isInsideLives3[2]|isInsideLives3[3]|isInsideLives3[4]) ? bgr_data_raw_lives1 : ((isInsideLives4[0]|isInsideLives4[1]|isInsideLives4[2]|isInsideLives4[3]|isInsideLives4[4]) ? bgr_data_raw_lives2 : bgr_data_raw_endscreen1);
+	end
+	else if((p2VGA[143:128] == 16'b0)) begin
+		bgr_data_raw <= (isInsideLives3[0]|isInsideLives3[1]|isInsideLives3[2]|isInsideLives3[3]|isInsideLives3[4]) ? bgr_data_raw_lives1 : ((isInsideLives4[0]|isInsideLives4[1]|isInsideLives4[2]|isInsideLives4[3]|isInsideLives4[4]) ? bgr_data_raw_lives2 : bgr_data_raw_endscreen2);
+	end
+	else begin
+		bgr_data_raw <= bgr_data_raw_wow4;
+	end
+end
 					
 /************** OUR CODE ENDS HERE **************/
 

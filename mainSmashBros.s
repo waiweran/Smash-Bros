@@ -48,7 +48,7 @@ addi $2 $0 56
 # top boundary
 addi $3 $0 680
 # right boundary
-addi $4 $0 880
+addi $4 $0 1096
 # bottom boundary just 0
 
 # $5 is the counter
@@ -110,7 +110,17 @@ jr $31
 
 # decrease lives P1
 dieOne:
+addi $23 $23 4
+nop
+nop
+nop
+addi $23 $23 -4
+addi $24 $0 0
 sra $28 $28 1
+bne $28 $0 1
+j setlives
+
+
 j doneOne
 
  # Pos P2
@@ -136,9 +146,24 @@ jr $31
 
 # decrease lives P2
 dieTwo:
+addi $23 $23 8
+nop
+nop
+nop
+addi $23 $23 -8
+addi $25 $0 0
 sra $29 $29 1
 j doneTwo
 
+setlives:
+# store lives into memory p1
+sra $28 $18 16
+sw $28 0($0)
+# store lives into memory p2
+sll $29 $18 16
+sra $29 $29 16
+sw $29 $1(0)
+j setlives
 
 blinkLEDs:
 #First counter variable to turn high
