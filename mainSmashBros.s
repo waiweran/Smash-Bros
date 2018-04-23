@@ -96,36 +96,15 @@ sll $7 $19 16
 sra $7 $7 16
 
 # if out of left bound
-blt $6 $2 18
+blt $6 $2 6
 # if out of right bound
-blt $4 $6 17
+blt $4 $6 5
 # if out of bottom bound
-blt $7 $0 16
+blt $7 $0 4
 # if out of top bound
-blt $3 $7 15
+blt $3 $7 3
 
 doneOne:
-nop
-jr $31
-
- # Pos P1
-checkpTwo:
-# xpos
-sra $9 $20 16
-# ypos
-sll $10 $20 16
-sra $10 $10 16
-
-# if out of left bound
-blt $9 $2 9
-# if out of right bound
-blt $4 $9 8
-# if out of bottom bound
-blt $10 $0 7
-# if out of top bound
-blt $3 $10 6
-
-doneTwo:
 nop
 jr $31
 
@@ -134,12 +113,31 @@ dieOne:
 sra $28 $28 1
 j doneOne
 
+ # Pos P2
+checkpTwo:
+# xpos
+sra $9 $20 16
+# ypos
+sll $10 $20 16
+sra $10 $10 16
+
+# if out of left bound
+blt $9 $2 6
+# if out of right bound
+blt $4 $9 5
+# if out of bottom bound
+blt $10 $0 4
+# if out of top bound
+blt $3 $10 3
+
+doneTwo:
+nop
+jr $31
+
 # decrease lives P2
 dieTwo:
 sra $29 $29 1
 j doneTwo
-
-
 
 
 blinkLEDs:
