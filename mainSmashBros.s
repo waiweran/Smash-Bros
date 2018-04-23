@@ -4,21 +4,7 @@
 # - If you write "functionName:" then on a newline write the next instruction, a nop will be inserted.
 # - Comments cannot be on the same line as an instruction.
 # - Do not write the dollar sign or equals sign in a comment and do not write it in code unless actually calling a register.
-# For some reason the rest of this comment causes assembulator to crash, remove it when using.
-# Special Registers
-# - 23 - LED/Rumble Output
-# - 24 - Damage P1
-# - 25 - Damage P2
-# - 26 - Size P1
-# - 27 - Size P2
-# - 28 - Lives P1
-# - 29 - Lives P2
-# - 30 - Exceptions that we shouldnt use
-# - 31 - Return Address
-#
-# Other Registers
-# - 2, 3, 4 - Stage Boundaries for Death
-# - 5 is the counter for LEDs
+
 
 main:
 nop
@@ -87,11 +73,19 @@ nop
 
 # damage to P1
 lw $1 7168($0)
+bne $1 $15 1
+j afterAddOne
 add $24 $24 $1
+afterAddOne:
+add $15 $1 $0
 
 # damage to P2
 lw $1 7296($0)
+bne $1 $16 1
+j afterAddTwo
 add $25 $25 $1
+afterAddTwo:
+add $16 $1 $0
 
 j loop
 
@@ -142,12 +136,12 @@ jr $31
 
 # decrease lives P1
 dieOne:
-sub $28 $28 $1
+sra $28 $28 1
 j doneOne
 
 # decrease lives P2
 dieTwo:
-sub $29 $29 $1
+sra $29 $29 1
 j doneTwo
 
 
