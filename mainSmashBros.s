@@ -68,8 +68,6 @@ jal checkpTwo
 nop
 nop
 jal blinkLEDs
-nop
-nop
 
 # damage to P1
 bne $21 $15 1
@@ -162,31 +160,35 @@ sw $28 0($0)
 # store lives into memory p2
 sll $29 $18 16
 sra $29 $29 16
-sw $29 $1(0)
+sw $29 1($0)
 j setlives
 
 blinkLEDs:
-#First counter variable to turn high
-# Upper bits
-addi $8 $0 3051
-sll $8 $8 12
-# Lower bits
-addi $6 $8 3104
-#Second counter variable to turn low
-# Upper bits
-addi $8 $0 381
-sll $8 $8 16
-# Lower bits
-addi $7 $8 30784
-bne $5 $6 1
-addi $23 $0 1
+addi $23 $23 0
+# P1 (23[0])
+addi $7 $7 0
+# P2 (23[1])
+addi $8 $8 0
 
-bne $5 $7 2
-addi $23 $0 0
-addi $5 $0 0
+bne $21 $0 2
+# Zero code
+addi $7 $0 0
+j endLEDBranchOne
+# Nonzero code
+addi $7 $0 1
+endLEDBranchOne:
 
-addi $5 $5 1
+bne $22 $0 2
+# Zero code
+addi $8 $0 0
+j endLEDBranchTwo
+# Nonzero code
+addi $8 $0 1
+endLEDBranchTwo:
 
-nop
-nop
+#Shift into reg23
+sll $8 $8 1
+add $8 $8 $7
+addi $23 $8 0
+
 jr $31
