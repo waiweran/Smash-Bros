@@ -40,7 +40,7 @@ module skeleton(
 	// Clock and Reset Inputs
 	input clock, reset_btn;
 	wire reset;
-	assign reset = ~reset_btn | gpio[35] | gpio[33];
+	assign reset = ~reset_btn | p1VGA[89] | p2VGA[89];
 	
 	// GPIO Pins
 	input[35:0] gpio;

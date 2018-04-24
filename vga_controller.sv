@@ -292,7 +292,7 @@ always@(posedge VGA_CLK_n) begin
 	else if((p1VGA[71:69] == 3'b000) & p1VGA[113]) begin
 		bgr_data_raw_p1 <= bgr_data_raw_p1_down;
 	end	
-	else if((p1VGA[79:78] != 2'b10) & (p1VGA[79:78] != 2'b01) & p1VGA[113]) begin
+	else if(((p1VGA[79:78] != 2'b10) & (p1VGA[79:78] != 2'b01) & p1VGA[113])|p1VGA[108]) begin
 		bgr_data_raw_p1 <= bgr_data_raw_p1_walk;
 	end
 	else begin
@@ -319,7 +319,7 @@ always@(posedge VGA_CLK_n) begin
 	else if((p2VGA[71:69] == 3'b000) & p2VGA[113]) begin
 		bgr_data_raw_p2 <= bgr_data_raw_p2_down;
 	end	
-	else if((p2VGA[79:78] != 2'b10) & (p2VGA[79:78] != 2'b01) & p2VGA[113]) begin
+	else if(((p2VGA[79:78] != 2'b10) & (p2VGA[79:78] != 2'b01) & p2VGA[113])|p2VGA[108]) begin
 		bgr_data_raw_p2 <= bgr_data_raw_p2_walk;
 	end
 	else begin
@@ -482,9 +482,9 @@ assign bgr_data_raw_wow4 = (isInsideLives2[0]|isInsideLives2[1]|isInsideLives2[2
 	  
 
 wire [23:0] bgr_data_raw_endscreen;
-wire [2:0] indexend, indexend2;
+wire [7:0] indexend;
 endscreen_data	endscreen_data_inst (
-	.address ( ADDR/2 ),
+	.address ( indexgame/2 ),
 	.clock ( VGA_CLK_n ),
 	.q ( indexend )
 );
@@ -501,13 +501,20 @@ isInsideLives insidesetLives2(lives2, myX, myY, setlives2, isInsideLives4);
 //reg uplastpressed, downlastpressed;
 
 wire [63:0] game;
-assign game[63:48] = 16'd110;
+assign game[63:48] = 16'd366;
 assign game[47:32] = 16'd280;
-assign game[31:16] = 16'd425;
+assign game[31:16] = 16'd420;
 assign game[15:0] = 16'd133;
 wire isInsideGame;
-isInsideEndGame game1(game, myX, myY, isInsideGame);
-assign bgr_data_raw = isInsideGame ? bgr_data_raw_endscreen : bgr_data_raw_wow4;
+wire [18:0] indexgame;
+isInsideEndGame game1(game, myX, myY, isInsideGame, indexgame);
+always@(negedge VGA_CLK_n) begin
+	if((p1VGA[143:128] == 16'b0) | (p2VGA[143:128] == 16'b0)) begin
+		bgr_data_raw <= isInsideGame & (bgr_data_raw_endscreen != 24'b000000001111111100000000) ? bgr_data_raw_endscreen : bgr_data_raw_wow4;
+	end
+	else
+		bgr_data_raw <= bgr_data_raw_wow4;
+end
 
 //Check ending
 //always@(negedge VGA_CLK_n) begin

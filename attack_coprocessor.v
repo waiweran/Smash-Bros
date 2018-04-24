@@ -9,17 +9,15 @@ module attack_coprocessor(
 	// Outputs
 	attack,
 	movement,
-	knockback,
-	my_shield
+	knockback
 );
 
 	input clock, reset;
 	input [31:0] char1pos, char1size;
 	input [31:0] char2pos, char2size;
 	input [31:0] controls;
-	input opp_shield
+	input opp_shield;
 	output [31:0] attack, movement, knockback;
-	output my_shield
 
 	// smash attacks
 	wire smashL, smashR, smashU, smashD;
@@ -85,7 +83,7 @@ module attack_coprocessor(
 	reg lastAttack;
 	reg lastSL, lastSR, lastSU, lastSD, lastJNL, lastJNR;
 	reg lastBNL, lastBNR, lastBL, lastBR, lastBU, lastBD;
-	reg lastShield
+	reg lastShield;
 	always@(posedge clock) begin
 		
 		// Attack Starts
@@ -151,7 +149,8 @@ module attack_coprocessor(
 		end
 		
 		// Shield Starts
-		if(shield & ~lastShield) begin
+		if(shield & ~lastShield & ~lastAttack) begin
+			lastAttack = 1'b1;
 			lastShield = 1'b1;
 			shieldTimer = 26'b10000000000000000000000000;
 		end
@@ -180,8 +179,9 @@ module attack_coprocessor(
 		end
 		
 		// Shield Ending
-		if(shieldTimer === 26'b00100000000000000000000000) begin
+		if(shieldTimer === 26'b01111111111111111111111111) begin
 			lastShield = 1'b0;
+			lastAttack = 1'b0;
 		end
 
 		// Timer Increments
@@ -193,7 +193,7 @@ module attack_coprocessor(
 
 	// Duration Output Values
 	wire smashL_out, smashR_out, smashU_out, smashD_out, jabNL_out, jabNR_out;
-	wire specialNL_out, specialNR_out, specialL_out, specialR_out, specialU_out, specialD_out;
+	wire specialNL_out, specialNR_out, specialL_out, specialR_out, specialU_out, specialD_out, my_shield;
 	assign smashL_out = lastSL & longTimer[24];
 	assign smashR_out = lastSR & longTimer[24];
 	assign smashU_out = lastSU & longTimer[24];
@@ -226,23 +226,24 @@ module attack_coprocessor(
 	assign attack[11] = smashU_out | smashD_out | smashL_out | smashR_out | jabNL_out
 						 | jabNR_out | specialU_out | specialD_out | specialL_out 
 						 | specialR_out | specialNL_out | specialNR_out;
-	assign attack[31:12] = 20'b0;
+	assign attack[12] = my_shield;
+	assign attack[31:13] = 19'b0;
 		
 	// Giving Knockback
 	reg [31:0] knockback;
 	always@(posedge clock) begin
-		if(smashU_out) knockback <= 32'h00000800;
-		if(smashD_out) knockback <= 32'h0000F7FE;
-		if(smashL_out) knockback <= 32'hF7FE00A0;
-		if(smashR_out) knockback <= 32'h080000A0;
-		if(jabNL_out) knockback <= 32'hFFBE0010;
-		if(jabNR_out) knockback <= 32'h00400010;
-		if(specialU_out) knockback <= 32'h00000800;
-		if(specialD_out) knockback <= 32'h0000F7FE;
-		if(specialL_out) knockback <= 32'hF7FE00A0;
-		if(specialR_out) knockback <= 32'h080000A0;
-		if(specialNL_out) knockback <= 32'hFBFE0080;
-		if(specialNR_out) knockback <= 32'h04000080;
+		if(smashU_out) knockback <= 32'h0000000A;
+		if(smashD_out) knockback <= 32'h0000FFF0;
+		if(smashL_out) knockback <= 32'hFFF80001;
+		if(smashR_out) knockback <= 32'h00080001;
+		if(jabNL_out) knockback <= 32'hFFFC0001;
+		if(jabNR_out) knockback <= 32'h00040001;
+		if(specialU_out) knockback <= 32'h00000006;
+		if(specialD_out) knockback <= 32'h0000FFF8;
+		if(specialL_out) knockback <= 32'hFFFA0002;
+		if(specialR_out) knockback <= 32'h00060002;
+		if(specialNL_out) knockback <= 32'hFFFF0000;
+		if(specialNR_out) knockback <= 32'h00010000;
 	end
 
 	// Moving the Characters

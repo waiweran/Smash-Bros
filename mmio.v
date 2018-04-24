@@ -42,7 +42,7 @@ module mmio(
 
 		.wall(collis1_inP),
 
-		.freeze_in(attack1_inP[11]),
+		.freeze_in(attack1_inP[11]|attack1_inP[12]|(reg28==32'b0)|(reg29==32'b0)),
 		
 		.ctrl_num(1'b0),
 
@@ -67,7 +67,7 @@ module mmio(
 
 		.wall(collis2_inP),
 
-		.freeze_in(attack2_inP[11]),
+		.freeze_in(attack2_inP[11]|attack2_inP[12]|(reg28==32'b0)|(reg29==32'b0)),
 		
 		.ctrl_num(1'b1),
 
@@ -139,6 +139,7 @@ module mmio(
 			.char1pos(pos1_attack), .char1size(size1_attack),
 			.char2pos(pos2_attack), .char2size(size2_attack),
 			.controls(p1controls_attack),
+			.opp_shield(attack_out2[12]),
 			.attack(attack_out1),
 			.movement(move_out1),
 			.knockback(knock_out1));
@@ -150,6 +151,7 @@ module mmio(
 			.char1pos(pos2_attack), .char1size(size2_attack),
 			.char2pos(pos1_attack), .char2size(size1_attack),
 			.controls(p2controls_attack),
+			.opp_shield(attack_out1[12]),
 			.attack(attack_out2),
 			.movement(move_out2),
 			.knockback(knock_out2));

@@ -71,10 +71,8 @@ module physics_coprocessor(
 	assign damage_multiplier[19:4] = damage_in[15:0] + 16'sd100;
 	assign damage_multiplier[3:0] = 4'b0;
 	assign damage_multiplier[47:20] = 28'b0;
-	assign kb_temp_x[19:4] = knockback_in[31:16]; // Split knockback into x, y
-	assign kb_temp_y[19:4] = knockback_in[15:0];
-	assign kb_temp_x[3:0] = 4'b0;
-	assign kb_temp_y[3:0] = 4'b0;
+	assign kb_temp_x[15:0] = knockback_in[31:16]; // Split knockback into x, y
+	assign kb_temp_y[15:0] = knockback_in[15:0];
 	assign movement_x[19:4] = movement_in[31:16]; // Split attack movement into x, y
 	assign movement_y[19:4] = movement_in[15:0];
 	assign movement_x[3:0] = 4'b0;
@@ -85,7 +83,7 @@ module physics_coprocessor(
 			assign move_x[i] = move_x[19];
 			assign move_y[i] = move_y[19];
 		end
-		for(i = 20; i < 48; i = i + 1) begin: signextend2
+		for(i = 16; i < 48; i = i + 1) begin: signextend2
 			assign kb_temp_x[i] = knockback_in[31];
 			assign kb_temp_y[i] = knockback_in[15];
 		end
@@ -94,8 +92,8 @@ module physics_coprocessor(
 			assign movement_y[i] = movement_in[15];
 		end
 	endgenerate
-	assign knockback_x = kb_temp_x*damage_multiplier;
-	assign knockbadk_y = kb_temp_y*damage_multiplier;
+	assign knockback_x = kb_temp_x*damage_multiplier/48'sd2;
+	assign knockback_y = kb_temp_y*damage_multiplier/48'sd2;
 
 	 // X, Y position components
     reg signed [47:0] pos_x, pos_y;

@@ -195,13 +195,11 @@ j doneTwo
 
 
 gameEnd:
-addi $23 $0 12
-setlives:
 nop
 nop
 nop
 nop
-j setlives
+j gameEnd
 
 blinkLEDs:
 addi $23 $23 0
