@@ -41,7 +41,7 @@ addi $27 $1 0
 lw $28 0($0)
 
 #Lives P2
-lw $29 0($0)
+lw $29 1($0)
 
 # left boundary (since left start is 256 off the screen, 56 is 200 off the screen)
 addi $2 $0 56
@@ -112,6 +112,8 @@ addi $23 $23 4
 nop
 nop
 nop
+nop
+nop
 addi $23 $23 -4
 addi $24 $0 0
 sra $28 $28 1
@@ -154,13 +156,10 @@ sra $29 $29 1
 j doneTwo
 
 setlives:
-# store lives into memory p1
-sra $28 $18 16
-sw $28 0($0)
-# store lives into memory p2
-sll $29 $18 16
-sra $29 $29 16
-sw $29 $1(0)
+nop
+nop
+nop
+nop
 j setlives
 
 blinkLEDs:

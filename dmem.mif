@@ -23,7 +23,8 @@ DATA_RADIX=HEX;
 
 CONTENT BEGIN
 	-- number of lives
-	[0000..0001]  :   00000003;
+	0000  :   00000003;
+	0001  :   00000003;
 	-- size bowser
 	0002  :   00000085;
 	0003  :   0000007D;
