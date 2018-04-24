@@ -489,7 +489,10 @@ reg [4:0] setlives1, setlives2;
 isInsideLives insidesetlives1(lives1, myX, myY, setlives1, isInsideLives3);
 isInsideLives insidesetLives2(lives2, myX, myY, setlives2, isInsideLives4);
 reg uplastpressed, downlastpressed;
-
+initial begin
+	setlives1 <= 5'b00011;
+	setlives2 <= 5'b00011;
+end
 //Check ending
 always@(negedge VGA_CLK_n) begin
 	if((p1VGA[143:128] == 16'b0) | (p2VGA[143:128] == 16'b0)) begin
