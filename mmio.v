@@ -125,7 +125,7 @@ module mmio(
 	gameControllerManager controllerP2(.mmioBoardOutput(gameControllerOutputP2),
 												  .mmioBoardInput(gameControllerInputP2),
 												  .halfgpio(gpio[31:16]), .halfoverflowgpio(gpio[35:34]), .ledMotorOut(gpioOutput[1]), 
-												  .fastClock(clock), .slowClock(unused), .startDir(1'b0), .reset(reset), .ledSignal(reg23[0]));
+												  .fastClock(clock), .slowClock(unused), .startDir(1'b0), .reset(reset), .ledSignal(reg23[1]));
 	
 	
 	
