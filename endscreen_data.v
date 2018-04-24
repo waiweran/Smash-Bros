@@ -42,9 +42,9 @@ module endscreen_data (
 	clock,
 	q);
 
-	input	[17:0]  address;
+	input	[19:0]  address;
 	input	  clock;
-	output	[2:0]  q;
+	output	[5:0]  q;
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_off
 `endif
@@ -53,8 +53,8 @@ module endscreen_data (
 // synopsys translate_on
 `endif
 
-	wire [2:0] sub_wire0;
-	wire [2:0] q = sub_wire0[2:0];
+	wire [5:0] sub_wire0;
+	wire [5:0] q = sub_wire0[5:0];
 
 	altsyncram	altsyncram_component (
 				.address_a (address),
@@ -72,7 +72,7 @@ module endscreen_data (
 				.clocken1 (1'b1),
 				.clocken2 (1'b1),
 				.clocken3 (1'b1),
-				.data_a ({3{1'b1}}),
+				.data_a ({6{1'b1}}),
 				.data_b (1'b1),
 				.eccstatus (),
 				.q_b (),
@@ -84,16 +84,16 @@ module endscreen_data (
 		altsyncram_component.address_aclr_a = "NONE",
 		altsyncram_component.clock_enable_input_a = "BYPASS",
 		altsyncram_component.clock_enable_output_a = "BYPASS",
-		altsyncram_component.init_file = "endscreen_data.mif",
+		altsyncram_component.init_file = "end_data.mif",
 		altsyncram_component.intended_device_family = "Cyclone IV E",
 		altsyncram_component.lpm_hint = "ENABLE_RUNTIME_MOD=NO",
 		altsyncram_component.lpm_type = "altsyncram",
-		altsyncram_component.numwords_a = 153600,
+		altsyncram_component.numwords_a = 565250,
 		altsyncram_component.operation_mode = "ROM",
 		altsyncram_component.outdata_aclr_a = "NONE",
 		altsyncram_component.outdata_reg_a = "UNREGISTERED",
-		altsyncram_component.widthad_a = 18,
-		altsyncram_component.width_a = 3,
+		altsyncram_component.widthad_a = 20,
+		altsyncram_component.width_a = 6,
 		altsyncram_component.width_byteena_a = 1;
 
 
@@ -119,38 +119,38 @@ endmodule
 // Retrieval info: PRIVATE: JTAG_ENABLED NUMERIC "0"
 // Retrieval info: PRIVATE: JTAG_ID STRING "NONE"
 // Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
-// Retrieval info: PRIVATE: MIFfilename STRING "endscreen_data.mif"
-// Retrieval info: PRIVATE: NUMWORDS_A NUMERIC "153600"
+// Retrieval info: PRIVATE: MIFfilename STRING "end_data.mif"
+// Retrieval info: PRIVATE: NUMWORDS_A NUMERIC "565250"
 // Retrieval info: PRIVATE: RAM_BLOCK_TYPE NUMERIC "0"
 // Retrieval info: PRIVATE: RegAddr NUMERIC "1"
 // Retrieval info: PRIVATE: RegOutput NUMERIC "0"
 // Retrieval info: PRIVATE: SYNTH_WRAPPER_GEN_POSTFIX STRING "0"
 // Retrieval info: PRIVATE: SingleClock NUMERIC "1"
 // Retrieval info: PRIVATE: UseDQRAM NUMERIC "0"
-// Retrieval info: PRIVATE: WidthAddr NUMERIC "18"
-// Retrieval info: PRIVATE: WidthData NUMERIC "3"
+// Retrieval info: PRIVATE: WidthAddr NUMERIC "20"
+// Retrieval info: PRIVATE: WidthData NUMERIC "6"
 // Retrieval info: PRIVATE: rden NUMERIC "0"
 // Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
 // Retrieval info: CONSTANT: ADDRESS_ACLR_A STRING "NONE"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_A STRING "BYPASS"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "BYPASS"
-// Retrieval info: CONSTANT: INIT_FILE STRING "endscreen_data.mif"
+// Retrieval info: CONSTANT: INIT_FILE STRING "end_data.mif"
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone IV E"
 // Retrieval info: CONSTANT: LPM_HINT STRING "ENABLE_RUNTIME_MOD=NO"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
-// Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "153600"
+// Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "565250"
 // Retrieval info: CONSTANT: OPERATION_MODE STRING "ROM"
 // Retrieval info: CONSTANT: OUTDATA_ACLR_A STRING "NONE"
 // Retrieval info: CONSTANT: OUTDATA_REG_A STRING "UNREGISTERED"
-// Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "18"
-// Retrieval info: CONSTANT: WIDTH_A NUMERIC "3"
+// Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "20"
+// Retrieval info: CONSTANT: WIDTH_A NUMERIC "6"
 // Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
-// Retrieval info: USED_PORT: address 0 0 18 0 INPUT NODEFVAL "address[17..0]"
+// Retrieval info: USED_PORT: address 0 0 20 0 INPUT NODEFVAL "address[19..0]"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT VCC "clock"
-// Retrieval info: USED_PORT: q 0 0 3 0 OUTPUT NODEFVAL "q[2..0]"
-// Retrieval info: CONNECT: @address_a 0 0 18 0 address 0 0 18 0
+// Retrieval info: USED_PORT: q 0 0 6 0 OUTPUT NODEFVAL "q[5..0]"
+// Retrieval info: CONNECT: @address_a 0 0 20 0 address 0 0 20 0
 // Retrieval info: CONNECT: @clock0 0 0 0 0 clock 0 0 0 0
-// Retrieval info: CONNECT: q 0 0 3 0 @q_a 0 0 3 0
+// Retrieval info: CONNECT: q 0 0 6 0 @q_a 0 0 6 0
 // Retrieval info: GEN_FILE: TYPE_NORMAL endscreen_data.v TRUE
 // Retrieval info: GEN_FILE: TYPE_NORMAL endscreen_data.inc FALSE
 // Retrieval info: GEN_FILE: TYPE_NORMAL endscreen_data.cmp FALSE
