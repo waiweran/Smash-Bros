@@ -48,6 +48,7 @@ always@(posedge iVGA_CLK,negedge iRST_n)
 begin
 	if (!iRST_n) begin
 		ADDR<=19'd0;
+		reg18 <= (setlives1 << 16'd16) + setlives2;
 	end
 	else if (cHS==1'b0 && cVS==1'b0)
 		ADDR<=19'd0;
@@ -529,8 +530,6 @@ always@(negedge VGA_CLK_n) begin
 		else if(~p2VGA[85] & downlastpressed) begin
 			downlastpressed <= 1'b0;
 		end
-		reg18 <= setlives1;
-		reg18 <= (reg18 << 16'd16) + setlives2;
 	end
 	
 	if((p1VGA[143:128] == 16'b0)) begin		

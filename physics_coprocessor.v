@@ -108,7 +108,7 @@ module physics_coprocessor(
 	 wire slowClockBit;
 	 assign slowClockBit = slowClock[10];
 	 always@(negedge clock) begin
-		if(reset) slowClock <= ~slowClock;
+		if(reset) slowClock <= 16'b0000010000000000;
 		else slowClock <= slowClock + 16'd1;
 	 end
 	 

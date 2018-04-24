@@ -160,7 +160,7 @@ sw $28 0($0)
 # store lives into memory p2
 sll $29 $18 16
 sra $29 $29 16
-sw $29 1($0)
+sw $29 $1(0)
 j setlives
 
 blinkLEDs:
