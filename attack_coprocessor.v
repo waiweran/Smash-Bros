@@ -219,14 +219,14 @@ module attack_coprocessor(
 		if(specialD_out) knockback <= 32'h0000F7FE;
 		if(specialL_out) knockback <= 32'hF7FE00A0;
 		if(specialR_out) knockback <= 32'h080000A0;
-//		if(specialNL_out) knockback <= 32'hFBFE0080;
-//		if(specialNR_out) knockback <= 32'h04000080;
+		if(specialNL_out) knockback <= 32'hFBFE0080;
+		if(specialNR_out) knockback <= 32'h04000080;
 	end
 
 	// Moving the Characters
 	reg [31:0] movement;
 	always@(posedge clock) begin
-		if(specialU_out) movement <= 32'h00000010;
+		if(specialU_out) movement <= 32'h00007F00;
 	end
 
 endmodule // attack_coprocessor

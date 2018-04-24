@@ -121,7 +121,7 @@ nop
 sra $28 $28 1
 addi $24 $0 0
 bne $28 $0 1
-j setlives
+j gameEnd
 nop
 addi $23 $23 4
 addi $7 $0 1
@@ -175,7 +175,7 @@ nop
 sra $29 $29 1
 addi $25 $0 0
 bne $29 $0 1
-j setlives
+j gameEnd
 nop
 addi $23 $23 8
 addi $7 $0 1
@@ -194,7 +194,8 @@ addi $23 $23 -8
 j doneTwo
 
 
-
+gameEnd:
+addi $23 $0 12
 setlives:
 nop
 nop

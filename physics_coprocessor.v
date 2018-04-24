@@ -55,8 +55,7 @@ module physics_coprocessor(
 	// Input Physics Parameters
 	wire signed [47:0] mass, gravity, wind;
    wire signed [8:0] sjoy_x, sjoy_y;
-	wire signed [47:0] move_x, move_y, knockback_x, knockback_y, movement_x, movement_y;
-	wire signed [15:0] damage_multiplier, kbx_signed, kby_signed;
+	wire signed [47:0] damage_multiplier, move_x, move_y, kb_temp_x, kb_temp_y, knockback_x, knockback_y, movement_x, movement_y;
 	assign mass[31:0] = mass_in;
 	assign mass[47:32] = 16'b0;
 	assign gravity[31:0] = gravity_in;
@@ -69,13 +68,13 @@ module physics_coprocessor(
 	assign move_x[10:0] = 11'b0;
 	assign move_y[19:11] = sjoy_y;
 	assign move_y[10:0] = 11'b0;
-	assign damage_multiplier = damage_in[15:0] + 16'sd100;
-	assign kbx_signed = knockback_in[31:16];
-	assign kby_signed = knockback_in[15:0];
-	assign knockback_x[19:4] = (kbx_signed*damage_multiplier) / 16'sd100; // Split knockback into x, y
-	assign knockback_y[19:4] = (kby_signed*damage_multiplier) / 16'sd100;
-	assign knockback_x[3:0] = 4'b0;
-	assign knockback_y[3:0] = 4'b0;
+	assign damage_multiplier[19:4] = damage_in[15:0] + 16'sd100;
+	assign damage_multiplier[3:0] = 4'b0;
+	assign damage_multiplier[47:20] = 28'b0;
+	assign kb_temp_x[19:4] = knockback_in[31:16]; // Split knockback into x, y
+	assign kb_temp_y[19:4] = knockback_in[15:0];
+	assign kb_temp_x[3:0] = 4'b0;
+	assign kb_temp_y[3:0] = 4'b0;
 	assign movement_x[19:4] = movement_in[31:16]; // Split attack movement into x, y
 	assign movement_y[19:4] = movement_in[15:0];
 	assign movement_x[3:0] = 4'b0;
@@ -87,14 +86,16 @@ module physics_coprocessor(
 			assign move_y[i] = move_y[19];
 		end
 		for(i = 20; i < 48; i = i + 1) begin: signextend2
-			assign knockback_x[i] = knockback_in[31];
-			assign knockback_y[i] = knockback_in[15];
+			assign kb_temp_x[i] = knockback_in[31];
+			assign kb_temp_y[i] = knockback_in[15];
 		end
 		for(i = 20; i < 48; i = i + 1) begin: signextend3
 			assign movement_x[i] = movement_in[31];
 			assign movement_y[i] = movement_in[15];
 		end
 	endgenerate
+	assign knockback_x = kb_temp_x*damage_multiplier;
+	assign knockbadk_y = kb_temp_y*damage_multiplier;
 
 	 // X, Y position components
     reg signed [47:0] pos_x, pos_y;
@@ -108,7 +109,7 @@ module physics_coprocessor(
 	 wire slowClockBit;
 	 assign slowClockBit = slowClock[10];
 	 always@(negedge clock) begin
-		if(reset) slowClock <= 16'b0000010000000000;
+		if(reset) slowClock <= ~slowClock;
 		else slowClock <= slowClock + 16'd1;
 	 end
 	 
