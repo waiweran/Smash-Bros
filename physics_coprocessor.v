@@ -71,10 +71,8 @@ module physics_coprocessor(
 	assign damage_multiplier[19:4] = damage_in[15:0] + 16'sd100;
 	assign damage_multiplier[3:0] = 4'b0;
 	assign damage_multiplier[47:20] = 28'b0;
-	assign kb_temp_x[19:4] = knockback_in[31:16]; // Split knockback into x, y
-	assign kb_temp_y[19:4] = knockback_in[15:0];
-	assign kb_temp_x[3:0] = 4'b0;
-	assign kb_temp_y[3:0] = 4'b0;
+	assign kb_temp_x[15:0] = knockback_in[31:16]; // Split knockback into x, y
+	assign kb_temp_y[15:0] = knockback_in[15:0];
 	assign movement_x[19:4] = movement_in[31:16]; // Split attack movement into x, y
 	assign movement_y[19:4] = movement_in[15:0];
 	assign movement_x[3:0] = 4'b0;
@@ -85,7 +83,7 @@ module physics_coprocessor(
 			assign move_x[i] = move_x[19];
 			assign move_y[i] = move_y[19];
 		end
-		for(i = 20; i < 48; i = i + 1) begin: signextend2
+		for(i = 16; i < 48; i = i + 1) begin: signextend2
 			assign kb_temp_x[i] = knockback_in[31];
 			assign kb_temp_y[i] = knockback_in[15];
 		end
@@ -95,7 +93,7 @@ module physics_coprocessor(
 		end
 	endgenerate
 	assign knockback_x = kb_temp_x*damage_multiplier;
-	assign knockbadk_y = kb_temp_y*damage_multiplier;
+	assign knockback_y = kb_temp_y*damage_multiplier;
 
 	 // X, Y position components
     reg signed [47:0] pos_x, pos_y;
@@ -152,18 +150,14 @@ module physics_coprocessor(
 		// Knockback application when attacked
 		else if(attack_in & ~attack_prev) begin
 			attack_prev <= 1'b1;
-			if(wall_Down) pos_y <= pos_y + 48'h000800000000;
-		end
-		else if(attack_in & attack_prev) begin
-			pos_x <= pos_x + movement_x;
-			pos_y <= pos_y + movement_y;
+			if(wall_Down) pos_y <= pos_y + 48'h000200000000;
 		end
 		else if(~attack_in & attack_prev) begin
 			attack_prev <= 1'b0;
 		end			
 
     	// Acceleration, position update for in air
-    	else if(~freeze_in & ~wall_Down & ~platform_Down) begin
+    	else if(~attack_in & ~freeze_in & ~wall_Down & ~platform_Down) begin
     		vel_x_t <= move_x / mass;// - vel_x * vel_x * vel_x / wind;
     		vel_y_t <= move_y / mass - gravity;// - vel_y * vel_y * vel_y / wind;
     		if((vel_x < 48'sb0 | ~wall_Right) & (vel_x > 48'sb0 | ~wall_Left)) pos_x <= pos_x + vel_x;
@@ -171,7 +165,7 @@ module physics_coprocessor(
     	end
 
     	// Acceleration, velocity update for on ground
-    	else if(~freeze_in) begin
+    	else if(~attack_in & ~freeze_in) begin
     		vel_x_t <= move_x / mass;
     		vel_y_t <= jump ? (48'h000000040000 / mass) : 48'b0;
     		pos_x <= pos_x + vel_x_t;

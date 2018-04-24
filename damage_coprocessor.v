@@ -15,25 +15,37 @@ module damage_coprocessor(
       if(reset) begin
         damage <= 32'b0;
       end
+		// up smash
+		else if(attack[0] & attack[1]) begin
+		  damage <= 32'd18;
+		end
+		// down smash
+		else if(attack[0] & attack[2]) begin
+		  damage <= 32'd13;
+		end
+		// side smash
+		else if(attack[0] & (attack[3] | attack[4])) begin
+		  damage <= 32'd15;
+		end
       // a
       else if(attack[0] & attack[5]) begin
-        damage <= 32'd5;
+        damage <= 32'd3;
       end
       // up b
       else if(attack[0] & attack[6]) begin
-        damage <= 32'd20;
+        damage <= 32'd12;
       end
       // down b
       else if(attack[0] & attack[7]) begin
-        damage <= 32'd15;
+        damage <= 32'd8;
       end
       // side b
       else if(attack[0] & (attack[8] | attack[9])) begin
-        damage <= 32'd30;
+        damage <= 32'd11;
       end
       // b
       else if(attack[0] & attack[10]) begin
-        damage <= 32'd10;
+        damage <= 32'd5;
       end
       else begin
         damage <= 32'b0;
