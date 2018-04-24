@@ -25,7 +25,7 @@ output [31:0] reg18; //register for lives
 input [159:0] p1VGA, p2VGA;
                         
 ///////// //// 
-reg [31:0] reg18;                    
+//reg [31:0] reg18;                    
 reg [18:0] ADDR;
 reg [16:0] stage_addr;
 reg [8:0] count;
@@ -48,7 +48,7 @@ always@(posedge iVGA_CLK,negedge iRST_n)
 begin
 	if (!iRST_n) begin
 		ADDR<=19'd0;
-		reg18 <= (setlives1 << 16'd16) + setlives2;
+//		reg18 <= (setlives1 << 16'd16) + setlives2;
 	end
 	else if (cHS==1'b0 && cVS==1'b0)
 		ADDR<=19'd0;
@@ -482,63 +482,109 @@ assign bgr_data_raw_wow4 = (isInsideLives2[0]|isInsideLives2[1]|isInsideLives2[2
 	  
 
 wire [23:0] bgr_data_raw_endscreen1, bgr_data_raw_endscreen2;
-assign bgr_data_raw_endscreen1 = 24'b000000001111111111111111;
-assign bgr_data_raw_endscreen2 = 24'b111111110000000000000000;
+wire [2:0] indexend, indexend2;
+endscreen_data	endscreen_data_inst (
+	.address ( ADDR/2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexend )
+);
+endscreen_index endscreen_index_inst (
+	.address ( indexend ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_endscreen1 )
+);	
+endscreen2_data	endscreen2_data_inst (
+	.address ( ADDR/2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexend2 )
+);
+endscreen2_index endscreen2_index_inst (
+	.address ( indexend2 ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_endscreen2 )
+);	
 
 wire [4:0] isInsideLives3, isInsideLives4;
 reg [4:0] setlives1, setlives2;
 isInsideLives insidesetlives1(lives1, myX, myY, setlives1, isInsideLives3);
 isInsideLives insidesetLives2(lives2, myX, myY, setlives2, isInsideLives4);
-reg uplastpressed, downlastpressed;
+//reg uplastpressed, downlastpressed;
 
 //Check ending
 always@(negedge VGA_CLK_n) begin
-	if((p1VGA[143:128] == 16'b0) | (p2VGA[143:128] == 16'b0)) begin
-		//dpad down, decrease lives
-		if(p1VGA[84] & ~uplastpressed) begin
-			setlives1 <= setlives1 >> 1'b1;
-			uplastpressed <= 1'b1;
-		end
-		else if(~p1VGA[84] & uplastpressed)begin
-			uplastpressed <= 1'b0;
-		end
-		//dpad up, increase lives
-		else if(p1VGA[85] & ~downlastpressed) begin
-			setlives1 <= (setlives1 << 1'b1) + 1'b1;
-			downlastpressed <= 1'b1;
-		end
-		else if(~p1VGA[85] & downlastpressed) begin
-			downlastpressed <= 1'b0;
-		end
-			
-		//dpad down, decrease lives
-		if(p2VGA[84] & ~uplastpressed) begin
-			setlives2 <= setlives2 >> 1'b1;
-			uplastpressed <= 1'b1;
-		end
-		else if(~p2VGA[84] & uplastpressed)begin
-			uplastpressed <= 1'b0;
-		end
-		//dpad up, increase lives
-		else if(p2VGA[85] & ~downlastpressed) begin
-			setlives2 <= (setlives2 << 1'b1) + 1'b1;
-			downlastpressed <= 1'b1;
-		end
-		else if(~p2VGA[85] & downlastpressed) begin
-			downlastpressed <= 1'b0;
-		end
-	end
+//	if((p1VGA[143:128] == 16'b0) | (p2VGA[143:128] == 16'b0)) begin
+//		//dpad down, decrease lives
+//		
+//	end
 	
 	if((p1VGA[143:128] == 16'b0)) begin		
+		if(p1VGA[84] ) begin
+			setlives1 <= setlives1 >> 1'b1;
+		end
+//		else if(~p1VGA[84] & uplastpressed)begin
+//			uplastpressed <= 1'b0;
+//		end
+//		//dpad up, increase lives
+		else if(p1VGA[85]) begin
+			setlives1 <= (setlives1 << 1'b1) + 1'b1;
+		end
+//		else if(~p1VGA[85] & downlastpressed) begin
+//			downlastpressed <= 1'b0;
+//		end
+//			
+//		//dpad down, decrease lives
+		if(p2VGA[84]) begin
+			setlives2 <= setlives2 >> 1'b1;
+		end
+//		else if(~p2VGA[84] & uplastpressed)begin
+//			uplastpressed <= 1'b0;
+//		end
+//		//dpad up, increase lives
+		else if(p2VGA[85]) begin
+			setlives2 <= (setlives2 << 1'b1) + 1'b1;
+		end
+//		else if(~p2VGA[85] & downlastpressed) begin
+//			downlastpressed <= 1'b0;
+//		end
 		bgr_data_raw <= (isInsideLives3[0]|isInsideLives3[1]|isInsideLives3[2]|isInsideLives3[3]|isInsideLives3[4]) ? bgr_data_raw_lives1 : ((isInsideLives4[0]|isInsideLives4[1]|isInsideLives4[2]|isInsideLives4[3]|isInsideLives4[4]) ? bgr_data_raw_lives2 : bgr_data_raw_endscreen1);
 	end
 	else if((p2VGA[143:128] == 16'b0)) begin
+		if(p1VGA[84] ) begin
+			setlives1 <= setlives1 >> 1'b1;
+		end
+//		else if(~p1VGA[84] & uplastpressed)begin
+//			uplastpressed <= 1'b0;
+//		end
+//		//dpad up, increase lives
+		else if(p1VGA[85]) begin
+			setlives1 <= (setlives1 << 1'b1) + 1'b1;
+		end
+//		else if(~p1VGA[85] & downlastpressed) begin
+//			downlastpressed <= 1'b0;
+//		end
+//			
+//		//dpad down, decrease lives
+		if(p2VGA[84]) begin
+			setlives2 <= setlives2 >> 1'b1;
+		end
+//		else if(~p2VGA[84] & uplastpressed)begin
+//			uplastpressed <= 1'b0;
+//		end
+//		//dpad up, increase lives
+		else if(p2VGA[85]) begin
+			setlives2 <= (setlives2 << 1'b1) + 1'b1;
+		end
+//		else if(~p2VGA[85] & downlastpressed) begin
+//			downlastpressed <= 1'b0;
+//		end
 		bgr_data_raw <= (isInsideLives3[0]|isInsideLives3[1]|isInsideLives3[2]|isInsideLives3[3]|isInsideLives3[4]) ? bgr_data_raw_lives1 : ((isInsideLives4[0]|isInsideLives4[1]|isInsideLives4[2]|isInsideLives4[3]|isInsideLives4[4]) ? bgr_data_raw_lives2 : bgr_data_raw_endscreen2);
 	end
 	else begin
 		bgr_data_raw <= bgr_data_raw_wow4;
 	end
 end
+assign reg18[31:16] = setlives1;
+assign reg18[15:0] = setlives2;
 					
 /************** OUR CODE ENDS HERE **************/
 
