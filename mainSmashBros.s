@@ -193,14 +193,14 @@ addi $23 $23 -8
 
 j doneTwo
 
-gameEndOne:
+gameEndTwo:
 lw $24 10($0)
 lw $25 11($0)
 addi $24 $24 1
 sw $24 10($0)
 j gameEnd
 
-gameEndTwo:
+gameEndOne:
 lw $24 10($0)
 lw $25 11($0)
 addi $25 $25 1
