@@ -233,13 +233,13 @@ module attack_coprocessor(
 	reg [31:0] knockback;
 	always@(posedge clock) begin
 		if(smashU_out) knockback <= 32'h0000000A;
-		if(smashD_out) knockback <= 32'h0000FFF0;
+		if(smashD_out) knockback <= 32'h00000001;
 		if(smashL_out) knockback <= 32'hFFF80001;
 		if(smashR_out) knockback <= 32'h00080001;
 		if(jabNL_out) knockback <= 32'hFFFC0001;
 		if(jabNR_out) knockback <= 32'h00040001;
 		if(specialU_out) knockback <= 32'h00000006;
-		if(specialD_out) knockback <= 32'h0000FFF8;
+		if(specialD_out) knockback <= 32'h00000001;
 		if(specialL_out) knockback <= 32'hFFFA0002;
 		if(specialR_out) knockback <= 32'h00060002;
 		if(specialNL_out) knockback <= 32'hFFFF0000;
