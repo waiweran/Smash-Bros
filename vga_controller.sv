@@ -482,8 +482,27 @@ assign bgr_data_raw_wow4 = (isInsideLives2[0]|isInsideLives2[1]|isInsideLives2[2
 	  
 
 wire [23:0] bgr_data_raw_endscreen1, bgr_data_raw_endscreen2;
-assign bgr_data_raw_endscreen1 = 24'b000000001111111111111111;
-assign bgr_data_raw_endscreen2 = 24'b111111110000000000000000;
+wire [2:0] indexend, indexend2;
+endscreen_data	endscreen_data_inst (
+	.address ( ADDR/2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexend )
+);
+endscreen_index endscreen_index_inst (
+	.address ( indexend ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_endscreen1 )
+);	
+endscreen2_data	endscreen2_data_inst (
+	.address ( ADDR/2 ),
+	.clock ( VGA_CLK_n ),
+	.q ( indexend2 )
+);
+endscreen2_index endscreen2_index_inst (
+	.address ( indexend2 ),
+	.clock ( iVGA_CLK ),
+	.q ( bgr_data_raw_endscreen2 )
+);	
 
 wire [4:0] isInsideLives3, isInsideLives4;
 reg [4:0] setlives1, setlives2;

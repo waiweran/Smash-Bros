@@ -108,18 +108,34 @@ jr $31
 
 # decrease lives P1
 dieOne:
+addi $7 $0 1
+sll $8 $7 19
+nop
+nop
+addi $7 $7 1
+nop
+nop
+nop
+blt $7 $8 -6
+nop
+sra $28 $28 1
+addi $24 $0 0
+bne $28 $0 1
+j setlives
+nop
 addi $23 $23 4
+addi $7 $0 1
+sll $8 $7 20
+nop
+nop
+addi $7 $7 1
 nop
 nop
 nop
+blt $7 $8 -6
 nop
 nop
 addi $23 $23 -4
-addi $24 $0 0
-sra $28 $28 1
-bne $28 $0 1
-j setlives
-
 
 j doneOne
 
@@ -146,14 +162,38 @@ jr $31
 
 # decrease lives P2
 dieTwo:
-addi $23 $23 8
+addi $7 $0 1
+sll $8 $7 19
 nop
+nop
+addi $7 $7 1
+nop
+nop
+nop
+blt $7 $8 -6
+nop
+sra $29 $29 1
+addi $25 $0 0
+bne $29 $0 1
+j setlives
+nop
+addi $23 $23 8
+addi $7 $0 1
+sll $8 $7 20
+nop
+nop
+addi $7 $7 1
+nop
+nop
+nop
+blt $7 $8 -6
 nop
 nop
 addi $23 $23 -8
-addi $25 $0 0
-sra $29 $29 1
+
 j doneTwo
+
+
 
 setlives:
 nop

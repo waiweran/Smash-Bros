@@ -1,0 +1,17 @@
+-- file: endscreen_index.mif
+WIDTH=24;
+DEPTH=8;
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=HEX;
+
+CONTENT
+BEGIN
+0 : AFEF9D;
+1 : BEBECF;
+2 : CB92F7;
+3 : CD8DFC;
+4 : CF86FF;
+5 : D17DFF;
+[6..7] : FFFFFF;
+END
